@@ -71,6 +71,10 @@ const activitySchema = new Schema({
       type: String,
       required: false // Optional
     },
+    budget: {
+      type: Number,
+      required: false // Optional
+    },
     booking_open: {
         type: Boolean,
         default: true // Default value is true

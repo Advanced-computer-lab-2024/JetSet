@@ -10,6 +10,10 @@ const {
   createAdmin,
 } = require("./Routes/adminController");
 
+const {createCategory, getCategory, updateCategory, deleteCategory,searchProductAdmin}= require('./Routes/adminController');
+const {filterActivity,searchProductTourist}= require('./Routes/touristController');
+const {filterActivityGuest}= require('./Routes/guestController');
+const {searchProductSeller}= require('./Routes/sellerController');
 // Load environment variables from .env file
 dotenv.config();
 
@@ -21,6 +25,18 @@ const MongoURI = process.env.MONGO_URI;
 // Middleware
 app.use(express.json());
 app.use('/api', advertiserRoutes); // Use advertiser routes under '/api'
+
+app.post("/addCategory",createCategory);
+app.get("/viewCategory",getCategory);
+app.put("/updateCategory/:categoryId",updateCategory);
+app.delete("/deleteCategory/:categoryId",deleteCategory);
+app.get("/filterActivity",filterActivity);
+app.get("/filterActivityGuest",filterActivityGuest);
+app.get("/searchProductTourist",searchProductTourist);
+app.get("/searchProductAdmin",searchProductAdmin);
+app.get("/searchProductSeller",searchProductSeller);
+
+
 
 // MongoDB Connection
 mongoose.connect(MongoURI, {
