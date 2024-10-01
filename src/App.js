@@ -10,6 +10,11 @@ const {
   createProduct,
 } = require("./Routes/adminController");
 
+const {
+  getActivities,
+  getitineraries,
+} = require("../src/Routes/touristController");
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -46,3 +51,5 @@ app.use(express.json());
 app.post("/tourism-governor", createTourismGoverner);
 app.post("/admin", createAdmin);
 app.post("/product", createProduct);
+app.get("/activities", getActivities);
+app.get("/itineraries", getitineraries);

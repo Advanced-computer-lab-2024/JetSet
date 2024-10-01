@@ -1,4 +1,6 @@
 const Product = require("../Models/Product");
+const Activity = require("../Models/Activity");
+const Itinerary = require("../Models/Itinerary");
 
 const getProducts = async (req, res) => {
   try {
@@ -10,7 +12,7 @@ const getProducts = async (req, res) => {
 };
 
 // Methods for tourists and guests
-app.get("/activities", async (req, res) => {
+const getActivities = async (req, res) => {
   const { sortBy } = req.body; // Query parameter for sorting: 'price' or 'ratings'
 
   try {
@@ -31,9 +33,9 @@ app.get("/activities", async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Internal server error." });
   }
-});
+};
 
-app.get("/itineraries", async (req, res) => {
+const getitineraries = async (req, res) => {
   const { sortBy } = req.body; // Query parameter for sorting: 'price' or 'ratings'
 
   try {
@@ -54,8 +56,10 @@ app.get("/itineraries", async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Internal server error." });
   }
-});
+};
 
 module.exports = {
   getProducts,
+  getActivities,
+  getitineraries,
 };
