@@ -9,6 +9,7 @@ const MongoURI = process.env.MONGO_URI;
 const {
   createTourismGoverner,
   createAdmin,
+  createProduct,
 } = require("./Routes/adminController");
 
 //App variables
@@ -37,3 +38,4 @@ app.use(express.json());
 
 app.post("/tourism-governor", createTourismGoverner);
 app.post("/admin", createAdmin);
+app.post("/product", createProduct);
