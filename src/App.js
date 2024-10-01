@@ -45,3 +45,4 @@ app.use(express.json());
 
 app.post("/tourism-governor", createTourismGoverner);
 app.post("/admin", createAdmin);
+app.post("/product", createProduct);
