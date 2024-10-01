@@ -8,12 +8,22 @@ const {
   createTourismGoverner,
   createAdmin,
   createProduct,
+  createCategory, 
+  getCategory, 
+  updateCategory, 
+  deleteCategory,
+  searchProductAdmin,
 } = require("./Routes/adminController");
 
 const {
   getActivities,
   getitineraries,
+  filterActivity,
+  searchProductTourist,
 } = require("../src/Routes/touristController");
+
+const {filterActivityGuest}= require('./Routes/guestController');
+const {searchProductSeller}= require('./Routes/sellerController');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -53,3 +63,13 @@ app.post("/admin", createAdmin);
 app.post("/product", createProduct);
 app.get("/activities", getActivities);
 app.get("/itineraries", getitineraries);
+
+app.post("/addCategory",createCategory);
+app.get("/viewCategory",getCategory);
+app.put("/updateCategory/:categoryId",updateCategory);
+app.delete("/deleteCategory/:categoryId",deleteCategory);
+app.get("/filterActivity",filterActivity);
+app.get("/filterActivityGuest",filterActivityGuest);
+app.get("/searchProductTourist",searchProductTourist);
+app.get("/searchProductAdmin",searchProductAdmin);
+app.get("/searchProductSeller",searchProductSeller);
