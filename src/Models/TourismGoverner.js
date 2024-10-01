@@ -3,12 +3,12 @@ const Schema = mongoose.Schema;
 const {ObjectId} = mongoose.Schema;
 
 const tourismGovernerSchema = new Schema({
-    username: {
+    Username: {
       type: String,
       required: true,
       unique: true
     },
-    password: {
+    Password: {
       type: String,
       required: true
     }
