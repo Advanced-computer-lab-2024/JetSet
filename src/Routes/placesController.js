@@ -1,6 +1,15 @@
 const Historical = require('../Models/Historical.js');
 const { default: mongoose } = require('mongoose');
 
+
+const viewAllPlaces = async (req, res) => {
+  try {
+      const places = await Historical.find();
+      res.status(200).json(places);
+  } catch (error) {
+      res.status(400).json({ error: error.message });
+  }
+}
 const createPlaces = async (req, res) => {
     const { Name, Description, location, Pictures, opening_hours, tags , TicketPricesF, TicketPricesN, TicketPricesS, managed_by } = req.body;
 
@@ -107,4 +116,4 @@ const deletePlace = async (req, res) => {
     }
 };
 
-module.exports = { createPlaces, getPlaces, updatePlace, deletePlace };
+module.exports = { viewAllPlaces , createPlaces, getPlaces, updatePlace, deletePlace };
