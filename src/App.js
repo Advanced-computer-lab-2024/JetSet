@@ -10,7 +10,7 @@ const {createPlaces,getPlaces, updatePlace, deletePlace} = require("./Routes/pla
 const {createTourismGoverner,createTag} = require("./Routes/tourismgovernerController");
 // const MongoURI ="mongodb+srv://mmjy2003:ACLProject@acl-project.cmpuq.mongodb.net/?retryWrites=true&w=majority&appName=ACL-Project";
 //const {createUser, getUsers, createBlog, filterBlog, editBlog}= require('./Routes/userController')
-const MongoURI="mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MongoURI="";
 
 
 
