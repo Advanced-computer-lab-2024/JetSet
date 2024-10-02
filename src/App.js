@@ -8,11 +8,18 @@ const {
   createTourismGoverner,
   createAdmin,
   createProduct,
+  createCategory, 
+  getCategory, 
+  updateCategory, 
+  deleteCategory,
+  searchProductAdmin,
 } = require("./Routes/adminController");
 
 const {
   getActivities,
   getitineraries,
+  filterActivity,
+  searchProductTourist,
 } = require("../src/Routes/touristController");
 
 const {
@@ -60,7 +67,19 @@ app.post("/admin", createAdmin);
 app.post("/product", createProduct);
 app.get("/activities", getActivities);
 app.get("/itineraries", getitineraries);
+
 app.get("/TourGuide",getTourGuides)
 app.post("/createTourGuideProfile/:tourGuideID",createTourGuideProfile);
 app.get("/createTourGuideProfile/:tourGuideID",readTourGuideProfile);
 app.patch("/createTourGuideProfile/:tourGuideID",createTourGuideProfile);
+
+app.post("/addCategory",createCategory);
+app.get("/viewCategory",getCategory);
+app.put("/updateCategory/:categoryId",updateCategory);
+app.delete("/deleteCategory/:categoryId",deleteCategory);
+app.get("/filterActivity",filterActivity);
+app.get("/filterActivityGuest",filterActivityGuest);
+app.get("/searchProductTourist",searchProductTourist);
+app.get("/searchProductAdmin",searchProductAdmin);
+app.get("/searchProductSeller",searchProductSeller);
+

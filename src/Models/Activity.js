@@ -75,6 +75,10 @@ const activitySchema = new Schema({
         type: Boolean,
         default: true // Default value is true
     },
+    budget: {
+      type: Number,
+      required: false // Optional
+    },
     rating: {
         type: Number,
         min: 0,
