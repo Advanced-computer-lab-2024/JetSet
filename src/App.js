@@ -15,6 +15,13 @@ const {
   getitineraries,
 } = require("../src/Routes/touristController");
 
+const {
+  createTourGuideProfile,
+  getTourGuides,
+  readTourGuideProfile
+} = require("../src/Routes/tourguideController");
+
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -53,3 +60,7 @@ app.post("/admin", createAdmin);
 app.post("/product", createProduct);
 app.get("/activities", getActivities);
 app.get("/itineraries", getitineraries);
+app.get("/TourGuide",getTourGuides)
+app.post("/createTourGuideProfile/:tourGuideID",createTourGuideProfile);
+app.get("/createTourGuideProfile/:tourGuideID",readTourGuideProfile);
+app.patch("/createTourGuideProfile/:tourGuideID",createTourGuideProfile);
