@@ -16,6 +16,10 @@ const tourGuideSchema = new Schema({
       type: String,
       required: true
     },
+    mobile_number: {
+      type: String,
+      required:false
+    },
     years_of_experience: Number, // For Tour Guides
     previous_work: String, // For Tour Guides
   }, { timestamps: true });
