@@ -1,10 +1,13 @@
 // app.js
 
-const express = require("express");
+
+  const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const advertiserRoutes = require("./Routes/advertiserController"); // Adjust path as necessary
 const itinerary = require('./Models/Itinerary');
+const {viewAllPlaces,createPlaces,getPlaces, updatePlace, deletePlace} = require("./Routes/placesController");
+const {createTourismGoverner,createTag} = require("./Routes/tourismgovernerController");
 
 const {
   createTourismGoverner,
@@ -41,6 +44,7 @@ dotenv.config();
 
 // App variables
 const app = express();
+
 const port = process.env.PORT || 3000;
 const MongoURI = process.env.MONGO_URI;
 
@@ -58,9 +62,10 @@ mongoose
     console.log("MongoDB connected!");
     app.listen(port, () => {
       console.log(`Server running on http://localhost:${port}`);
-    });
+    })
   })
   .catch((err) => console.error(err));
+
 
 // Basic route for testing
 app.get("/home", (req, res) => {
@@ -89,6 +94,18 @@ app.get("/filterActivityGuest",filterActivityGuest);
 app.get("/searchProductTourist",searchProductTourist);
 app.get("/searchProductAdmin",searchProductAdmin);
 app.get("/searchProductSeller",searchProductSeller);
+
+
+
+app.get("/viewAllPlaces",viewAllPlaces);
+app.post("/addPlace",createPlaces);
+app.get("/Places",getPlaces);
+app.put("/updatePlace/:id",updatePlace);
+app.delete("/deletePlace",deletePlace);
+app.post("/addTourismGoverner",createTourismGoverner);
+app.post("/addTag",createTag);
+
+
 
 app.use(express.json())
 app.post("/addItinerary",createItinerary);
