@@ -4,6 +4,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const advertiserRoutes = require("./Routes/advertiserController"); // Adjust path as necessary
+const itinerary = require('./Models/Itinerary');
+
 const {
   createTourismGoverner,
   createAdmin,
@@ -25,7 +27,12 @@ const {
 const {
   createTourGuideProfile,
   getTourGuides,
-  readTourGuideProfile
+  readTourGuideProfile,
+  createItinerary,
+   getItineraries,
+    updateItinerary, 
+     deleteItinerary,
+     viewCreatedItineraries
 } = require("../src/Routes/tourguideController");
 
 
@@ -83,3 +90,9 @@ app.get("/searchProductTourist",searchProductTourist);
 app.get("/searchProductAdmin",searchProductAdmin);
 app.get("/searchProductSeller",searchProductSeller);
 
+app.use(express.json())
+app.post("/addItinerary",createItinerary);
+app.get("/Itinerary",getItineraries );
+app.put("/updateItinerary/:id",updateItinerary );
+app.delete("/deleteItinerary/:id", deleteItinerary );
+app.get("/listofiternaries",viewCreatedItineraries );
