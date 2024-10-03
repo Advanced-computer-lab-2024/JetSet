@@ -3,7 +3,17 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const advertiserRoutes = require("./Routes/advertiserController"); // Adjust path as necessary
+const {
+  createProfile,
+  getProfile,
+  updateProfile,
+  deleteProfile,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+  getlistActivities,
+  viewCreatedActivities
+} = require("./Routes/advertiserController"); // Adjust path as necessary
 const {
   createTourismGoverner,
   createAdmin,
@@ -25,6 +35,8 @@ const {
 const {filterActivityGuest}= require('./Routes/guestController');
 const {searchProductSeller}= require('./Routes/sellerController');
 
+
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -35,7 +47,7 @@ const MongoURI = process.env.MONGO_URI;
 
 // Middleware
 app.use(express.json());
-app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
+//app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
 mongoose
@@ -58,6 +70,17 @@ app.get("/home", (req, res) => {
 
 app.use(express.json());
 
+
+app.post('/addprofiles', createProfile);
+app.get('/profiles', getProfile);
+app.put('/updateprofiles/:id', updateProfile);
+app.delete('/deleteprofiles/:id', deleteProfile);
+app.post('/addactivity', createActivity);
+app.put('/updateactivity/:id', updateActivity);
+app.delete('/deleteactivity/:id', deleteActivity);
+app.get('/getactivity', getlistActivities);
+app.get('/viewactivity', viewCreatedActivities);
+
 app.post("/tourism-governor", createTourismGoverner);
 app.post("/admin", createAdmin);
 app.post("/product", createProduct);
@@ -73,3 +96,7 @@ app.get("/filterActivityGuest",filterActivityGuest);
 app.get("/searchProductTourist",searchProductTourist);
 app.get("/searchProductAdmin",searchProductAdmin);
 app.get("/searchProductSeller",searchProductSeller);
+
+
+
+

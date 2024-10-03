@@ -9,9 +9,7 @@ const createProfile = async (req, res) => {
 
     try {
         const profile = await advertiserModel.create({
-            email,
-            username,
-            password,
+            
             company_name,
             website,
             hotline,
@@ -95,24 +93,6 @@ const createActivity = async (req, res) => {
     }
 };
 
-const getActivities = async (req, res) => {
-    try {
-        const activities = await Activity.find();
-        res.status(200).json(activities);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-};
-
-const viewCreatedActivities = async (req, res) => {
-    try {
-        const activities = await Activity.find();
-        res.render('activities', { activities });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-};
-
 const updateActivity = async (req, res) => {
     const { id } = req.params;
     const trimmedId = id.trim();
@@ -168,16 +148,36 @@ const deleteActivity = async (req, res) => {
     }
 };
 
-router.post('/addprofiles', createProfile);
-router.get('/profiles', getProfile);
-router.put('/updateprofiles/:id', updateProfile);
-router.delete('/deleteprofiles/:id', deleteProfile);
+const getlistActivities = async (req, res) => {
+    try {
+        const activities = await Activity.find();
+        res.status(200).json(activities);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
 
-router.post('/addactivity', createActivity);
-router.get('/getactivity', getActivities);
-router.put('/updateactivity/:id', updateActivity);
-router.delete('/deleteactivity/:id', deleteActivity);
-router.get('/viewactivity', viewCreatedActivities);
 
-module.exports = router; // Export the router directly
+const viewCreatedActivities = async (req, res) => {
+    try {
+        const activities = await Activity.find();
+        res.status(200).json(activities);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+//router.post('/addprofiles', createProfile);
+//router.get('/profiles', getProfile);
+//router.put('/updateprofiles/:id', updateProfile);
+//router.delete('/deleteprofiles/:id', deleteProfile);
+
+//router.post('/addactivity', createActivity);
+
+//router.put('/updateactivity/:id', updateActivity);
+//router.delete('/deleteactivity/:id', deleteActivity);
+//router.get('/getactivity', getActivities);
+//router.get('/viewactivity', viewCreatedActivities);
+
+module.exports = { createProfile,getProfile,updateProfile,deleteProfile,createActivity,updateActivity,deleteActivity,getlistActivities,viewCreatedActivities};
+//module.exports = router; // Export the router directly
 
