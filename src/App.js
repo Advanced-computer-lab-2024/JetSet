@@ -1,45 +1,102 @@
-// External variables
-const express = require("express");
-const mongoose = require('mongoose');
-mongoose.set('strictQuery', false);
+// app.js
 
-require("dotenv").config();
-//Make sure to add your MongoDB URI in the .env file as MONGO_URI="your mongodb uri"
-//Check db connection links in README file
+
+  const express = require("express");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const advertiserRoutes = require("./Routes/advertiserController"); // Adjust path as necessary
+const itinerary = require('./Models/Itinerary');
 const {viewAllPlaces,createPlaces,getPlaces, updatePlace, deletePlace} = require("./Routes/placesController");
 const {createTourismGoverner,createTag} = require("./Routes/tourismgovernerController");
-// const MongoURI ="mongodb+srv://mmjy2003:ACLProject@acl-project.cmpuq.mongodb.net/?retryWrites=true&w=majority&appName=ACL-Project";
-//const {createUser, getUsers, createBlog, filterBlog, editBlog}= require('./Routes/userController')
-const MongoURI="";
+
+const {
+  createTourismGoverner,
+  createAdmin,
+  createProduct,
+  createCategory, 
+  getCategory, 
+  updateCategory, 
+  deleteCategory,
+  searchProductAdmin,
+} = require("./Routes/adminController");
+
+const {
+  getActivities,
+  getitineraries,
+  filterActivity,
+  searchProductTourist,
+} = require("../src/Routes/touristController");
+
+const {
+  createTourGuideProfile,
+  getTourGuides,
+  readTourGuideProfile,
+  createItinerary,
+   getItineraries,
+    updateItinerary, 
+     deleteItinerary,
+     viewCreatedItineraries
+} = require("../src/Routes/tourguideController");
 
 
+// Load environment variables from .env file
+dotenv.config();
 
-//App variables
+// App variables
 const app = express();
-const port = process.env.PORT || "3000";
-const TourismGoverner = require('./Models/TourismGoverner');
-const place = require('./Models/Historical');
 
-//const user = require('./Models/User');
-// #Importing the userController
+const port = process.env.PORT || 3000;
+const MongoURI = process.env.MONGO_URI;
 
+// Middleware
+app.use(express.json());
+app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
-// configurations
-// Mongo DB
-mongoose.connect(MongoURI)
-.then(()=>{
-  console.log("MongoDB is now connected!")
-// Starting server
- app.listen(port, () => {
-    console.log(`Listening to requests on http://localhost:${port}`);
+// MongoDB Connection
+mongoose
+  .connect(MongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
-})
-.catch(err => console.log(err));
+  .then(() => {
+    console.log("MongoDB connected!");
+    app.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}`);
+    })
+  })
+  .catch((err) => console.error(err));
+
+
+// Basic route for testing
 app.get("/home", (req, res) => {
-    res.status(200).send("You have everything installed!");
-  });
+  res.status(200).send("You have everything installed!");
+});
 
 app.use(express.json());
+
+app.post("/tourism-governor", createTourismGoverner);
+app.post("/admin", createAdmin);
+app.post("/product", createProduct);
+app.get("/activities", getActivities);
+app.get("/itineraries", getitineraries);
+
+app.get("/TourGuide",getTourGuides)
+app.post("/createTourGuideProfile/:tourGuideID",createTourGuideProfile);
+app.get("/createTourGuideProfile/:tourGuideID",readTourGuideProfile);
+app.patch("/createTourGuideProfile/:tourGuideID",createTourGuideProfile);
+
+app.post("/addCategory",createCategory);
+app.get("/viewCategory",getCategory);
+app.put("/updateCategory/:categoryId",updateCategory);
+app.delete("/deleteCategory/:categoryId",deleteCategory);
+app.get("/filterActivity",filterActivity);
+app.get("/filterActivityGuest",filterActivityGuest);
+app.get("/searchProductTourist",searchProductTourist);
+app.get("/searchProductAdmin",searchProductAdmin);
+app.get("/searchProductSeller",searchProductSeller);
+
+
+
 app.get("/viewAllPlaces",viewAllPlaces);
 app.post("/addPlace",createPlaces);
 app.get("/Places",getPlaces);
@@ -49,3 +106,10 @@ app.post("/addTourismGoverner",createTourismGoverner);
 app.post("/addTag",createTag);
 
 
+
+app.use(express.json())
+app.post("/addItinerary",createItinerary);
+app.get("/Itinerary",getItineraries );
+app.put("/updateItinerary/:id",updateItinerary );
+app.delete("/deleteItinerary/:id", deleteItinerary );
+app.get("/listofiternaries",viewCreatedItineraries );

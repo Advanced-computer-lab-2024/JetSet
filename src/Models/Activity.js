@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const {ObjectId} = mongoose.Schema;
-
+//empty comment
 const activitySchema = new Schema({
     title: {
       type: String,
-      required: true
+      required: false // Title is now optional
     },
     date: {
       type: Date,
@@ -16,40 +15,49 @@ const activitySchema = new Schema({
       required: true
     },
     location: {
-      address: String,
+      address: {
+        type: String,
+        required: true // Make address required
+      },
       coordinates: {
-        lat: Number,
-        lng: Number
+        lat: {
+          type: Number,
+          required: false // Optional
+        },
+        lng: {
+          type: Number,
+          required: false // Optional
+        }
       }
     },
     price: {
         type: {
           fixed: {
             type: Number,
-            required: false // Optional if price range is used
+            required: false // Optional
           },
           range: {
             min: {
               type: Number,
-              required: false // Optional if fixed price is used
+              required: false // Optional
             },
             max: {
               type: Number,
-              required: false // Optional if fixed price is used
+              required: false // Optional
             }
           }
         },
         validate: {
           validator: function(value) {
             // Ensure either fixed price is set, or both min and max in range are set
-            if (value.fixed || (value.range.min && value.range.max)) {
+            if (value.fixed || (value.range && value.range.min != null && value.range.max != null)) {
               return true;
             }
             return false;
           },
           message: 'Either a fixed price or a price range (min and max) is required.'
         }
-      },
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
@@ -58,25 +66,31 @@ const activitySchema = new Schema({
     tags: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tag'  // Referencing the Tag model
-      }],
-    special_discounts: String,
+    }],
+    special_discount: {
+      type: String,
+      required: false // Optional
+    },
     booking_open: {
         type: Boolean,
-        default: true  // Default value is true, meaning bookings are open by default
-      },
-      rating: {
+        default: true // Default value is true
+    },
+    budget: {
+      type: Number,
+      required: false // Optional
+    },
+    rating: {
         type: Number,
-        min: 0, // Minimum rating can be 0
-        max: 5, // Maximum rating can be 5
-        default: 0  // Default rating is 0 when the activity is created
-      },
+        min: 0,
+        max: 5,
+        default: 0 // Default rating is 0
+    },
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Advertiser',
-      required: true
+      required: false
     }
-  }, { timestamps: true });
-  
-  const Activity = mongoose.model('Activity', activitySchema);
-  module.exports = Activity;
-  
+}, { timestamps: true });
+
+const Activity = mongoose.model('Activity', activitySchema);
+module.exports = Activity;
