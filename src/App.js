@@ -25,6 +25,8 @@ const {
   getitineraries,
   filterActivity,
   searchProductTourist,
+  getProducts,
+  filterProducts
 } = require("../src/Routes/touristController");
 
 const {
@@ -84,8 +86,10 @@ app.get("/TourGuide",getTourGuides)
 app.post("/TourGuideProfile/:tourGuideID",createTourGuideProfile);
 app.get("/TourGuideProfile/:tourGuideID",readTourGuideProfile);
 app.patch("/TourGuideProfile/:tourGuideID",createTourGuideProfile);
-app.post("/createTourGuide",createTourGuide)
 app.delete("/deleteAccount",deleteAccount);
+app.get("/filterProducts",filterProducts);
+app.get("/products",getProducts);
+
 
 app.post("/addCategory",createCategory);
 app.get("/viewCategory",getCategory);

@@ -88,15 +88,26 @@ const filterActivity = async (req, res) => {
 
 const searchProductTourist = async (req, res) => {
  
-    const { name } = req.body;
-    try {
-       const product = await Product.find({name});
-       res.status(200).json(product);
-     } catch (error) {
-      
-       res.status(500).json({ message: 'Error retrieving product', error });
-     }
-   }
+  const { name } = req.body;
+  try {
+      const product = await Product.find({name});
+      res.status(200).json(product);
+    } catch (error) {
+    
+      res.status(500).json({ message: 'Error retrieving product', error });
+    }
+}
+
+const filterProducts = async (req, res) => {
+  const { limit } = req.body;
+  try {
+    const products = await Product.find({ price: { $lte: limit } }).populate("reviews.userId", "name");
+    res.status(200).json(products);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+   
 
 
 module.exports = {
@@ -105,4 +116,5 @@ module.exports = {
   getitineraries,
   filterActivity,
   searchProductTourist,
+  filterProducts,
 };
