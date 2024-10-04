@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const historicalSchema = new Schema({
-    name: {
+    Name: {
       type: String,
       required: true
     },
-    description: String,
+    Description: String,
     location: {
       address: String,
       coordinates: {
@@ -14,13 +14,25 @@ const historicalSchema = new Schema({
         lng: Number
       }
     },
-    pictures: [String], // Array of image URLs
+    Pictures: [String], // Array of image URLs
     opening_hours: String,
-    ticket_prices: Number,
+    
     tags: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'HistoricalTags'
       }], 
+      TicketPricesF: {
+        type: Number,
+        required: true,
+      },
+      TicketPricesN: {
+        type: Number,
+        required: true,
+      },
+      TicketPricesS: {
+        type: Number,
+        required: true,
+      },
     managed_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'TourismGoverner', // Reference to Tourism Governor

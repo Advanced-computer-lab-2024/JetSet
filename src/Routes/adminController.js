@@ -1,7 +1,13 @@
 const TourismGoverner = require("../Models/TourismGoverner");
+const Tourist = require("../Models/Tourist");
+const TourGuide = require("../Models/TourGuide");
+const Seller = require("../Models/Seller");
+const Advertiser = require("../Models/Advertiser");
 const Admin = require("../Models/Admin");
 const Product = require("../Models/Product");
 const Category = require("../Models/Category");
+const tagModel = require('../Models/Tag');
+
 
 
 //Tourism Governer
@@ -55,6 +61,16 @@ const createProduct = async (req, res) => {
     res
       .status(400)
       .json({ message: "Error creating Admin", error: error.message || error });
+  }
+};
+
+const getProductsAdmin = async (req, res) => {
+    
+  try {
+      const products = await Product.find().populate('reviews.userId', 'name'); 
+      res.status(200).json(products);
+  } catch (err) {
+      res.status(400).json({ error: err.message });
   }
 };
 
@@ -129,6 +145,93 @@ const updateCategory = async (req, res) => {
    }
  }
 
+ const deleteAccount = async (req, res) => {
+  const { accountUsername, accountType } = req.body;
+
+  let model;
+  switch (accountType) {
+    case "Tourist":
+      model = Tourist;
+      break;
+    case "Tour Guide":
+      model = TourGuide;
+      break;
+    case "Seller":
+      model = Seller;
+      break;
+    case "Advertiser":
+      model = Advertiser;
+      break;
+    default:
+      return res.status(400).json({ message: "Invalid account type" });
+  }
+
+  const deletedAccount = await model.findOneAndDelete({ username:accountUsername });
+  if (!deletedAccount) {
+    return res.status(404).json({ message: "Account not found" });
+  }
+
+  res.status(200).json({
+    message: `${accountType} deleted successfully`,
+    deletedAccount: deletedAccount,
+  });
+  
+};
+const createPrefTag = async (req, res) => {
+  const { name,type,period} = req.body;
+
+  try {
+      const newTag = new tagModel({ name , type , period });
+      await newTag.save();
+      res.status(201).json(newTag);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to create tag' });
+  }
+};
+// Get all tags
+const getPrefTag = async (req, res) => {
+  try {
+      const tags = await tagModel.find();
+      res.status(200).json(tags);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch tags' });
+  }
+};
+
+// Update a tag
+const updatePrefTag = async (req, res) => {
+  const { id } = req.query;
+  const { name ,type,period} = req.body;
+ 
+
+  try {
+      const updatedTag = await tagModel.findByIdAndUpdate(id, { name, type,period} ,{ new: true });
+      if (!updatedTag) {
+          return res.status(404).json({ error: 'Tag not found' });
+      }
+      res.status(200).json(updatedTag);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to update tag' });
+  }
+};
+
+// Delete a tag
+const deletePrefTag = async (req, res) => {
+  const { id } = req.query;
+
+  try {
+      const deletedTag = await tagModel.findByIdAndDelete(id);
+      if (!deletedTag) {
+          return res.status(404).json({ error: 'Tag not found' });
+      }
+      res.status(200).json({ message: 'Tag deleted successfully' });
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to delete tag' });
+  }
+};
+
+
+
 
 module.exports = { createTourismGoverner,
                    createAdmin, 
@@ -138,4 +241,10 @@ module.exports = { createTourismGoverner,
                    updateCategory, 
                    deleteCategory, 
                    searchProductAdmin,
-                   };
+                   deleteAccount,
+                   createPrefTag,
+                   getPrefTag,
+                  updatePrefTag,
+                  deletePrefTag,
+                  getProductsAdmin,
+                  };
