@@ -72,6 +72,10 @@ const filterActivity = async (req, res) => {
     if (category) query.category = category;
     if (rating) query.rating = rating;
 
+    // Add condition to only return upcoming activities based on date
+    const currentDate = new Date();
+    query.date = { ...query.date, $gte: currentDate };
+
     try {
         // Perform the query with dynamic filters
         const activity = await Activity.find(query);
