@@ -4,7 +4,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const advertiserRoutes = require("./Routes/advertiserController"); // Adjust path as necessary
+ Ayas
+const {
+  createProfile,
+  getProfile,
+  updateProfile,
+  deleteProfile,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+  getlistActivities,
+  viewCreatedActivities
+} = require("./Routes/advertiserController"); // Adjust path as necessary
+
 const itinerary = require('./Models/Itinerary');
 const {viewAllPlaces,createPlaces,getPlaces, updatePlace, deletePlace} = require("./Routes/placesController");
 const {createTag} = require("./Routes/tourismgovernerController");
@@ -12,6 +24,7 @@ const {filterActivityGuest,guestFilterItineraries} = require("./Routes/guestCont
 const {searchProductSeller} = require("./Routes/sellerController");
 const {createPrefTag, getPrefTag, updatePrefTag, deletePrefTag}= require('./Routes/adminController')
 
+main
 const {
   createAdmin,
   createProduct,
@@ -48,6 +61,8 @@ const {
 } = require("../src/Routes/tourguideController");
 
 
+
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -59,7 +74,7 @@ const MongoURI = process.env.MONGO_URI;
 
 // Middleware
 app.use(express.json());
-app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
+//app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
 mongoose
@@ -82,6 +97,17 @@ app.get("/home", (req, res) => {
 });
 
 app.use(express.json());
+
+
+app.post('/addprofiles', createProfile);
+app.get('/profiles', getProfile);
+app.put('/updateprofiles/:id', updateProfile);
+app.delete('/deleteprofiles/:id', deleteProfile);
+app.post('/addactivity', createActivity);
+app.put('/updateactivity/:id', updateActivity);
+app.delete('/deleteactivity/:id', deleteActivity);
+app.get('/getactivity', getlistActivities);
+app.get('/viewactivity', viewCreatedActivities);
 
 app.post("/tourism-governor", createTourismGoverner);
 app.post("/admin", createAdmin);
@@ -111,6 +137,8 @@ app.get("/searchProductSeller",searchProductSeller);
 
 
 
+ Ayas
+
 app.get("/viewAllPlaces",viewAllPlaces);
 app.post("/addPlace",createPlaces);
 app.get("/Places",getPlaces);
@@ -137,4 +165,5 @@ app.get('/search',search);
 app.get('/tourist/filter-itineraries', touristFilterItineraries);
 app.get('/guest/filter-itineraries', guestFilterItineraries);
 
+ main
 
