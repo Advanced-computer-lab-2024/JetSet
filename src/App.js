@@ -7,7 +7,9 @@ const dotenv = require("dotenv");
 const advertiserRoutes = require("./Routes/advertiserController"); // Adjust path as necessary
 const itinerary = require('./Models/Itinerary');
 const {viewAllPlaces,createPlaces,getPlaces, updatePlace, deletePlace} = require("./Routes/placesController");
-const {createTourismGoverner,createTag} = require("./Routes/tourismgovernerController");
+const {createTag} = require("./Routes/tourismgovernerController");
+const {filterActivityGuest} = require("./Routes/guestController");
+const {searchProductSeller} = require("./Routes/sellerController");
 
 const {
   createTourismGoverner,
