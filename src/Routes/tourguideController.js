@@ -28,6 +28,8 @@ const createTourGuideProfile = async (req, res) => {
     try {
         const myProfile = await TourGuide.findById(tourGuideID);
         res.status(200).json({
+            username: myProfile.username,
+            email:myProfile.email,
             mobile_number: myProfile.mobile_number,
             years_of_experience: myProfile.years_of_experience,
             previous_work:myProfile.previous_work

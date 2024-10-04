@@ -1,4 +1,5 @@
 const Activity = require("../Models/Activity");
+const TourGuide = require("../Models/TourGuide.js");
 
 const filterActivityGuest = async (req, res) => {
     const { budget, date, category, rating } = req.body;
@@ -26,5 +27,23 @@ const filterActivityGuest = async (req, res) => {
     }
 };
 
+const createTourGuide = async (req, res) => {
+    const { email, username , password } = req.body;
+    
+    try {
+      await TourGuide.create({
+        email: email,
+        username: username,
+        password: password
+      });
+      res.status(200).json({ msg: "tour guide is created" });
+    } catch (error) {
+      res.status(400).json({
+        message: "Error creating Tour Guide",
+        error: error.message || error,
+      });
+    }
+  };
 
-module.exports = { filterActivityGuest };
+
+module.exports = { filterActivityGuest , createTourGuide};
