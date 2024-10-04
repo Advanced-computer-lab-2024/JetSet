@@ -94,10 +94,10 @@ app.get("/viewCategory",getCategory);
 app.put("/updateCategory/:categoryId",updateCategory);
 app.delete("/deleteCategory/:categoryId",deleteCategory);
 app.get("/filterActivity",filterActivity);
-app.get("/filterActivityGuest",filterActivity);
+app.get("/filterActivityGuest",filterActivityGuest);
 app.get("/searchProductTourist",searchProductTourist);
 app.get("/searchProductAdmin",searchProductAdmin);
-app.get("/searchProductSeller",searchProductTourist);
+app.get("/searchProductSeller",searchProductSeller);
 
 
 
