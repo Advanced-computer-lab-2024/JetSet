@@ -18,8 +18,7 @@ const {
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const itinerary = require('./Models/Itinerary');
-const {viewAllPlaces,createPlaces,getPlaces, updatePlace, deletePlace} = require("./Routes/placesController");
-const {createTag} = require("./Routes/tourismgovernerController");
+const {viewAllPlaces,createPlaces,getPlaces, updatePlace, deletePlace,createTag} = require("./Routes/tourismgovernerController");
 const {filterActivityGuest,guestFilterItineraries} = require("./Routes/guestController");
 const {searchProductSeller} = require("./Routes/sellerController");
 const {createPrefTag, getPrefTag, updatePrefTag, deletePrefTag}= require('./Routes/adminController')
@@ -28,6 +27,7 @@ main
 const {
   createAdmin,
   createProduct,
+  updateProduct,
   getProductsAdmin,
   createCategory, 
   getCategory, 
@@ -70,7 +70,8 @@ dotenv.config();
 const app = express();
 
 const port = process.env.PORT || 3000;
-const MongoURI = process.env.MONGO_URI;
+// const MongoURI = process.env.MONGO_URI;
+const MongoURI="mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Middleware
 app.use(express.json());
@@ -112,6 +113,8 @@ app.get('/viewactivity', viewCreatedActivities);
 app.post("/tourism-governor", createTourismGoverner);
 app.post("/admin", createAdmin);
 app.post("/product", createProduct);
+app.put("/updateProduct/:id", updateProduct);
+
 app.get("/activities", getActivities);
 app.get("/itineraries", getitineraries);
 
@@ -143,7 +146,7 @@ app.get("/viewAllPlaces",viewAllPlaces);
 app.post("/addPlace",createPlaces);
 app.get("/Places",getPlaces);
 app.put("/updatePlace/:id",updatePlace);
-app.delete("/deletePlace",deletePlace);
+app.delete("/deletePlace/:id",deletePlace);
 app.post("/addTourismGoverner",createTourismGoverner);
 app.post("/addTag",createTag);
 
