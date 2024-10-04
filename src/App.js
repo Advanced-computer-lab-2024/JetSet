@@ -38,10 +38,6 @@ const {
      viewCreatedItineraries
 } = require("../src/Routes/tourguideController");
 
-const {
-  createTourGuide
-}= require("../src/Routes/guestController");
-
 
 // Load environment variables from .env file
 dotenv.config();
