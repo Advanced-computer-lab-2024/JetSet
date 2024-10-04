@@ -1,4 +1,5 @@
 const Activity = require("../Models/Activity");
+const itinerariesModel = require('../Models/Itinerary.js');
 
 const filterActivityGuest = async (req, res) => {
     const { budget, date, category, rating } = req.body;
@@ -30,4 +31,43 @@ const filterActivityGuest = async (req, res) => {
     }
 };
 
-module.exports = { filterActivityGuest };
+// const guestFilterItineraries = async (req, res) => {
+//     const { budget, availabilitydate, tag, language } = req.query;  // Get budget instead of minBudget/maxBudget
+
+//     try {
+//         const query = {};
+
+//         // Filter by Budget
+//         if (budget) {
+//             query.budget = parseFloat(budget);  // Exact match for budget
+//         }
+
+//         // Filter by Date (For upcoming itineraries)
+//         if (availabilitydate) {
+//             query.availabilitydate = { $gte: new Date(availabilitydate) };  // Greater than or equal to the given date
+//         }
+
+//         // Filter by Preferences
+//         if (tag) {
+//             query.tag = { $in: tag.split(',') };  // Matches any of the given preferences
+//         }
+
+//         // Filter by Language
+//         if (language) {
+//             query.language = { $regex: language, $options: 'i' };  // Case-insensitive match
+//         }
+
+//         // Query the database for itineraries matching the criteria
+//         const itineraries = await itinerariesModel.find(query);
+
+//         if (itineraries.length === 0) {
+//             return res.status(404).json({ message: 'No itineraries found' });
+//         }
+
+//         res.status(200).json(itineraries);
+//     } catch (error) {
+//         console.error('Error fetching itineraries:', error);  // Log the error for debugging
+//         res.status(500).json({ error: 'Failed to fetch itineraries' });
+//     }
+// };
+module.exports = { filterActivityGuest,guestFilterItineraries};

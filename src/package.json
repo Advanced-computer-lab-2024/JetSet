@@ -7,9 +7,6 @@
   },
   "scripts": {
     "start": "node app.js",
-
- 
     "react": "^18.3.1"
-
-}
+  }
 }

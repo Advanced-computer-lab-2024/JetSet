@@ -10,6 +10,9 @@ const {viewAllPlaces,createPlaces,getPlaces, updatePlace, deletePlace} = require
 const {createTag} = require("./Routes/tourismgovernerController");
 const {filterActivityGuest} = require("./Routes/guestController");
 const {searchProductSeller} = require("./Routes/sellerController");
+const {createPrefTag, getPrefTag, updatePrefTag, deletePrefTag}= require('./Routes/adminController')
+const {search,touristFilterItineraries}= require('./Routes/touristController');
+const {guestFilterItineraries}= require('./Routes/guestController');
 
 const {
   createAdmin,
@@ -121,4 +124,14 @@ app.get("/Itinerary",getItineraries );
 app.put("/updateItinerary/:id",updateItinerary );
 app.delete("/deleteItinerary/:id", deleteItinerary );
 app.get("/listofiternaries",viewCreatedItineraries );
+
+app.use(express.json())
+app.post("/addPreferancetag",createPrefTag);
+app.get("/getPreferancetag", getPrefTag);
+app.put('/updateTags', updatePrefTag);
+app.delete('/deletePrefTag', deletePrefTag);
+app.get('/search',search);
+app.get('/tourist/filter-itineraries', touristFilterItineraries);
+app.get('/guest/filter-itineraries', guestFilterItineraries);
+
 

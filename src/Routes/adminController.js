@@ -6,6 +6,8 @@ const Advertiser = require("../Models/Advertiser");
 const Admin = require("../Models/Admin");
 const Product = require("../Models/Product");
 const Category = require("../Models/Category");
+const tagModel = require('../Models/Tag');
+const productModel = require('./Models/Product.js');
 
 
 //Tourism Governer
@@ -165,6 +167,59 @@ const updateCategory = async (req, res) => {
   });
   
 };
+const createPrefTag = async (req, res) => {
+  const { name,type,period} = req.body;
+
+  try {
+      const newTag = new tagModel({ name , type , period });
+      await newTag.save();
+      res.status(201).json(newTag);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to create tag' });
+  }
+};
+// Get all tags
+const getPrefTag = async (req, res) => {
+  try {
+      const tags = await tagModel.find();
+      res.status(200).json(tags);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch tags' });
+  }
+};
+
+// Update a tag
+const updatePrefTag = async (req, res) => {
+  const { id } = req.query;
+  const { name ,type,period} = req.body;
+ 
+
+  try {
+      const updatedTag = await tagModel.findByIdAndUpdate(id, { name, type,period} ,{ new: true });
+      if (!updatedTag) {
+          return res.status(404).json({ error: 'Tag not found' });
+      }
+      res.status(200).json(updatedTag);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to update tag' });
+  }
+};
+
+// Delete a tag
+const deletePrefTag = async (req, res) => {
+  const { id } = req.query;
+
+  try {
+      const deletedTag = await tagModel.findByIdAndDelete(id);
+      if (!deletedTag) {
+          return res.status(404).json({ error: 'Tag not found' });
+      }
+      res.status(200).json({ message: 'Tag deleted successfully' });
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to delete tag' });
+  }
+};
+
 
 
 
@@ -177,4 +232,8 @@ module.exports = { createTourismGoverner,
                    deleteCategory, 
                    searchProductAdmin,
                    deleteAccount,
+                   createPrefTag,
+                   getPrefTag,
+                  updatePrefTag,
+                  deletePrefTag,
                   };

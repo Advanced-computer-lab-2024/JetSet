@@ -111,7 +111,107 @@ const filterProducts = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+   // const search = async (req, res) => {
+//   const { name, category, tag } = req.query;
+
+//   try {
+//       const query = {};
+
+//       // Exact match for name
+//       if (name) {
+//           query.name = name;
+//       }
+
+//       // Validate category ObjectId
+//       if (category) {
+//           if (!mongoose.isValidObjectId(category)) {
+//               return res.status(400).json({ error: 'Invalid category ID' });
+//           }
+//           const existingCategory = await Category.findById(category);
+//           if (!existingCategory) {
+//               return res.status(404).json({ error: 'Category not found' });
+//           }
+//           query.category = category; // Use the validated ObjectId directly
+//       }
+
+//       // Check tags against an array of tags
+//       if (tag) {
+//           query.tags = { $in: tag.split(',').map(t => t.trim()) };
+//       }
+
+//       // Log the query for debugging
+//       console.log('Query:', JSON.stringify(query, null, 2));
+
+//       // Query all models concurrently
+//       const [historicalPlaces, activities, itineraries] = await Promise.all([
+//           Historical.find(query),
+//           Activity.find(query),
+//           Itinerary.find(query)
+//       ]);
+
+//       // Merge all the results
+//       const results = [
+//           ...historicalPlaces,
+//           ...activities,
+//           ...itineraries
+//       ];
+
+//       // If no results found
+//       if (results.length === 0) {
+//           return res.status(404).json({ message: 'No results found' });
+//       }
+
+//       // Return the merged results
+//       res.status(200).json(results);
+//   } catch (error) {
+//       console.error('Error fetching results:', error);
+//       res.status(500).json({ error: 'Failed to fetch results', details: error.message });
+//   }
+// };
    
+   
+
+
+// const touristFilterItineraries = async (req, res) => {
+//     const { budget, availabilitydate, tag, language } = req.query;  // Get budget instead of minBudget/maxBudget
+
+//     try {
+//         const query = {};
+
+//         // Filter by Budget
+//         if (budget) {
+//             query.budget = parseFloat(budget);  // Exact match for budget
+//         }
+
+//         // Filter by Date (For upcoming itineraries)
+//         if (availabilitydate) {
+//             query.availabilitydate = { $gte: new Date(availabilitydate) };  // Greater than or equal to the given date
+//         }
+
+//         // Filter by Preferences
+//         if (tag) {
+//             query.tag = { $in: tag.split(',') };  // Matches any of the given preferences
+//         }
+
+//         // Filter by Language
+//         if (language) {
+//             query.language = { $regex: language, $options: 'i' };  // Case-insensitive match
+//         }
+
+//         // Query the database for itineraries matching the criteria
+//         const itineraries = await itineraryModel.find(query);
+
+//         if (itineraries.length === 0) {
+//             return res.status(404).json({ message: 'No itineraries found' });
+//         }
+
+//         res.status(200).json(itineraries);
+//     } catch (error) {
+//         console.error('Error fetching itineraries:', error);  // Log the error for debugging
+//         res.status(500).json({ error: 'Failed to fetch itineraries' });
+//     }
+// };
 
 
 module.exports = {
@@ -121,4 +221,6 @@ module.exports = {
   filterActivity,
   searchProductTourist,
   filterProducts,
+  search,
+  touristFilterItineraries
 };
