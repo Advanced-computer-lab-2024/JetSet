@@ -1,4 +1,8 @@
 const TourismGoverner = require("../Models/TourismGoverner");
+const Tourist = require("../Models/Tourist");
+const TourGuide = require("../Models/TourGuide");
+const Seller = require("../Models/Seller");
+const Advertiser = require("../Models/Advertiser");
 const Admin = require("../Models/Admin");
 const Product = require("../Models/Product");
 const Category = require("../Models/Category");
@@ -129,6 +133,40 @@ const updateCategory = async (req, res) => {
    }
  }
 
+ const deleteAccount = async (req, res) => {
+  const { accountUsername, accountType } = req.body;
+
+  let model;
+  switch (accountType) {
+    case "Tourist":
+      model = Tourist;
+      break;
+    case "Tour Guide":
+      model = TourGuide;
+      break;
+    case "Seller":
+      model = Seller;
+      break;
+    case "Advertiser":
+      model = Advertiser;
+      break;
+    default:
+      return res.status(400).json({ message: "Invalid account type" });
+  }
+
+  const deletedAccount = await model.findOneAndDelete({ username:accountUsername });
+  if (!deletedAccount) {
+    return res.status(404).json({ message: "Account not found" });
+  }
+
+  res.status(200).json({
+    message: `${accountType} deleted successfully`,
+    deletedAccount: deletedAccount,
+  });
+  
+};
+
+
 
 module.exports = { createTourismGoverner,
                    createAdmin, 
@@ -138,4 +176,5 @@ module.exports = { createTourismGoverner,
                    updateCategory, 
                    deleteCategory, 
                    searchProductAdmin,
-                   };
+                   deleteAccount,
+                  };

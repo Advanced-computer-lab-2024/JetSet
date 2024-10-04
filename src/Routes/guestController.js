@@ -26,5 +26,4 @@ const filterActivityGuest = async (req, res) => {
     }
 };
 
-
 module.exports = { filterActivityGuest };

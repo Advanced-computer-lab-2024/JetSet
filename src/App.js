@@ -1,7 +1,7 @@
 // app.js
 
 
-  const express = require("express");
+const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const advertiserRoutes = require("./Routes/advertiserController"); // Adjust path as necessary
@@ -12,7 +12,6 @@ const {filterActivityGuest} = require("./Routes/guestController");
 const {searchProductSeller} = require("./Routes/sellerController");
 
 const {
-  createTourismGoverner,
   createAdmin,
   createProduct,
   createCategory, 
@@ -20,6 +19,7 @@ const {
   updateCategory, 
   deleteCategory,
   searchProductAdmin,
+  deleteAccount,
 } = require("./Routes/adminController");
 
 const {
@@ -83,19 +83,21 @@ app.get("/activities", getActivities);
 app.get("/itineraries", getitineraries);
 
 app.get("/TourGuide",getTourGuides)
-app.post("/createTourGuideProfile/:tourGuideID",createTourGuideProfile);
-app.get("/createTourGuideProfile/:tourGuideID",readTourGuideProfile);
-app.patch("/createTourGuideProfile/:tourGuideID",createTourGuideProfile);
+app.post("/TourGuideProfile/:tourGuideID",createTourGuideProfile);
+app.get("/TourGuideProfile/:tourGuideID",readTourGuideProfile);
+app.patch("/TourGuideProfile/:tourGuideID",createTourGuideProfile);
+app.post("/createTourGuide",createTourGuide)
+app.delete("/deleteAccount",deleteAccount);
 
 app.post("/addCategory",createCategory);
 app.get("/viewCategory",getCategory);
 app.put("/updateCategory/:categoryId",updateCategory);
 app.delete("/deleteCategory/:categoryId",deleteCategory);
 app.get("/filterActivity",filterActivity);
-app.get("/filterActivityGuest",filterActivityGuest);
+app.get("/filterActivityGuest",filterActivity);
 app.get("/searchProductTourist",searchProductTourist);
 app.get("/searchProductAdmin",searchProductAdmin);
-app.get("/searchProductSeller",searchProductSeller);
+app.get("/searchProductSeller",searchProductTourist);
 
 
 
@@ -115,3 +117,4 @@ app.get("/Itinerary",getItineraries );
 app.put("/updateItinerary/:id",updateItinerary );
 app.delete("/deleteItinerary/:id", deleteItinerary );
 app.get("/listofiternaries",viewCreatedItineraries );
+
