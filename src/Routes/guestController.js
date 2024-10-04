@@ -31,43 +31,36 @@ const filterActivityGuest = async (req, res) => {
     }
 };
 
-// const guestFilterItineraries = async (req, res) => {
-//     const { budget, availabilitydate, tag, language } = req.query;  // Get budget instead of minBudget/maxBudget
-
-//     try {
-//         const query = {};
-
-//         // Filter by Budget
-//         if (budget) {
-//             query.budget = parseFloat(budget);  // Exact match for budget
-//         }
-
-//         // Filter by Date (For upcoming itineraries)
-//         if (availabilitydate) {
-//             query.availabilitydate = { $gte: new Date(availabilitydate) };  // Greater than or equal to the given date
-//         }
-
-//         // Filter by Preferences
-//         if (tag) {
-//             query.tag = { $in: tag.split(',') };  // Matches any of the given preferences
-//         }
-
-//         // Filter by Language
-//         if (language) {
-//             query.language = { $regex: language, $options: 'i' };  // Case-insensitive match
-//         }
-
-//         // Query the database for itineraries matching the criteria
-//         const itineraries = await itinerariesModel.find(query);
-
-//         if (itineraries.length === 0) {
-//             return res.status(404).json({ message: 'No itineraries found' });
-//         }
-
-//         res.status(200).json(itineraries);
-//     } catch (error) {
-//         console.error('Error fetching itineraries:', error);  // Log the error for debugging
-//         res.status(500).json({ error: 'Failed to fetch itineraries' });
-//     }
-// };
+const guestFilterItineraries = async (req, res) => {
+    try {
+        const { budget, startDate,endDate, tag, language } = req.body;
+    
+        // Build the query object dynamically
+        const query = {};
+    
+        if (budget) query.budget = budget;
+        if (startDate && endDate) {
+          query.availability_dates = { $gte: new Date(startDate), $lte: new Date(endDate) };
+        }
+        // Filter by preferences (assumes tags reference preferences like 'historic', 'beach', etc.)
+        if (tag) {
+          query.tag = { $in: tag.split(',') }; // Assumes preferences are sent as comma-separated values
+        }
+    
+        // Filter by language
+        if (language) {
+          query.language = language;
+        }
+    
+        // Execute the query
+        const itineraries = await itinerariesModel.find(query).populate('tag');
+    
+        // Send the filtered itineraries back
+        res.status(200).json(itineraries);
+    
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching itineraries' });
+      }
+};
 module.exports = { filterActivityGuest,guestFilterItineraries};

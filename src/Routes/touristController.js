@@ -1,6 +1,7 @@
 const Product = require("../Models/Product");
 const Activity = require("../Models/Activity");
 const Itinerary = require("../Models/Itinerary");
+const Historical = require('../Models/Historical');
 
 
 
@@ -112,8 +113,8 @@ const filterProducts = async (req, res) => {
   }
 };
 
-   // const search = async (req, res) => {
-//   const { name, category, tag } = req.query;
+//    const search = async (req, res) => {
+//   const { name, category, tag } = req.body;
 
 //   try {
 //       const query = {};
@@ -124,15 +125,18 @@ const filterProducts = async (req, res) => {
 //       }
 
 //       // Validate category ObjectId
+//       // if (category) {
+//       //     if (!mongoose.isValidObjectId(category)) {
+//       //         return res.status(400).json({ error: 'Invalid category ID' });
+//       //     }
+//       //     const existingCategory = await Category.findById(category);
+//       //     if (!existingCategory) {
+//       //         return res.status(404).json({ error: 'Category not found' });
+//       //     }
+//       //     query.category = category; // Use the validated ObjectId directly
+//       // }
 //       if (category) {
-//           if (!mongoose.isValidObjectId(category)) {
-//               return res.status(400).json({ error: 'Invalid category ID' });
-//           }
-//           const existingCategory = await Category.findById(category);
-//           if (!existingCategory) {
-//               return res.status(404).json({ error: 'Category not found' });
-//           }
-//           query.category = category; // Use the validated ObjectId directly
+//         query.category = { $in: category.split(',') }; // Assumes preferences are sent as comma-separated values
 //       }
 
 //       // Check tags against an array of tags
@@ -169,49 +173,94 @@ const filterProducts = async (req, res) => {
 //       res.status(500).json({ error: 'Failed to fetch results', details: error.message });
 //   }
 // };
+
+const search = async (req, res) => {
+  try {
+    const { query, category, tag } = req.body;
+
+    // Build query object dynamically
+    const searchQuery = {};
+
+    if (query) {
+      // If the user provides a search term, search by name or description
+      searchQuery.$or = [
+        { Name: { $regex: query, $options: 'i' } },        // Case-insensitive search in Historical places
+        { description: { $regex: query, $options: 'i' } }, // Search in Activity description or Itinerary timeline
+        { timeline: { $regex: query, $options: 'i' } },
+        { 'activities.title': { $regex: query, $options: 'i' } }
+      ];
+    }
+
+    if (category) {
+      // Fetch category by name
+      const categoryDoc = await Category.findOne({ name: { $regex: category, $options: 'i' } });
+      
+      if (categoryDoc) {
+        // If category is found, add it to search query for activities
+        searchQuery.category = categoryDoc._id;
+      } else {
+        // If no matching category found, return empty results
+        return res.status(200).json({ results: [] });
+      }
+    }
+
+    if (tag) {
+      // If the user provides a tag, match the tag across the models
+      searchQuery.tags = { $in: tag.split(',') };
+    }
+
+    // Fetch results from Historical, Itinerary, and Activity models
+    const historicalResults = await Historical.find(searchQuery).populate('tags');
+    const itineraryResults = await Itinerary.find(searchQuery).populate('tag');
+    const activityResults = await Activity.find(searchQuery).populate('tags').populate('category', 'name');
+
+    // Combine results into a single array
+    const results = [...historicalResults, ...itineraryResults, ...activityResults];
+
+    res.status(200).json(results);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error during search' });
+  }
+};
    
    
 
 
-// const touristFilterItineraries = async (req, res) => {
-//     const { budget, availabilitydate, tag, language } = req.query;  // Get budget instead of minBudget/maxBudget
+const touristFilterItineraries = async (req, res) => {
+  try {
+    const { budget, startDate,endDate, tag, language } = req.body;
 
-//     try {
-//         const query = {};
+    // Build the query object dynamically
+    const query = {};
 
-//         // Filter by Budget
-//         if (budget) {
-//             query.budget = parseFloat(budget);  // Exact match for budget
-//         }
+    if (budget) query.budget = budget;
+    if (startDate && endDate) {
+      query.availability_dates = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    }
+    // Filter by preferences (assumes tags reference preferences like 'historic', 'beach', etc.)
+    if (tag) {
+      query.tag = { $in: tag.split(',') }; // Assumes preferences are sent as comma-separated values
+    }
 
-//         // Filter by Date (For upcoming itineraries)
-//         if (availabilitydate) {
-//             query.availabilitydate = { $gte: new Date(availabilitydate) };  // Greater than or equal to the given date
-//         }
+    // Filter by language
+    if (language) {
+      query.language = language;
+    }
 
-//         // Filter by Preferences
-//         if (tag) {
-//             query.tag = { $in: tag.split(',') };  // Matches any of the given preferences
-//         }
+    // Execute the query
+    const itineraries = await Itinerary.find(query).populate('tag');
 
-//         // Filter by Language
-//         if (language) {
-//             query.language = { $regex: language, $options: 'i' };  // Case-insensitive match
-//         }
+    // Send the filtered itineraries back
+    res.status(200).json(itineraries);
 
-//         // Query the database for itineraries matching the criteria
-//         const itineraries = await itineraryModel.find(query);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching itineraries' });
+  }
+};
 
-//         if (itineraries.length === 0) {
-//             return res.status(404).json({ message: 'No itineraries found' });
-//         }
-
-//         res.status(200).json(itineraries);
-//     } catch (error) {
-//         console.error('Error fetching itineraries:', error);  // Log the error for debugging
-//         res.status(500).json({ error: 'Failed to fetch itineraries' });
-//     }
-// };
 
 
 module.exports = {
@@ -221,6 +270,7 @@ module.exports = {
   filterActivity,
   searchProductTourist,
   filterProducts,
-  search,
-  touristFilterItineraries
+  touristFilterItineraries,
+  search
+  
 };

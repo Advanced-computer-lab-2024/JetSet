@@ -7,7 +7,7 @@ const Admin = require("../Models/Admin");
 const Product = require("../Models/Product");
 const Category = require("../Models/Category");
 const tagModel = require('../Models/Tag');
-const productModel = require('./Models/Product.js');
+
 
 
 //Tourism Governer
@@ -61,6 +61,16 @@ const createProduct = async (req, res) => {
     res
       .status(400)
       .json({ message: "Error creating Admin", error: error.message || error });
+  }
+};
+
+const getProductsAdmin = async (req, res) => {
+    
+  try {
+      const products = await Product.find().populate('reviews.userId', 'name'); 
+      res.status(200).json(products);
+  } catch (err) {
+      res.status(400).json({ error: err.message });
   }
 };
 
@@ -236,4 +246,5 @@ module.exports = { createTourismGoverner,
                    getPrefTag,
                   updatePrefTag,
                   deletePrefTag,
+                  getProductsAdmin,
                   };

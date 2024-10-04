@@ -8,21 +8,21 @@ const advertiserRoutes = require("./Routes/advertiserController"); // Adjust pat
 const itinerary = require('./Models/Itinerary');
 const {viewAllPlaces,createPlaces,getPlaces, updatePlace, deletePlace} = require("./Routes/placesController");
 const {createTag} = require("./Routes/tourismgovernerController");
-const {filterActivityGuest} = require("./Routes/guestController");
+const {filterActivityGuest,guestFilterItineraries} = require("./Routes/guestController");
 const {searchProductSeller} = require("./Routes/sellerController");
 const {createPrefTag, getPrefTag, updatePrefTag, deletePrefTag}= require('./Routes/adminController')
-const {search,touristFilterItineraries}= require('./Routes/touristController');
-const {guestFilterItineraries}= require('./Routes/guestController');
 
 const {
   createAdmin,
   createProduct,
+  getProductsAdmin,
   createCategory, 
   getCategory, 
   updateCategory, 
   deleteCategory,
   searchProductAdmin,
   deleteAccount,
+  createTourismGoverner,
 } = require("./Routes/adminController");
 
 const {
@@ -31,7 +31,9 @@ const {
   filterActivity,
   searchProductTourist,
   getProducts,
-  filterProducts
+  filterProducts,
+  touristFilterItineraries,
+  search
 } = require("../src/Routes/touristController");
 
 const {
@@ -94,6 +96,7 @@ app.patch("/TourGuideProfile/:tourGuideID",createTourGuideProfile);
 app.delete("/deleteAccount",deleteAccount);
 app.get("/filterProducts",filterProducts);
 app.get("/products",getProducts);
+app.get("/productsAdmin",getProductsAdmin);
 
 
 app.post("/addCategory",createCategory);
