@@ -70,8 +70,7 @@ dotenv.config();
 const app = express();
 
 const port = process.env.PORT || 3000;
-// const MongoURI = process.env.MONGO_URI;
-const MongoURI="mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MongoURI = process.env.MONGO_URI;
 
 // Middleware
 app.use(express.json());
