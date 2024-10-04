@@ -64,6 +64,35 @@ const createProduct = async (req, res) => {
   }
 };
 
+ 
+const updateProduct = async (req, res) => {
+  const { id } = req.params; 
+  const { name, price,description, quantity, seller_id } = req.body;
+
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        name,
+        description,
+        price,
+        quantity,
+        seller_id,
+      },
+      { new: true } 
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ msg: "Product updated", product: updatedProduct });
+  } catch (error) {
+    res.status(400).json({ message: "Error updating product", error: error.message || error });
+  }
+};
+
+
 const getProductsAdmin = async (req, res) => {
     
   try {
@@ -236,6 +265,7 @@ const deletePrefTag = async (req, res) => {
 module.exports = { createTourismGoverner,
                    createAdmin, 
                    createProduct,
+                   updateProduct,
                    createCategory, 
                    getCategory, 
                    updateCategory, 
