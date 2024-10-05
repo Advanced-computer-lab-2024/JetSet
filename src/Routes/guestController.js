@@ -83,4 +83,33 @@ const guestFilterItineraries = async (req, res) => {
     res.status(500).json({ message: "Error fetching itineraries" });
   }
 };
-module.exports = { filterActivityGuest, guestFilterItineraries, register };
+
+const Historical = require('../Models/Historical');
+
+// Filter historical places/museums by tag
+const filterHistoricalByTag = async (req, res) => {
+  const { tag } = req.body; // Expecting 'tag' from the request body
+
+  if (!tag) {
+    return res.status(400).json({ error: "Tag is required for filtering." });
+  }
+
+  try {
+    // Find historical places that contain the specified tag
+    const historicalPlaces = await Historical.find({ 
+      tags: tag // Matches the tag within the tags array
+    }).populate('tags', 'type period'); // Optionally populate tag details
+
+    if (historicalPlaces.length === 0) {
+      return res.status(404).json({ message: "No historical places found with the specified tag." });
+    }
+
+    res.status(200).json(historicalPlaces);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
+module.exports = { filterActivityGuest, guestFilterItineraries, register, filterHistoricalByTag};

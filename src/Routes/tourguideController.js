@@ -234,10 +234,160 @@ const viewCreatedItineraries = async (req, res) => {
   }
 };
 
+//TOURIST ITINERARY
+const TouristItinerary = require('../Models/TouristItinerary.js');
+const Tag = require('../Models/Tag.js'); // Assuming tags are stored here
+
+const createTouristItinerary = async (req, res) => {
+    const {
+        activities,
+        locations,
+        timeline,
+        duration,
+        language,
+        price,
+        availability_dates,
+        pickup_location,
+        dropoff_location,
+        accessibility,
+        budget,
+        created_by,
+        tags
+    } = req.body;
+
+    try {
+        const itinerary = await TouristItinerary.create({
+            activities,
+            locations,
+            timeline,
+            duration,
+            language,
+            price,
+            availability_dates,
+            pickup_location,
+            dropoff_location,
+            accessibility,
+            budget,
+            created_by,
+            tags
+        });
+        res.status(201).json({ msg: "Tourist Itinerary created", itinerary });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+const readTouristItinerary = async (req, res) => {
+    const { id } = req.params;
+
+    if (!validateObjectId(id)) {
+        return res.status(400).json({ error: "Invalid Itinerary ID format" });
+    }
+
+    try {
+        const itinerary = await TouristItinerary.findById(id).populate('tags', 'name type period');
+        if (!itinerary) {
+            return res.status(404).json({ error: "Itinerary not found" });
+        }
+        res.status(200).json(itinerary);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+const updateTouristItinerary = async (req, res) => {
+    const { id } = req.params;
+
+    if (!validateObjectId(id)) {
+        return res.status(400).json({ error: "Invalid Itinerary ID format" });
+    }
+
+    const {
+        activities,
+        locations,
+        timeline,
+        duration,
+        language,
+        price,
+        availability_dates,
+        pickup_location,
+        dropoff_location,
+        accessibility,
+        budget,
+        created_by,
+        tags
+    } = req.body;
+
+    try {
+        const updatedItinerary = await TouristItinerary.findByIdAndUpdate(
+            id,
+            {
+                activities,
+                locations,
+                timeline,
+                duration,
+                language,
+                price,
+                availability_dates,
+                pickup_location,
+                dropoff_location,
+                accessibility,
+                budget,
+                created_by,
+                tags
+            },
+            { new: true }
+        );
+
+        if (!updatedItinerary) {
+            return res.status(404).json({ error: "Itinerary not found" });
+        }
+        res.status(200).json(updatedItinerary);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+const deleteTouristItinerary = async (req, res) => {
+    const { id } = req.params;
+
+    if (!validateObjectId(id)) {
+        return res.status(400).json({ error: "Invalid Itinerary ID format" });
+    }
+
+    try {
+        const deletedItinerary = await TouristItinerary.findByIdAndDelete(id);
+        if (!deletedItinerary) {
+            return res.status(404).json({ error: "Itinerary not found" });
+        }
+        res.status(200).json({ message: "Itinerary deleted", deletedItinerary });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+const getItinerariesByDateRange = async (req, res) => {
+    const { startDate, endDate } = req.query;
+
+    try {
+        const itineraries = await TouristItinerary.find({
+            'availability_dates.start': { $gte: new Date(startDate) },
+            'availability_dates.end': { $lte: new Date(endDate) }
+        }).populate('tags', 'name type period');
+
+        if (itineraries.length === 0) {
+            return res.status(404).json({ message: "No itineraries found for the specified date range." });
+        }
+
+        res.status(200).json(itineraries);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+
+
 module.exports = { createTourGuideProfile , getTourGuides , readTourGuideProfile,createItinerary,
   getItineraries,
   updateItinerary,
-  deleteItinerary,viewCreatedItineraries};
+  deleteItinerary,viewCreatedItineraries, createTouristItinerary,readTouristItinerary, updateTouristItinerary,deleteTouristItinerary, getItinerariesByDateRange};
 
 
 
