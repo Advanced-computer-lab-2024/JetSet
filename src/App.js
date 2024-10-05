@@ -30,10 +30,7 @@ const {
   guestFilterItineraries,
   register,
 } = require("./Routes/guestController");
-const {
-  searchProductSeller,
-  sortProducts,
-} = require("./Routes/sellerController");
+const { searchProductSeller } = require("./Routes/sellerController");
 const {
   createPrefTag,
   getPrefTag,
@@ -58,7 +55,6 @@ const {
 
 const {
   getActivities,
-  getItineraries,
   filterActivity,
   searchProductTourist,
   getProducts,
@@ -68,7 +64,6 @@ const {
   createTourist,
   getTouristProfile,
   updateTouristProfile,
-  sortProducts,
 } = require("../src/Routes/touristController");
 
 const {
