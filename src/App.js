@@ -77,6 +77,15 @@ const {
   viewCreatedItineraries,
 } = require("../src/Routes/tourguideController");
 
+//tourguide tourist itinerary
+const {
+  createTouristItinerary,
+  readTouristItinerary,
+  updateTouristItinerary,
+  deleteTouristItinerary,
+  getItinerariesByDateRange
+} = require("../src/Routes/tourguideController");
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -176,3 +185,12 @@ app.delete("/deletePrefTag", deletePrefTag);
 app.get("/search", search);
 app.get("/tourist/filter-itineraries", touristFilterItineraries);
 app.get("/guest/filter-itineraries", guestFilterItineraries);
+
+
+app.post('/createTouristItineraries', createTouristItinerary);
+app.get('/getTouristItineraries/:id', readTouristItinerary);
+app.put('/updateTouristItineraries/:id', updateTouristItinerary);
+app.delete('/deleteTouristItineraries/:id', deleteTouristItinerary);
+app.get('/tourist-itineraries', getItinerariesByDateRange);
+
+app.get("/filterHistoricalTags", filterHistoricalByTag);
