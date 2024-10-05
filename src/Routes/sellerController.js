@@ -78,18 +78,37 @@ const getProducts = async (req, res) => {
   }
 };
 
-const searchProductSeller = async (req, res) => {
- 
-    const { name } = req.body;
-    try {
-       const product = await Product.find({name});
-       res.status(200).json(product);
-     } catch (error) {
-      
-       res.status(500).json({ message: 'Error retrieving product', error });
-     }
-   }
+//Sort products by ratings
+const sortProducts = async (req, res) => {
+  const { sortBy = "ratings", sortOrder = -1 } = req.body; // Default to sort by ratings in descending order
 
+  try {
+    let sortOption = {};
+    if (sortBy === "ratings") {
+      sortOption.ratings = sortOrder; // -1 for descending, 1 for ascending
+    } else {
+      return res
+        .status(400)
+        .json({ error: 'Invalid sort parameter. Use "ratings".' });
+    }
+
+    const sortedProducts = await Product.find().sort(sortOption);
+    res.json(sortedProducts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const searchProductSeller = async (req, res) => {
+  const { name } = req.body;
+  try {
+    const product = await Product.find({ name });
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving product", error });
+  }
+};
 
 module.exports = {
   createSeller,
@@ -98,4 +117,5 @@ module.exports = {
   createProduct,
   getProducts,
   searchProductSeller,
+  sortProducts,
 };

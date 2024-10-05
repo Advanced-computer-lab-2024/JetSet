@@ -1,31 +1,31 @@
- Ayas
-
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const {ObjectId} = mongoose.Schema;
+const { ObjectId } = mongoose.Schema;
 
-const tourGuideSchema = new Schema({
+const tourGuideSchema = new Schema(
+  {
     email: {
       type: String,
-      required: true
+      required: true,
     },
     username: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
     mobile_number: {
       type: String,
-      required:false
+      required: false,
     },
     years_of_experience: Number, // For Tour Guides
     previous_work: String, // For Tour Guides
-  }, { timestamps: true });
-  
-  const TourGuide = mongoose.model('TourGuide', tourGuideSchema);
-  module.exports = TourGuide;
- main
+  },
+  { timestamps: true }
+);
+
+const TourGuide = mongoose.model("TourGuide", tourGuideSchema);
+module.exports = TourGuide;

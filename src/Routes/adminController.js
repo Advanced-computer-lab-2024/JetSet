@@ -6,9 +6,7 @@ const Advertiser = require("../Models/Advertiser");
 const Admin = require("../Models/Admin");
 const Product = require("../Models/Product");
 const Category = require("../Models/Category");
-const tagModel = require('../Models/Tag');
-
-
+const tagModel = require("../Models/Tag");
 
 //Tourism Governer
 const createTourismGoverner = async (req, res) => {
@@ -64,10 +62,9 @@ const createProduct = async (req, res) => {
   }
 };
 
- 
 const updateProduct = async (req, res) => {
-  const { id } = req.params; 
-  const { name, price,description, quantity, seller_id } = req.body;
+  const { id } = req.params;
+  const { name, price, description, quantity, seller_id } = req.body;
 
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -79,7 +76,7 @@ const updateProduct = async (req, res) => {
         quantity,
         seller_id,
       },
-      { new: true } 
+      { new: true }
     );
 
     if (!updatedProduct) {
@@ -88,93 +85,111 @@ const updateProduct = async (req, res) => {
 
     res.status(200).json({ msg: "Product updated", product: updatedProduct });
   } catch (error) {
-    res.status(400).json({ message: "Error updating product", error: error.message || error });
+    res.status(400).json({
+      message: "Error updating product",
+      error: error.message || error,
+    });
   }
 };
-
 
 const getProductsAdmin = async (req, res) => {
-    
   try {
-      const products = await Product.find().populate('reviews.userId', 'name'); 
-      res.status(200).json(products);
+    const products = await Product.find().populate("reviews.userId", "name");
+    res.status(200).json(products);
   } catch (err) {
-      res.status(400).json({ error: err.message });
+    res.status(400).json({ error: err.message });
   }
 };
 
-const createCategory = async(req,res) => {
+//Sort products by ratings
+const sortProducts = async (req, res) => {
+  const { sortBy = "ratings", sortOrder = -1 } = req.body; // Default to sort by ratings in descending order
 
-  const {name} = req.body;
+  try {
+    let sortOption = {};
+    if (sortBy === "ratings") {
+      sortOption.ratings = sortOrder; // -1 for descending, 1 for ascending
+    } else {
+      return res
+        .status(400)
+        .json({ error: 'Invalid sort parameter. Use "ratings".' });
+    }
 
-  try{
-    const category = await Category.create({name});
-    res.status(200).json(category)
-    }catch(error){
-    res.status(400).json({error:error.message})
+    const sortedProducts = await Product.find().sort(sortOption);
+    res.json(sortedProducts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error." });
   }
+};
 
-}
+const createCategory = async (req, res) => {
+  const { name } = req.body;
+
+  try {
+    const category = await Category.create({ name });
+    res.status(200).json(category);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 const getCategory = async (req, res) => {
- 
- try {
+  try {
     const category = await Category.find({});
     res.status(200).json(category);
   } catch (error) {
-   
-    res.status(500).json({ message: 'Error retrieving categories', error });
+    res.status(500).json({ message: "Error retrieving categories", error });
   }
-}
+};
 
 const updateCategory = async (req, res) => {
-
-  try { 
-     const { categoryId } = req.params;
-     const { name } = req.body;
-     
-     const updatedCategory = await Category.findByIdAndUpdate(categoryId, {name}, { new: true });
- 
-     if (!updatedCategory) {
-       return res.status(404).json({ message: 'Category not found' });
-     }
- 
-     res.status(200).json(updatedCategory);
-   } catch (error) {
-     res.status(500).json({ message: 'Error updating category', error });
-   }
- }
- 
- const deleteCategory = async (req, res) => {
   try {
-     
+    const { categoryId } = req.params;
+    const { name } = req.body;
+
+    const updatedCategory = await Category.findByIdAndUpdate(
+      categoryId,
+      { name },
+      { new: true }
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    res.status(200).json(updatedCategory);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating category", error });
+  }
+};
+
+const deleteCategory = async (req, res) => {
+  try {
     const { categoryId } = req.params;
     const deletedCategory = await Category.findByIdAndDelete(categoryId);
-    
+
     if (!deletedCategory) {
-      return res.status(404).json({ message: 'Category not found' });
+      return res.status(404).json({ message: "Category not found" });
     }
- 
+
     res.status(200).json(deletedCategory);
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error deleting category', error });
+    res.status(500).json({ message: "Error deleting category", error });
   }
- }
+};
 
- const searchProductAdmin = async (req, res) => {
- 
+const searchProductAdmin = async (req, res) => {
   const { name } = req.body;
   try {
-     const product = await Product.find({name});
-     res.status(200).json(product);
-   } catch (error) {
-    
-     res.status(500).json({ message: 'Error retrieving product', error });
-   }
- }
+    const product = await Product.find({ name });
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving product", error });
+  }
+};
 
- const deleteAccount = async (req, res) => {
+const deleteAccount = async (req, res) => {
   const { accountUsername, accountType } = req.body;
 
   let model;
@@ -195,7 +210,9 @@ const updateCategory = async (req, res) => {
       return res.status(400).json({ message: "Invalid account type" });
   }
 
-  const deletedAccount = await model.findOneAndDelete({ username:accountUsername });
+  const deletedAccount = await model.findOneAndDelete({
+    username: accountUsername,
+  });
   if (!deletedAccount) {
     return res.status(404).json({ message: "Account not found" });
   }
@@ -204,43 +221,45 @@ const updateCategory = async (req, res) => {
     message: `${accountType} deleted successfully`,
     deletedAccount: deletedAccount,
   });
-  
 };
 const createPrefTag = async (req, res) => {
-  const { name,type,period} = req.body;
+  const { name, type, period } = req.body;
 
   try {
-      const newTag = new tagModel({ name , type , period });
-      await newTag.save();
-      res.status(201).json(newTag);
+    const newTag = new tagModel({ name, type, period });
+    await newTag.save();
+    res.status(201).json(newTag);
   } catch (error) {
-      res.status(500).json({ error: 'Failed to create tag' });
+    res.status(500).json({ error: "Failed to create tag" });
   }
 };
 // Get all tags
 const getPrefTag = async (req, res) => {
   try {
-      const tags = await tagModel.find();
-      res.status(200).json(tags);
+    const tags = await tagModel.find();
+    res.status(200).json(tags);
   } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch tags' });
+    res.status(500).json({ error: "Failed to fetch tags" });
   }
 };
 
 // Update a tag
 const updatePrefTag = async (req, res) => {
   const { id } = req.query;
-  const { name ,type,period} = req.body;
- 
+  const { name, type, period } = req.body;
 
   try {
-      const updatedTag = await tagModel.findByIdAndUpdate(id, { name, type,period} ,{ new: true });
-      if (!updatedTag) {
-          return res.status(404).json({ error: 'Tag not found' });
-      }
-      res.status(200).json(updatedTag);
+    const updatedTag = await tagModel.findByIdAndUpdate(
+      id,
+      { name, type, period },
+      { new: true }
+    );
+    if (!updatedTag) {
+      return res.status(404).json({ error: "Tag not found" });
+    }
+    res.status(200).json(updatedTag);
   } catch (error) {
-      res.status(500).json({ error: 'Failed to update tag' });
+    res.status(500).json({ error: "Failed to update tag" });
   }
 };
 
@@ -249,32 +268,31 @@ const deletePrefTag = async (req, res) => {
   const { id } = req.query;
 
   try {
-      const deletedTag = await tagModel.findByIdAndDelete(id);
-      if (!deletedTag) {
-          return res.status(404).json({ error: 'Tag not found' });
-      }
-      res.status(200).json({ message: 'Tag deleted successfully' });
+    const deletedTag = await tagModel.findByIdAndDelete(id);
+    if (!deletedTag) {
+      return res.status(404).json({ error: "Tag not found" });
+    }
+    res.status(200).json({ message: "Tag deleted successfully" });
   } catch (error) {
-      res.status(500).json({ error: 'Failed to delete tag' });
+    res.status(500).json({ error: "Failed to delete tag" });
   }
 };
 
-
-
-
-module.exports = { createTourismGoverner,
-                   createAdmin, 
-                   createProduct,
-                   updateProduct,
-                   createCategory, 
-                   getCategory, 
-                   updateCategory, 
-                   deleteCategory, 
-                   searchProductAdmin,
-                   deleteAccount,
-                   createPrefTag,
-                   getPrefTag,
-                  updatePrefTag,
-                  deletePrefTag,
-                  getProductsAdmin,
-                  };
+module.exports = {
+  createTourismGoverner,
+  createAdmin,
+  createProduct,
+  updateProduct,
+  createCategory,
+  getCategory,
+  updateCategory,
+  deleteCategory,
+  searchProductAdmin,
+  deleteAccount,
+  createPrefTag,
+  getPrefTag,
+  updatePrefTag,
+  deletePrefTag,
+  getProductsAdmin,
+  sortProducts,
+};
