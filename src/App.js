@@ -97,7 +97,11 @@ const port = process.env.PORT || 3000;
 const MongoURI = process.env.MONGO_URI;
 
 // Middleware
-app.use(express.json());
+app.use(express.json()); // For parsing application/json
+
+const cors = require('cors');
+app.use(cors());
+
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
