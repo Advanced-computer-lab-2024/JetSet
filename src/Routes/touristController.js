@@ -371,7 +371,6 @@ const touristFilterItineraries = async (req, res) => {
     res.status(500).json({ message: "Error fetching itineraries" });
   }
 };
-const Historical = require('../Models/Historical');
 
 // Filter historical places/museums by tag
 const filterHistoricalByTag = async (req, res) => {
@@ -383,12 +382,14 @@ const filterHistoricalByTag = async (req, res) => {
 
   try {
     // Find historical places that contain the specified tag
-    const historicalPlaces = await Historical.find({ 
-      tags: tag // Matches the tag within the tags array
-    }).populate('tags', 'type period'); // Optionally populate tag details
+    const historicalPlaces = await Historical.find({
+      tags: tag, // Matches the tag within the tags array
+    }).populate("tags", "type period"); // Optionally populate tag details
 
     if (historicalPlaces.length === 0) {
-      return res.status(404).json({ message: "No historical places found with the specified tag." });
+      return res.status(404).json({
+        message: "No historical places found with the specified tag.",
+      });
     }
 
     res.status(200).json(historicalPlaces);
@@ -397,7 +398,6 @@ const filterHistoricalByTag = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
-
 
 module.exports = {
   getProducts,

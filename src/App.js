@@ -64,6 +64,7 @@ const {
   createTourist,
   getTouristProfile,
   updateTouristProfile,
+  filterHistoricalByTag,
 } = require("../src/Routes/touristController");
 
 const {
@@ -83,7 +84,7 @@ const {
   readTouristItinerary,
   updateTouristItinerary,
   deleteTouristItinerary,
-  getItinerariesByDateRange
+  getItinerariesByDateRange,
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
@@ -186,11 +187,10 @@ app.get("/search", search);
 app.get("/tourist/filter-itineraries", touristFilterItineraries);
 app.get("/guest/filter-itineraries", guestFilterItineraries);
 
-
-app.post('/createTouristItineraries', createTouristItinerary);
-app.get('/getTouristItineraries/:id', readTouristItinerary);
-app.put('/updateTouristItineraries/:id', updateTouristItinerary);
-app.delete('/deleteTouristItineraries/:id', deleteTouristItinerary);
-app.get('/tourist-itineraries', getItinerariesByDateRange);
+app.post("/createTouristItineraries", createTouristItinerary);
+app.get("/getTouristItineraries/:id", readTouristItinerary);
+app.put("/updateTouristItineraries/:id", updateTouristItinerary);
+app.delete("/deleteTouristItineraries/:id", deleteTouristItinerary);
+app.get("/tourist-itineraries", getItinerariesByDateRange);
 
 app.get("/filterHistoricalTags", filterHistoricalByTag);
