@@ -3,6 +3,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require("cors");
+
 
 const {
   createProfile,
@@ -83,8 +85,7 @@ const {
   createTouristItinerary,
   readTouristItinerary,
   updateTouristItinerary,
-  deleteTouristItinerary,
-  getItinerariesByDateRange,
+  deleteTouristItinerary
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
@@ -93,11 +94,13 @@ dotenv.config();
 // App variables
 const app = express();
 
+
 const port = process.env.PORT || 3000;
 const MongoURI = process.env.MONGO_URI;
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
@@ -175,8 +178,8 @@ app.use(express.json());
 app.post("/addItinerary", createItinerary);
 app.get("/Itinerary", getItineraries);
 app.put("/updateItinerary/:id", updateItinerary);
-app.delete("/deleteItinerary/:id", deleteItinerary);
-app.get("/listofiternaries", viewCreatedItineraries);
+app.delete("/deleteItinerary", deleteItinerary);
+app.get("/listofiternaries/:id", viewCreatedItineraries);
 
 app.use(express.json());
 app.post("/addPreferancetag", createPrefTag);
@@ -187,10 +190,10 @@ app.get("/search", search);
 app.get("/tourist/filter-itineraries", touristFilterItineraries);
 app.get("/guest/filter-itineraries", guestFilterItineraries);
 
-app.post("/createTouristItineraries", createTouristItinerary);
-app.get("/getTouristItineraries/:id", readTouristItinerary);
+app.post("/createTouristItineraries/:id", createTouristItinerary);
+app.get("/getTouristItineraries", readTouristItinerary);
 app.put("/updateTouristItineraries/:id", updateTouristItinerary);
 app.delete("/deleteTouristItineraries/:id", deleteTouristItinerary);
-app.get("/tourist-itineraries", getItinerariesByDateRange);
 
 app.get("/filterHistoricalTags", filterHistoricalByTag);
+

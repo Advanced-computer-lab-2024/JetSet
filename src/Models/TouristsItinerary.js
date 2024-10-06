@@ -38,6 +38,11 @@ const touristItinerarySchema = new Schema({
       ref: "Tag", // Referencing the Tag model
     },
   ], // e.g., adventure, family, luxury
+  created_by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'TourGuide', // Tour Guide reference
+    required: true
+  }
 });
 
 const TouristItinerary = mongoose.model(

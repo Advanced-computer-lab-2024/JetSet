@@ -165,7 +165,7 @@ const updateItinerary = async (req, res) => {
 };
 
 const deleteItinerary = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
   console.log("Received ID for deletion:", id); // Log the ID
 
   if (!validateObjectId(id)) {
@@ -228,46 +228,35 @@ const deleteItinerary = async (req, res) => {
   }
 };
 const viewCreatedItineraries = async (req, res) => {
+  const { id } = req.params;
   try {
-    const itineraries = await itineraryModel.find();
-    res.status(200).json(itineraries);
-  } catch (err) {
+    const itineraries = await itineraryModel.find({"created_by":id}).populate('activities');
+    const Tourist = await TouristItinerary.find({"created_by":id}).populate('activities');
+
+    res.status(200).json({
+      itineraries: itineraries,
+      touristItineraries: Tourist
+    });  } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
 const createTouristItinerary = async (req, res) => {
+  const createdBy = req.params.id;
   const {
     activities,
     locations,
-    timeline,
-    duration,
-    language,
-    price,
-    availability_dates,
-    pickup_location,
-    dropoff_location,
-    accessibility,
-    budget,
-    created_by,
-    tags,
+    dateRange,
+    tags
   } = req.body;
 
   try {
     const itinerary = await TouristItinerary.create({
       activities,
       locations,
-      timeline,
-      duration,
-      language,
-      price,
-      availability_dates,
-      pickup_location,
-      dropoff_location,
-      accessibility,
-      budget,
-      created_by,
+      dateRange,
       tags,
+      createdBy
     });
     res.status(201).json({ msg: "Tourist Itinerary created", itinerary });
   } catch (err) {
@@ -275,21 +264,16 @@ const createTouristItinerary = async (req, res) => {
   }
 };
 const readTouristItinerary = async (req, res) => {
-  const { id } = req.params;
-
-  if (!validateObjectId(id)) {
-    return res.status(400).json({ error: "Invalid Itinerary ID format" });
-  }
-
   try {
-    const itinerary = await TouristItinerary.findById(id).populate(
-      "tags",
-      "name type period"
-    );
-    if (!itinerary) {
-      return res.status(404).json({ error: "Itinerary not found" });
+    const itineraries = await TouristItinerary.find()
+      .populate("tags", "name type period")
+      .populate("created_by", "name email"); // Adjust fields as needed
+
+    if (!itineraries || itineraries.length === 0) {
+      return res.status(404).json({ error: "No itineraries found" });
     }
-    res.status(200).json(itinerary);
+
+    res.status(200).json(itineraries);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -304,36 +288,18 @@ const updateTouristItinerary = async (req, res) => {
   const {
     activities,
     locations,
-    timeline,
-    duration,
-    language,
-    price,
-    availability_dates,
-    pickup_location,
-    dropoff_location,
-    accessibility,
-    budget,
-    created_by,
-    tags,
+    dateRange,
+    tags
   } = req.body;
 
   try {
     const updatedItinerary = await TouristItinerary.findByIdAndUpdate(
       id,
       {
-        activities,
-        locations,
-        timeline,
-        duration,
-        language,
-        price,
-        availability_dates,
-        pickup_location,
-        dropoff_location,
-        accessibility,
-        budget,
-        created_by,
-        tags,
+      activities,
+      locations,
+      dateRange,
+      tags
       },
       { new: true }
     );
@@ -364,26 +330,6 @@ const deleteTouristItinerary = async (req, res) => {
   }
 };
 
-const getItinerariesByDateRange = async (req, res) => {
-  const { startDate, endDate } = req.query;
-
-  try {
-    const itineraries = await TouristItinerary.find({
-      "availability_dates.start": { $gte: new Date(startDate) },
-      "availability_dates.end": { $lte: new Date(endDate) },
-    }).populate("tags", "name type period");
-
-    if (itineraries.length === 0) {
-      return res.status(404).json({
-        message: "No itineraries found for the specified date range.",
-      });
-    }
-
-    res.status(200).json(itineraries);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
 
 module.exports = {
   createTourGuideProfile,
@@ -398,5 +344,4 @@ module.exports = {
   readTouristItinerary,
   updateTouristItinerary,
   deleteTouristItinerary,
-  getItinerariesByDateRange,
 };

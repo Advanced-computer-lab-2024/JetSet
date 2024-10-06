@@ -25,7 +25,7 @@ const itinerarySchema = new Schema({
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'TourGuide', // Tour Guide reference
-      required: true
+      required: false
     }
   }, { timestamps: true });
   
