@@ -1,8 +1,31 @@
 import React, { useState } from 'react';
+import TagForm from "./components/TagForm";   // Correct relative path
+import PlaceForm from "./components/PlaceForm";  // Correct relative path
+import PlaceList from "./components/PlaceList";
+
 import ProfileForm from './components/ProfileAdvertiser';
 import ActivityForm from './components/ActivityProfileAdv';
 import ActivityList from './components/ActivityListAdv';
 import axios from 'axios';
+// import React from 'react';
+
+// App.js
+
+
+
+
+// const App = () => {
+//   return (
+//     <div>
+//       <h1>Tourism App</h1>
+//       <PlaceForm />
+//       <PlaceList />
+//       <TagForm />
+//     </div>
+//   );
+// };
+
+
 
 const App = () => {
     const [selectedProfile, setSelectedProfile] = useState(null);
@@ -70,6 +93,10 @@ const App = () => {
 
     return (
         <div>
+            <h1>Tourism App</h1>
+            <PlaceForm />
+            <PlaceList />
+            <TagForm />
             <h1>Advertiser Management</h1>
 
             {/* Profile Management */}
