@@ -97,17 +97,18 @@ dotenv.config();
 const app = express();
 
 const port = process.env.PORT || 3000;
-const MongoURI="mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MongoURI=process.env.MongoURI;
 
 // Middleware
 app.use(express.json());
+
 app.use(cors());
 
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
 mongoose
-  .connect("mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",{  useNewUrlParser: true,
+  .connect(MongoURI,{  useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => {
