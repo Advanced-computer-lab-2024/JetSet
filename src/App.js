@@ -3,6 +3,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require('cors');
+
 
 const {
   createProfile,
@@ -21,9 +23,10 @@ const {
   viewAllPlaces,
   createPlaces,
   getPlaces,
+  AllTags,
   updatePlace,
   deletePlace,
-  createTag,
+  createTag
 } = require("./Routes/tourismgovernerController");
 const {
   filterActivityGuest,
@@ -94,15 +97,19 @@ dotenv.config();
 const app = express();
 
 const port = process.env.PORT || 3000;
-const MongoURI = process.env.MONGO_URI;
+const MongoURI="mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Middleware
 app.use(express.json());
+app.use(cors());
+
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
 mongoose
-  .connect(MongoURI)
+  .connect("mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",{  useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("MongoDB connected!");
     app.listen(port, () => {
@@ -170,6 +177,8 @@ app.put("/updatePlace/:id", updatePlace);
 app.delete("/deletePlace/:id", deletePlace);
 app.post("/addTourismGoverner", createTourismGoverner);
 app.post("/addTag", createTag);
+app.get("/Tags", AllTags);
+
 
 app.use(express.json());
 app.post("/addItinerary", createItinerary);

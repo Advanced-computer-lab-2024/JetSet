@@ -10,14 +10,14 @@ const tagModel = require("../Models/Tag");
 
 //Tourism Governer
 const createTourismGoverner = async (req, res) => {
-  const { username, password } = req.body;
+  const { Username, Password } = req.body;
 
   try {
-    await TourismGoverner.create({
-      username,
-      password,
+    const tGoverner = await TourismGoverner.create({
+      Username,
+      Password,
     });
-    res.status(200).json({ msg: "Tourism Governer created" });
+    res.status(200).json({ msg: "Tourism Governer created:  ",tGoverner});
   } catch (error) {
     res.status(400).json({
       message: "Error creating Tourism Governer",

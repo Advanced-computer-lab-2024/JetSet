@@ -1,25 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import TagForm from "./components/TagForm";   // Correct relative path
+import PlaceForm from "./components/PlaceForm";  // Correct relative path
+import PlaceList from "./components/PlaceList";
+// App.js
 
-function App() {
+
+
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Tourism App</h1>
+      <PlaceForm />
+      <PlaceList />
+      <TagForm />
     </div>
   );
-}
+};
+
 
 export default App;
