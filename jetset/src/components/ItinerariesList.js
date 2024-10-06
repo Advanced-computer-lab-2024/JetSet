@@ -44,14 +44,26 @@ const ItineraryList = () => {
     <div>
       <h2>Itineraries</h2>
       <ul>
-        {itineraries.map(itinerary => (
-          <li key={itinerary._id}>
-            <h3>{itinerary.activities.join(', ')}</h3>
-            <p>Location: {itinerary.locations.join(', ')}</p>
-            <p>Duration: {itinerary.duration}</p>
-            <button onClick={() => handleDelete(itinerary._id)}>Delete</button>
-          </li>
-        ))}
+        {itineraries.length > 0 ? (
+          itineraries.map((itinerary) => (
+            <li key={itinerary._id}>
+              <h4>Activities: {itinerary.activities?.map(activity => activity.name).join(', ') || 'No activities listed'}</h4>
+              <p>Locations: {itinerary.locations?.join(', ') || 'No locations listed'}</p>
+              <p>Timeline: {itinerary.timeline || 'N/A'}</p>
+              <p>Duration: {itinerary.duration || 'N/A'}</p>
+              <p>Language: {itinerary.language || 'N/A'}</p>
+              <p>Price: ${itinerary.price || 'N/A'}</p>
+              <p>Availability Dates: {itinerary.availability_dates?.map(date => new Date(date).toLocaleDateString()).join(', ') || 'N/A'}</p>
+              <p>Pickup Location: {itinerary.pickup_location || 'N/A'}</p>
+              <p>Dropoff Location: {itinerary.dropoff_location || 'N/A'}</p>
+              <p>Accessibility: {itinerary.accessibility || 'N/A'}</p>
+              <p>Budget: ${itinerary.budget || 'N/A'}</p>
+              <p>Tags: {itinerary.tag?.map(tag => tag.name).join(', ') || 'No tags available'}</p>
+            </li>
+          ))
+        ) : (
+          <p>No itineraries found.</p>
+        )}
       </ul>
     </div>
   );

@@ -10,13 +10,14 @@ const ReadTourGuideProfileForm = ({ tourGuideID }) => {
   const fetchTourGuideProfile = async (tourGuideID) => {
     try {
       const response = await axios.get(`http://localhost:5000/TourGuideProfile/${tourGuideID}`);
-      setProfile(response.data); // Set profile data
-      setError(''); // Clear any previous error
+      setProfile(response.data);
+      setError('');
     } catch (err) {
+      console.error('Error fetching tour guide profile:', err); // Log the full error
       setError(err.response?.data?.message || 'Error fetching the profile');
-      setProfile(null); // Clear profile data if error occurs
+      setProfile(null);
     } finally {
-      setLoading(false); // Stop the loading state
+      setLoading(false);
     }
   };
 
