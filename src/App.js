@@ -5,7 +5,6 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 
-
 const {
   createProfile,
   getProfile,
@@ -90,6 +89,7 @@ const {
   updateItinerary,
   deleteItinerary,
   viewCreatedItineraries,
+  getItinerariesByDateRange,
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -97,7 +97,7 @@ const {
   createTouristItinerary,
   readTouristItinerary,
   updateTouristItinerary,
-  deleteTouristItinerary
+  deleteTouristItinerary,
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
@@ -105,7 +105,6 @@ dotenv.config();
 
 // App variables
 const app = express();
-
 
 const port = process.env.PORT || 3000;
 
@@ -222,10 +221,9 @@ app.get("/getSellerById/:id", getSellerById);
 
 //Admin Controlleryyy
 app.delete("/deleteAccount", deleteAccount);
-app.post("/tourismgovernor", createTourismGoverner);
+app.post("/tourism-governor", createTourismGoverner);
 app.post("/admin", createAdmin);
 
 app.get("/get", gettourism);
 
 app.get("/gets", getTourist);
-

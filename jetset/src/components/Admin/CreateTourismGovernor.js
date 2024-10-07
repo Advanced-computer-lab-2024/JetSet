@@ -18,7 +18,7 @@ const CreateTourismGovernor = () => {
           password: password.trim(), // Trim whitespace
         }
       );
-      setMessage(response.data.msg);
+      setMessage(response.data.message); // Use 'message' instead of 'msg'
       setError(""); // Clear any previous errors
     } catch (err) {
       console.error(err); // Log the error for better debugging

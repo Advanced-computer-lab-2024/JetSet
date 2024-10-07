@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
 const DeleteItineraryForm = () => {
-  const [itineraryID, setItineraryID] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [itineraryID, setItineraryID] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   // Handle input change
   const handleChange = (e) => {
@@ -15,23 +15,29 @@ const DeleteItineraryForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.delete(`http://localhost:5000/deleteItinerary`, {
-        data: { id: itineraryID } // Sending the ID in the body
-      });
+      const response = await axios.delete(
+        `http://localhost:3000/deleteItinerary`,
+        {
+          data: { id: itineraryID }, // Sending the ID in the body
+        }
+      );
       setMessage(response.data.msg || "Itinerary deleted successfully!");
-      setError(''); // Clear any previous error
-      setItineraryID(''); // Clear the input field
+      setError(""); // Clear any previous error
+      setItineraryID(""); // Clear the input field
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred while deleting the itinerary.');
-      setMessage(''); // Clear success message
+      setError(
+        err.response?.data?.error ||
+          "An error occurred while deleting the itinerary."
+      );
+      setMessage(""); // Clear success message
     }
   };
 
   return (
     <div>
       <h2>Delete Itinerary</h2>
-      {message && <p style={{ color: 'green' }}>{message}</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {message && <p style={{ color: "green" }}>{message}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
           <label>Itinerary ID:</label>

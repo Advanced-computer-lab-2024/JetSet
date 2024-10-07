@@ -11,6 +11,7 @@ import SellerFrontend from "./components/SellerFrontend";
 import ProfileForm from "./components/ProfileAdvertiser";
 import Place from "./components/Place";
 import Tourist from "./components/TouristApp"; // Ensure the correct case here
+import TourGuide from "./components/TourGuide";
 
 const App = () => {
   return (
@@ -27,10 +28,10 @@ const App = () => {
         <Route path="/sellerfrontend" element={<SellerFrontend />} />
         <Route path="/createadvertiser" element={<ProfileForm />} />
         <Route path="/place" element={<Place />} />
+        <Route path="/tourguide" element={<TourGuide />} />
       </Routes>
     </Router>
   );
 };
 
 export default App;
-

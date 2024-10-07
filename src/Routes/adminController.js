@@ -11,18 +11,26 @@ const tagModel = require("../Models/Tag");
 //added
 //Tourism Governer
 const createTourismGoverner = async (req, res) => {
-  const { Username, Password } = req.body;
+  const { username, password } = req.body;
 
   try {
+    // Check if the Username already exists
+    const existingGovernor = await TourismGoverner.findOne({ username });
+    if (existingGovernor) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
 
-    const tGoverner = await TourismGoverner.create({
-      Username,
-      Password,
+    // Create the new Tourism Governor (without password hashing)
+    const newGovernor = await TourismGoverner.create({
+      username: username,
+      password: password,
     });
 
-    res.status(200).json({ msg: "Tourism Governer created:  ",tGoverner});
+    res
+      .status(200)
+      .json({ message: "Tourism Governor created", data: newGovernor });
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       message: "Error creating Tourism Governor",
       error: error.message || error,
     });
@@ -218,8 +226,11 @@ const deleteAccount = async (req, res) => {
     case "Advertiser":
       model = Advertiser;
       break;
+    case "Tourism Governor":
+      model = TourismGoverner;
+      break;
     default:
-      return res.status(400).json({ message: "Invalid account type" });
+      return res.status(400).json({ message: "Invalid account type" });
   }
 
   const deletedAccount = await model.findOneAndDelete({

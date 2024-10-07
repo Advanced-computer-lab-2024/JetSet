@@ -15,14 +15,6 @@ const register = async (req, res) => {
       email,
       role,
     });
-
-    // If the role is "seller", respond with a special message
-    if (role === "seller") {
-      return res
-        .status(200)
-        .json({ msg: "Account created. You are accepted as a seller." });
-    }
-
     res.status(200).json({ msg: "Account created" });
   } catch (err) {
     res.status(400).json({ error: err.message });

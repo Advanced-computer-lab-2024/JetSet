@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
 const DeleteTouristItineraryForm = () => {
-  const [touristItineraryID, setTouristItineraryID] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [touristItineraryID, setTouristItineraryID] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.delete(`http://localhost:5000/deleteTouristItineraries/${touristItineraryID}`);
-      setSuccess('Itinerary deleted successfully!');
-      setError('');
+      const response = await axios.delete(
+        `http://localhost:3000/deleteTouristItineraries/${touristItineraryID}`
+      );
+      setSuccess("Itinerary deleted successfully!");
+      setError("");
     } catch (err) {
-      setError(err.response?.data?.error || 'Error deleting itinerary');
-      setSuccess('');
+      setError(err.response?.data?.error || "Error deleting itinerary");
+      setSuccess("");
     }
   };
 
@@ -37,8 +39,8 @@ const DeleteTouristItineraryForm = () => {
       <button type="submit">Delete Itinerary</button>
 
       {/* Error and Success Messages */}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p style={{ color: "green" }}>{success}</p>}
     </form>
   );
 };

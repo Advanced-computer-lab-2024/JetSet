@@ -7,12 +7,14 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("tour_guide");
+  const [role, setRole] = useState("");
   const [message, setMessage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate(); // Use useNavigate
 
   const handleRegister = async (e) => {
+    console.log({ username, password, email, role });
+
     e.preventDefault();
     try {
       const response = await axios.post("http://localhost:3000/register", {
@@ -24,7 +26,7 @@ const Register = () => {
 
       setMessage(response.data.msg);
 
-      if (role === "seller" || role === "advertiser") {
+      if (role === "seller" || role === "advertiser" || role === "tourguide") {
         setShowModal(true); // Show the popup for both seller and advertiser
       }
     } catch (err) {
@@ -38,6 +40,8 @@ const Register = () => {
       navigate("/createseller", { state: { username, password, email } }); // Navigate to seller page
     } else if (role === "advertiser") {
       navigate("/createadvertiser", { state: { username, password, email } }); // Navigate to advertiser page
+    } else if (role === "tourguide") {
+      navigate("/tourguide", { state: { username, password, email } });
     }
   };
 
@@ -67,10 +71,12 @@ const Register = () => {
           required
         />
         <select value={role} onChange={(e) => setRole(e.target.value)} required>
-          <option value="tour_guide">Tour Guide</option>
+          <option value="">Select a role</option> {/* Default empty option */}
+          <option value="tourguide">Tour Guide</option>
           <option value="advertiser">Advertiser</option>
           <option value="seller">Seller</option>
         </select>
+
         <button type="submit">Register</button>
         {message && (
           <p

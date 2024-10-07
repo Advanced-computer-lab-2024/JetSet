@@ -56,6 +56,7 @@ const DeleteAccount = () => {
             <option value="Tour Guide">Tour Guide</option>
             <option value="Seller">Seller</option>
             <option value="Advertiser">Advertiser</option>
+            <option value="Tourism Governor">Tourism Governer</option>
           </select>
         </div>
 
