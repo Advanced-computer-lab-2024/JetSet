@@ -21,6 +21,8 @@ const Register = () => {
     } else if (selectedRole === "seller") {
       // Stay on the current page for the Seller role
       navigate("/registerAst"); // Stay on the seller registration page
+    } else if (selectedRole == "Tourism Governor") {
+      navigate("/place");
     }
   };
 

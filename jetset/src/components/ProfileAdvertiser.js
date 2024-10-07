@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import ActivityForm from "./ActivityProfileAdv"; // Import ActivityForm
 
 const ProfileForm = ({ onProfileCreated }) => {
-  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
 
   const [formData, setFormData] = useState({
     email: "",
@@ -18,6 +19,7 @@ const ProfileForm = ({ onProfileCreated }) => {
   const [profileId, setProfileId] = useState(""); // For profile ID if needed for update/delete
   const [profiles, setProfiles] = useState([]); // State to store profiles
   const [isFetchingProfiles, setIsFetchingProfiles] = useState(false); // State to indicate fetching
+  const [selectedAdvertiserId, setSelectedAdvertiserId] = useState(null); // For selected advertiser ID
 
   // Fetch profiles when the component mounts
   useEffect(() => {
@@ -27,7 +29,7 @@ const ProfileForm = ({ onProfileCreated }) => {
   const getProfiles = async () => {
     setIsFetchingProfiles(true);
     try {
-      const response = await axios.get("http://localhost:8000/getprofiles");
+      const response = await axios.get(`${BASE_URL}/profiles`);
       console.log("Fetched profiles:", response.data); // Log the fetched data
       setProfiles(response.data);
       setStatusMessage("Profiles fetched successfully!");
@@ -36,7 +38,6 @@ const ProfileForm = ({ onProfileCreated }) => {
         "Error fetching profiles:",
         error.response ? error.response.data : error.message
       );
-      //setStatusMessage('Error fetching profiles. Please try again.');
     } finally {
       setIsFetchingProfiles(false);
     }
@@ -51,10 +52,7 @@ const ProfileForm = ({ onProfileCreated }) => {
     console.log("Submitting:", formData);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/addprofiles",
-        formData
-      );
+      const response = await axios.post(`${BASE_URL}/addprofiles`, formData);
       console.log("API Response:", response);
 
       if (response.status === 201) {
@@ -67,9 +65,6 @@ const ProfileForm = ({ onProfileCreated }) => {
       }
     } catch (error) {
       console.error("Submit error:", error);
-      if (error.response) {
-        console.error("Error response:", error.response.data);
-      }
       setStatusMessage("Error creating profile. Please try again.");
     }
   };
@@ -82,15 +77,15 @@ const ProfileForm = ({ onProfileCreated }) => {
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/updateprofiles/${profileId}`,
+        `${BASE_URL}/updateprofiles/${profileId}`,
         formData
       );
       console.log("Update Profile Response:", response.data);
-      setStatusMessage("Profile updated successfully!"); // Add success message
+      setStatusMessage("Profile updated successfully!");
       getProfiles(); // Refresh profiles after updating
     } catch (error) {
       console.error("Error updating profile:", error);
-      setStatusMessage("Error updating profile."); // Add error message
+      setStatusMessage("Error updating profile.");
     }
   };
 
@@ -105,6 +100,7 @@ const ProfileForm = ({ onProfileCreated }) => {
       companyDescription: "",
     });
     setProfileId(""); // Reset profile ID if needed
+    setSelectedAdvertiserId(null); // Reset selected advertiser ID
   };
 
   return (
@@ -173,7 +169,7 @@ const ProfileForm = ({ onProfileCreated }) => {
           onChange={(e) => setProfileId(e.target.value)}
           placeholder="Profile ID"
         />
-        {statusMessage && <p>{statusMessage}</p>} {/* Display the message */}
+        {statusMessage && <p>{statusMessage}</p>}
       </form>
 
       {/* Display the list of profiles */}
@@ -184,10 +180,20 @@ const ProfileForm = ({ onProfileCreated }) => {
           {profiles.map((profile) => (
             <li key={profile._id}>
               <strong>{profile.username}</strong> - {profile.company_name}
+              <button onClick={() => setSelectedAdvertiserId(profile._id)}>
+                View Profile
+              </button>
             </li>
           ))}
         </ul>
       )}
+
+      {/* Integrate ActivityForm component */}
+      <ActivityForm
+        onActivityCreated={(activity) => {
+          console.log("Activity created:", activity);
+        }}
+      />
     </div>
   );
 };

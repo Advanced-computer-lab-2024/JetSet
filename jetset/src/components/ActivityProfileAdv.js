@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 const ActivityForm = ({ onActivityCreated }) => {
-  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
 
   const [formData, setFormData] = useState({
     title: "",

@@ -10,9 +10,7 @@ const ReadAdvertiserProfileForm = ({ advertiserID }) => {
   const fetchAdvertiserProfile = async (advertiserID) => {
     setLoading(true); // Set loading state before fetching
     try {
-      const response = await axios.get(
-        `http://localhost:3000/AdvertiserProfile/${advertiserID}`
-      );
+      const response = await axios.get(`http://localhost:3000/profiles`);
       setProfile(response.data);
       setError("");
     } catch (err) {
