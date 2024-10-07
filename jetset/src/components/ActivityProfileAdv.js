@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import axios from "axios";
 
 const ActivityForm = ({ onActivityCreated }) => {
-  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3001";
 
   const [formData, setFormData] = useState({
     title: "",
     budget: "",
     date: "",
     time: "",
-    location: { coordinates: { lat: "", lng: "" } },
+    location: "",
     price: { fixed: "", range: { min: "", max: "" } },
     category: "",
     special_discount: "",
@@ -39,17 +39,10 @@ const ActivityForm = ({ onActivityCreated }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
-    if (name.startsWith("location.coordinates")) {
-      const field = name.split(".")[2];
-      setFormData((prevState) => ({
-        ...prevState,
-        location: {
-          ...prevState.location,
-          coordinates: { ...prevState.location.coordinates, [field]: value },
-        },
-      }));
+    if (type === "checkbox" && name === "booking_open") {
+      setFormData((prevState) => ({ ...prevState, booking_open: checked }));
     } else if (name.startsWith("price.range")) {
       const field = name.split(".")[2];
       setFormData((prevState) => ({
@@ -87,7 +80,7 @@ const ActivityForm = ({ onActivityCreated }) => {
       onActivityCreated(response.data);
       resetForm();
       setStatusMessage("Activity added successfully!");
-      getActivities(); // Optionally refresh the activities after adding
+      getActivities();
     } catch (error) {
       console.error("Error adding activity:", error);
       setStatusMessage("Error adding activity. Please try again.");
@@ -108,7 +101,7 @@ const ActivityForm = ({ onActivityCreated }) => {
 
       await axios.put(`${BASE_URL}/updateactivity/${activityId}`, preparedData);
       setStatusMessage("Activity updated successfully!");
-      getActivities(); // Optionally refresh the activities after updating
+      getActivities();
     } catch (error) {
       console.error("Error updating activity:", error);
       setStatusMessage("Error updating activity. Please try again.");
@@ -124,7 +117,7 @@ const ActivityForm = ({ onActivityCreated }) => {
     try {
       await axios.delete(`${BASE_URL}/deleteactivity/${activityId}`);
       setStatusMessage("Activity deleted successfully!");
-      getActivities(); // Optionally refresh the activities after deleting
+      getActivities();
     } catch (error) {
       console.error("Error deleting activity:", error);
       setStatusMessage("Error deleting activity. Please try again.");
@@ -137,11 +130,11 @@ const ActivityForm = ({ onActivityCreated }) => {
       budget: "",
       date: "",
       time: "",
-      location: { coordinates: { lat: "", lng: "" } },
+      location: "",
       price: { fixed: "", range: { min: "", max: "" } },
       category: "",
-      specialDiscount: "",
-      bookingOpen: "",
+      special_discount: "",
+      booking_open: true,
       tags: "",
     });
     setActivityId("");
@@ -186,19 +179,11 @@ const ActivityForm = ({ onActivityCreated }) => {
         />
 
         <input
-          type="number"
-          name="location.coordinates.lat"
-          value={formData.location.coordinates.lat}
+          type="text"
+          name="location"
+          value={formData.location}
           onChange={handleChange}
-          placeholder="Latitude"
-          required
-        />
-        <input
-          type="number"
-          name="location.coordinates.lng"
-          value={formData.location.coordinates.lng}
-          onChange={handleChange}
-          placeholder="Longitude"
+          placeholder="Location (Address)"
           required
         />
 
@@ -229,23 +214,27 @@ const ActivityForm = ({ onActivityCreated }) => {
           name="category"
           value={formData.category}
           onChange={handleChange}
-          placeholder="Category"
+          placeholder="Category ID"
           required
         />
         <input
           type="text"
-          name="specialDiscount"
-          value={formData.specialDiscount}
+          name="special_discount"
+          value={formData.special_discount}
           onChange={handleChange}
           placeholder="Special Discount"
         />
-        <input
-          type="text"
-          name="bookingOpen"
-          value={formData.bookingOpen}
-          onChange={handleChange}
-          placeholder="Booking Open"
-        />
+
+        <label>
+          Booking Open:
+          <input
+            type="checkbox"
+            name="booking_open"
+            checked={formData.booking_open}
+            onChange={handleChange}
+          />
+        </label>
+
         <input
           type="text"
           name="tags"
@@ -284,8 +273,7 @@ const ActivityForm = ({ onActivityCreated }) => {
               <th>Budget</th>
               <th>Date</th>
               <th>Time</th>
-              <th>Latitude</th>
-              <th>Longitude</th>
+              <th>Location</th>
               <th>Fixed Price</th>
               <th>Min Price</th>
               <th>Max Price</th>
@@ -300,23 +288,26 @@ const ActivityForm = ({ onActivityCreated }) => {
               <tr key={activity._id}>
                 <td>{activity.title || "N/A"}</td>
                 <td>{activity.budget || "N/A"}</td>
-                <td>{activity.date || "N/A"}</td>
+                <td>
+                  {activity.date
+                    ? new Date(activity.date).toLocaleDateString()
+                    : "N/A"}
+                </td>
                 <td>{activity.time || "N/A"}</td>
-                <td>{activity.location?.coordinates?.lat || "N/A"}</td>
-                <td>{activity.location?.coordinates?.lng || "N/A"}</td>
+                <td>{activity.location || "N/A"}</td>
                 <td>{activity.price?.fixed || "N/A"}</td>
                 <td>{activity.price?.range?.min || "N/A"}</td>
                 <td>{activity.price?.range?.max || "N/A"}</td>
                 <td>{activity.category || "N/A"}</td>
-                <td>{activity.specialDiscount || "N/A"}</td>
-                <td>{activity.bookingOpen ? "Yes" : "No"}</td>
+                <td>{activity.special_discount || "N/A"}</td>
+                <td>{activity.booking_open?.toString() || "N/A"}</td>
                 <td>{activity.tags?.join(", ") || "N/A"}</td>
               </tr>
             ))}
           </tbody>
         </table>
       ) : (
-        activitiesFetched && <p>No activities available.</p>
+        <p>No activities found.</p>
       )}
     </div>
   );
