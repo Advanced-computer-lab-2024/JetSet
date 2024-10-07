@@ -4,16 +4,26 @@ const itinerariesModel = require("../Models/Itinerary.js");
 const Guest = require("../Models/Guest.js");
 const { default: mongoose } = require("mongoose");
 
+//added
 const register = async (req, res) => {
   const { username, password, email, role } = req.body;
+
   try {
     const user = await Guest.create({
-      username: username,
-      password: password,
-      email: email,
-      role: role,
+      username,
+      password,
+      email,
+      role,
     });
-    res.status(200).json({ msg: "Acount created" });
+
+    // If the role is "seller", respond with a special message
+    if (role === "seller") {
+      return res
+        .status(200)
+        .json({ msg: "Account created. You are accepted as a seller." });
+    }
+
+    res.status(200).json({ msg: "Account created" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -84,7 +94,7 @@ const guestFilterItineraries = async (req, res) => {
   }
 };
 
-const Historical = require('../Models/Historical');
+const Historical = require("../Models/Historical");
 
 // Filter historical places/museums by tag
 const filterHistoricalByTag = async (req, res) => {
@@ -96,12 +106,14 @@ const filterHistoricalByTag = async (req, res) => {
 
   try {
     // Find historical places that contain the specified tag
-    const historicalPlaces = await Historical.find({ 
-      tags: tag // Matches the tag within the tags array
-    }).populate('tags', 'type period'); // Optionally populate tag details
+    const historicalPlaces = await Historical.find({
+      tags: tag, // Matches the tag within the tags array
+    }).populate("tags", "type period"); // Optionally populate tag details
 
     if (historicalPlaces.length === 0) {
-      return res.status(404).json({ message: "No historical places found with the specified tag." });
+      return res.status(404).json({
+        message: "No historical places found with the specified tag.",
+      });
     }
 
     res.status(200).json(historicalPlaces);
@@ -111,5 +123,9 @@ const filterHistoricalByTag = async (req, res) => {
   }
 };
 
-
-module.exports = { filterActivityGuest, guestFilterItineraries, register, filterHistoricalByTag};
+module.exports = {
+  filterActivityGuest,
+  guestFilterItineraries,
+  register,
+  filterHistoricalByTag,
+};

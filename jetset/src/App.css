@@ -1,128 +1,39 @@
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #a0e0e0, #f0f8ff); /* Soft gradient for a beachy feel */
-  color: #333; /* Dark gray text */
-  line-height: 1.6;
-  overflow-x: hidden; /* Prevent horizontal scroll */
-}
-h1, h2, h3 {
-  color: #0077b6; /* Deep blue for headings */
-}
-/* Container Styles */
-.container {
-  max-width: 1200px;
+.App {
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-}
-/* Header Styles */
-header {
-  background-color: rgba(255, 255, 255, 0.9); /* Light white background */
-  color: #0077b6; /* Deep blue */
-  padding: 20px 0;
-  text-align: center;
-  border-radius: 0 0 30px 30px; /* Rounded corners */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-}
-/* Navigation Styles */
-nav {
-  display: flex;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.8); /* Light semi-transparent background */
-  border-radius: 20px;
-  margin: 10px 0;
-  padding: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-nav a {
-  color: #0077b6; /* Deep blue */
-  padding: 12px 20px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background-color 0.3s, transform 0.3s;
-  border-radius: 15px;
-}
-nav a:hover {
-  background-color: #ffcc00; /* Bright yellow on hover */
-  color: white; /* Change text color on hover */
-  transform: translateY(-3px); /* Lift effect on hover */
-}
-/* Card Styles for Listings */
-.card {
-  background-color: #ffffff; /* White background for cards */
-  border: 2px solid #0077b6; /* Blue border */
-  border-radius: 20px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Stronger shadow for floating effect */
-  margin: 20px 0;
-  padding: 20px;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.card:hover {
-  transform: translateY(-8px); /* Lift effect on hover */
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
-}
-/* Floating Button Styles */
-.float-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #ffcc00; /* Bright yellow */
-  color: #0077b6; /* Deep blue */
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 24px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s, transform 0.3s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.float-button:hover {
-  background-color: #ffb300; /* Darker yellow on hover */
-  transform: scale(1.1); /* Slight zoom effect */
-}
-/* Form Styles */
-form {
-  background-color: #ffffff; /* White background for forms */
-  border: 2px solid #0077b6; /* Blue border */
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Shadow for floating effect */
-  margin-bottom: 20px;
-}
-input, textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #ddd; /* Light gray */
+  background-color: #fff5cd; /* Background color */
   border-radius: 10px;
-  margin-bottom: 10px;
-  transition: border-color 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-input:focus, textarea:focus {
-  border-color: #0077b6; /* Ocean blue on focus */
-  outline: none;
+
+h1,
+h2 {
+  color: #e78f81; /* Title color */
 }
-/* Button Styles */
+
 button {
-  background-color: #00b4d8; /* Light blue */
-  color: white;
+  background-color: #b7e0ff; /* Button background color */
+  color: #000; /* Text color */
   border: none;
-  border-radius: 10px;
-  padding: 12px 20px;
+  padding: 10px 20px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-  font-weight: bold;
+  margin: 10px 0;
+  transition: background-color 0.3s;
 }
+
 button:hover {
-  background-color: #0077b6; /* Darker blue on hover */
-  transform: translateY(-3px); /* Lift effect on hover */
+  background-color: #ffcfb3; /* Change on hover */
 }
-/* List Styles */
-ul {
-  list-style-type: none; /* Remove default list styles */
-  padding: 0;
+
+.success-message {
+  color: green;
+}
+
+.error-message {
+  color: red;
+
 }
 li {
   background-color: #ffffff; /* White background for list items */

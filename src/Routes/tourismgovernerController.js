@@ -1,5 +1,6 @@
 const TourismGoverner = require('../Models/TourismGoverner'); // Adjust the path as needed
 const Tag = require('../Models/Tag'); // Adjust the path as needed
+const Historical = require("../Models/Historical.js");
 
 const { default: mongoose } = require('mongoose');
 
@@ -42,6 +43,15 @@ const getPlaces = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 }
+const AllTags = async (req, res) => {
+    try {
+        const tags = await Tag.find();
+        res.status(200).json(tags);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
 
 
 const updatePlace = async (req, res) => {
@@ -115,5 +125,5 @@ const createTag = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-module.exports = { viewAllPlaces , createPlaces, getPlaces, updatePlace, deletePlace, createTag };
+module.exports = { viewAllPlaces , createPlaces, getPlaces,AllTags, updatePlace, deletePlace, createTag };
 
