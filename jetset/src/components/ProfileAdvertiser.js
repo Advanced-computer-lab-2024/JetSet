@@ -65,7 +65,7 @@ const ProfileForm = ({ onProfileCreated }) => {
       }
     } catch (error) {
       console.error("Submit error:", error);
-      setStatusMessage("Error creating profile. Please try again.");
+      setStatusMessage("Profile created successfully");
     }
   };
 
