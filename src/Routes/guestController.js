@@ -13,7 +13,7 @@ const register = async (req, res) => {
       email: email,
       role: role,
     });
-    res.status(200).json({ msg: "Acount created" });
+    res.status(200).json({ msg: "Account created" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -26,21 +26,27 @@ const filterActivityGuest = async (req, res) => {
   let query = {};
 
   // Add filters to the query object only if they are provided in the request body
-  if (budget) query.budget = budget;
-  if (date) query.date = date;
+  if (budget) query.budget = { $lte: budget }; // Use $lte for "less than or equal to" budget
   if (category) query.category = category;
-  if (rating) query.rating = rating;
+  if (rating) query.rating = { $gte: rating }; // Use $gte for "greater than or equal to" rating
 
   // Add condition to only return upcoming activities based on date
   const currentDate = new Date();
-  query.date = { ...query.date, $gte: currentDate };
+
+  if (date) {
+    // If the user provides a specific date, filter for activities on that exact date
+    query.date = { $eq: date };
+  } else {
+    // Otherwise, filter for upcoming activities based on the current date
+    query.date = { $gte: currentDate };
+  }
 
   try {
     // Perform the query with dynamic filters
     const activity = await Activity.find(query);
 
     if (activity.length === 0) {
-      return res.status(404).json({ message: "No activity found" });
+      return res.status(404).json({ message: "No activities found." });
     }
 
     res.status(200).json(activity);
@@ -49,6 +55,7 @@ const filterActivityGuest = async (req, res) => {
   }
 };
 
+
 const guestFilterItineraries = async (req, res) => {
   try {
     const { budget, startDate, endDate, tag, language } = req.body;
@@ -56,25 +63,37 @@ const guestFilterItineraries = async (req, res) => {
     // Build the query object dynamically
     const query = {};
 
-    if (budget) query.budget = budget;
+    // Filter by budget
+    if (budget) {
+      query.budget = budget;
+    }
+
+    // Filter by availability dates
     if (startDate && endDate) {
       query.availability_dates = {
         $gte: new Date(startDate),
         $lte: new Date(endDate),
       };
     }
-    // Filter by preferences (assumes tags reference preferences like 'historic', 'beach', etc.)
+
+    // Filter by preferences (tags)
     if (tag) {
-      query.tag = { $in: tag.split(",") }; // Assumes preferences are sent as comma-separated values
+      query.tag = { $in: tag.split(",").map(t => t.trim()) }; // Assumes preferences are sent as comma-separated values
     }
 
-    // Filter by language
+    // Filter by language with case insensitivity
     if (language) {
-      query.language = language;
+      // Use a regex for case-insensitive matching
+      query.language = { $regex: new RegExp(language, 'i') }; 
     }
 
     // Execute the query
     const itineraries = await itinerariesModel.find(query).populate("tag");
+
+    // Check if any itineraries were found
+    if (itineraries.length === 0) {
+      return res.status(404).json({ message: "No itineraries found matching the criteria." });
+    }
 
     // Send the filtered itineraries back
     res.status(200).json(itineraries);
@@ -83,6 +102,7 @@ const guestFilterItineraries = async (req, res) => {
     res.status(500).json({ message: "Error fetching itineraries" });
   }
 };
+
 
 const Historical = require('../Models/Historical');
 

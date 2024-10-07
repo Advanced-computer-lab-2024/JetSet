@@ -3,6 +3,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require('cors');
 
 const {
   createProfile,
@@ -99,8 +100,8 @@ const MongoURI = process.env.MONGO_URI;
 // Middleware
 app.use(express.json()); // For parsing application/json
 
-const cors = require('cors');
-app.use(cors());
+app.use(cors()); // This allows all origins by default
+
 
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
@@ -198,3 +199,7 @@ app.delete("/deleteTouristItineraries/:id", deleteTouristItinerary);
 app.get("/tourist-itineraries", getItinerariesByDateRange);
 
 app.get("/filterHistoricalTags", filterHistoricalByTag);
+
+
+
+

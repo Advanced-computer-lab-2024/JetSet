@@ -1,29 +1,20 @@
 import React, { useState } from 'react';
-import ProfileForm from './components/ProfileAdvertiser';
-import ActivityForm from './components/ActivityProfileAdv';
-import ProfileList from './components/ProfileLIstAdv';
-import ActivityList from './components/ActivityListAdv';
+//GUEST
+import RegisterForm from './components/RegisterForm';
+import ActivityFilterForm from './components/ActivityFilterForm';
+import ItineraryFilterForm from './components/ItineraryFilterForm';
+import HistoricalFilterForm from './components/HistoricalFilterForm';
+
 import axios from 'axios';
+import TouristRegister from './components/TouristRegister';
 
 const App = () => {
-    const [selectedProfile, setSelectedProfile] = useState(null);
-    const [selectedActivity, setSelectedActivity] = useState(null);
+    //const [selectedProfile, setSelectedProfile] = useState(null);
+    //const [selectedActivity, setSelectedActivity] = useState(null);
 
-    const handleProfileSubmit = async (data) => {
-        try {
-            if (selectedProfile) {
-                await axios.put(`/updateprofiles/${selectedProfile._id}`, data);
-            } else {
-                await axios.post('/addprofiles', data);
-            }
-            setSelectedProfile(null);
-            // Optionally refresh the profile list
-        } catch (error) {
-            console.error('Error submitting profile:', error);
-        }
-    };
 
-    const handleActivitySubmit = async (data) => {
+
+    const handleSubmit = async (data) => {
         try {
             if (selectedActivity) {
                 await axios.put(`/updateactivity/${selectedActivity._id}`, data);
@@ -39,13 +30,15 @@ const App = () => {
 
     return (
         <div>
-            <h1>Advertiser Management</h1>
-            <ProfileForm profile={selectedProfile} onSubmit={handleProfileSubmit} />
-            <ActivityForm activity={selectedActivity} onSubmit={handleActivitySubmit} />
-            <ProfileList />
-            <ActivityList />
+          <h1>Guest Controller Page</h1>
+          <RegisterForm />
+          <TouristRegister />
+          <ActivityFilterForm />
+          <ItineraryFilterForm />
+          <HistoricalFilterForm />
         </div>
-    );
+      );
 };
+
 
 export default App;
