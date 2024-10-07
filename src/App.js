@@ -3,8 +3,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const cors = require('cors');
-
+const cors = require("cors");
 
 const {
   createProfile,
@@ -26,7 +25,7 @@ const {
   AllTags,
   updatePlace,
   deletePlace,
-  createTag
+  createTag,
 } = require("./Routes/tourismgovernerController");
 const {
   filterActivityGuest,
@@ -105,12 +104,10 @@ dotenv.config();
 
 // App variables
 const app = express();
-const cors = require("cors");
 
 const port = process.env.PORT || 3000;
 
-const MongoURI=process.env.MongoURI;
-
+const MongoURI = process.env.MONGO_URI;
 
 // Middleware
 app.use(express.json());
@@ -121,9 +118,7 @@ app.use(cors());
 
 // MongoDB Connection
 mongoose
-  .connect(MongoURI,{  useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(MongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("MongoDB connected!");
     app.listen(port, () => {
@@ -185,7 +180,6 @@ app.delete("/deletePlace/:id", deletePlace);
 app.post("/addTourismGoverner", createTourismGoverner);
 app.post("/addTag", createTag);
 app.get("/Tags", AllTags);
-
 
 app.use(express.json());
 app.post("/addItinerary", createItinerary);

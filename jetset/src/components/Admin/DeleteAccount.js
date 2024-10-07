@@ -12,7 +12,7 @@ const DeleteAccount = () => {
 
     try {
       const response = await axios.delete(
-        "http://localhost:8000/deleteAccount",
+        "http://localhost:3000/deleteAccount",
         {
           data: { accountUsername, accountType },
         }

@@ -16,7 +16,7 @@ const EditProduct = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/products"); // Adjust this endpoint as necessary
+        const response = await axios.get("http://localhost:3000/products"); // Adjust this endpoint as necessary
         setProducts(response.data);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -34,7 +34,7 @@ const EditProduct = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/editproduct/${selectedProductId}`,
+        `http://localhost:3000/editproduct/${selectedProductId}`,
         {
           price: newPrice,
           description: newDescription,

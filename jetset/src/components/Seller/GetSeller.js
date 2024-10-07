@@ -14,7 +14,7 @@ const GetSeller = ({ sellerId }) => {
       setError(null);
       try {
         const response = await axios.get(
-          `http://localhost:8000/getSellerById/${sellerId}`
+          `http://localhost:3000/getSellerById/${sellerId}`
         ); // Get seller by ID
         setSeller(response.data.seller); // Assuming response.data.seller contains seller info
       } catch (err) {

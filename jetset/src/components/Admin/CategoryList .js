@@ -12,7 +12,7 @@ const CategoryList = () => {
     setError(null);
 
     try {
-      const response = await axios.get("http://localhost:8000/viewCategory");
+      const response = await axios.get("http://localhost:3000/viewCategory");
       setCategories(response.data);
     } catch (error) {
       setError("Error retrieving categories");

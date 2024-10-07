@@ -17,7 +17,7 @@ const CreateAdmin = () => {
     setSuccess(null); // Reset success state
 
     try {
-      const response = await axios.post("http://localhost:8000/admin", {
+      const response = await axios.post("http://localhost:3000/admin", {
         username,
         password,
       });

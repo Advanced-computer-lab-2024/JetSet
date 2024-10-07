@@ -15,7 +15,7 @@ const DeleteCategory = ({ categories, setCategories }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:8000/deleteCategory/${selectedCategoryId}`
+        `http://localhost:3000/deleteCategory/${selectedCategoryId}`
       );
       setCategories((prevCategories) =>
         prevCategories.filter((category) => category._id !== response.data._id)

@@ -14,7 +14,7 @@ const CreateCategory = () => {
     setSuccess(false);
 
     try {
-      const response = await axios.post("http://localhost:8000/addCategory", {
+      const response = await axios.post("http://localhost:3000/addCategory", {
         name,
       });
       setSuccess(true);

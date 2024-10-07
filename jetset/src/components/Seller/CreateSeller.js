@@ -14,7 +14,7 @@ const CreateSeller = () => {
   const handleCreateSeller = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/createSeller", {
+      const response = await axios.post("http://localhost:3000/createSeller", {
         username,
         password,
         email,

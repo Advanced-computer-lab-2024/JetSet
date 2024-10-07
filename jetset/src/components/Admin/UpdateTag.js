@@ -16,7 +16,7 @@ const UpdateTag = ({ tags }) => {
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/updateTags?id=${selectedTagId}`,
+        `http://localhost:3000/updateTags?id=${selectedTagId}`,
         {
           name: newName,
           type: newType,

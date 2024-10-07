@@ -15,7 +15,7 @@ const SearchProduct = () => {
 
     try {
       const response = await axios.get(
-        "http://localhost:8000/searchProductSeller",
+        "http://localhost:3000/searchProductSeller",
         {
           params: { name: searchQuery }, // Send the search query (product name) to the backend
         }

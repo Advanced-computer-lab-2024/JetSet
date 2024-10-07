@@ -14,7 +14,7 @@ const FilterProducts = () => {
     setError(null); // Reset error state before request
 
     try {
-      const response = await axios.get("http://localhost:8000/filterProduct", {
+      const response = await axios.get("http://localhost:3000/filterProduct", {
         params: { limit }, // Send the limit as a query parameter
       });
       console.log("Response from backend:", response.data); // Log the response from backend

@@ -49,7 +49,7 @@ function AdminFrontend() {
 
     try {
       const response = await axios.get(
-        "http://localhost:8000/getPreferancetag"
+        "http://localhost:3000/getPreferancetag"
       ); // Adjust endpoint as per your API
       setTags(response.data);
     } catch (error) {
@@ -65,7 +65,7 @@ function AdminFrontend() {
     setCategoryError(null);
 
     try {
-      const response = await axios.get("http://localhost:8000/viewCategory");
+      const response = await axios.get("http://localhost:3000/viewCategory");
       setCategories(response.data);
     } catch (error) {
       setCategoryError("Error retrieving categories");
@@ -80,7 +80,7 @@ function AdminFrontend() {
     setProductError(null);
 
     try {
-      const response = await axios.get("http://localhost:8000/getProducts"); // Adjust endpoint as per your API
+      const response = await axios.get("http://localhost:3000/getProducts"); // Adjust endpoint as per your API
       setProducts(response.data);
     } catch (error) {
       setProductError("Error retrieving products");

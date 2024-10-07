@@ -1,90 +1,43 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./styles.css"; // Import your CSS file
+import "./styles.css";
 
 const Register = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("tour_guide");
+  const [role, setRole] = useState("seller"); // Start with 'seller' by default for this page
   const [message, setMessage] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const navigate = useNavigate(); // Use useNavigate
+  const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:8000/register", {
-        username,
-        password,
-        email,
-        role,
-      });
+  // Handle role selection (Tourist, Admin, Seller)
+  const handleRoleSelection = (selectedRole) => {
+    setRole(selectedRole);
+    setMessage(null); // Clear any previous messages
 
-      setMessage(response.data.msg);
-
-      if (role === "seller") {
-        setShowModal(true); // Show the popup if the role is seller
-      }
-    } catch (err) {
-      setMessage("Error creating account.");
+    // Navigate to the appropriate page based on role selection
+    if (selectedRole === "tourist") {
+      navigate("/touristregister"); // Navigate to Tourist register page
+    } else if (selectedRole === "admin") {
+      navigate("/admin"); // Navigate to Admin page
+    } else if (selectedRole === "seller") {
+      // Stay on the current page for the Seller role
+      navigate("/registerAst"); // Stay on the seller registration page
     }
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    navigate("/createseller", { state: { username, password, email } }); // Pass data using state
   };
 
   return (
     <div className="App">
-      <form onSubmit={handleRegister}>
-        <h2>Register</h2>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <select value={role} onChange={(e) => setRole(e.target.value)} required>
-          <option value="tour_guide">Tour Guide</option>
-          <option value="advertiser">Advertiser</option>
-          <option value="seller">Seller</option>
-        </select>
-        <button type="submit">Register</button>
-        {message && (
-          <p
-            className={
-              message.includes("Error") ? "error-message" : "success-message"
-            }
-          >
-            {message}
-          </p>
-        )}
-      </form>
-
-      {showModal && (
-        <div className="modal">
-          <p>You are accepted as a seller!</p>
-          <button onClick={handleCloseModal}>Next</button>
-        </div>
-      )}
+      {/* Role selection */}
+      <div className="role-selection">
+        <button onClick={() => handleRoleSelection("tourist")}>Tourist</button>
+        <button onClick={() => handleRoleSelection("admin")}>Admin</button>
+        <button onClick={() => handleRoleSelection("seller")}>
+          {" "}
+          tour guide/ advertiser/ seller
+        </button>
+        <button onClick={() => handleRoleSelection("Tourism Governor")}>
+          Tourism Governor
+        </button>
+      </div>
     </div>
   );
 };

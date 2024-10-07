@@ -12,7 +12,7 @@ const CreateTourismGovernor = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/tourism-governor",
+        "http://localhost:3000/tourism-governor",
         {
           username: username.trim(), // Trim whitespace
           password: password.trim(), // Trim whitespace

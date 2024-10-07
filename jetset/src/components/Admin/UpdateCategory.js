@@ -16,7 +16,7 @@ const UpdateCategory = ({ categories }) => {
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/updateCategory/${selectedCategoryId}, { name: newName }`
+        `http://localhost:3000/updateCategory/${selectedCategoryId}, { name: newName }`
       );
       setMessage(
         `Category updated: ${response.data.name} (ID: ${response.data._id})`

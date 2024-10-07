@@ -11,7 +11,7 @@ const SortProducts = () => {
     setError(null);
 
     try {
-      const response = await axios.get("http://localhost:8000/sortProducts", {
+      const response = await axios.get("http://localhost:3000/sortProducts", {
         params: {
           sortBy: "ratings",
           sortOrder,

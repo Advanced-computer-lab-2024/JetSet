@@ -10,7 +10,7 @@ const CreateTag = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/addPreferancetag", {
+      const response = await fetch("http://localhost:3000/addPreferancetag", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

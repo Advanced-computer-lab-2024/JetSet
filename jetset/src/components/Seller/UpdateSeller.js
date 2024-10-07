@@ -11,7 +11,7 @@ const UpdateSeller = ({ sellerId }) => {
     const fetchSeller = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/seller/${sellerId}`
+          `http://localhost:3000/seller/${sellerId}`
         );
 
         const { seller_name, seller_description } = response.data;
@@ -29,7 +29,7 @@ const UpdateSeller = ({ sellerId }) => {
   const handleUpdateSeller = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:8000/updateSeller/${sellerId}`, {
+      await axios.put(`http://localhost:3000/updateSeller/${sellerId}`, {
         seller_name: name,
         seller_description: description,
       });

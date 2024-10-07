@@ -13,7 +13,7 @@ const ProductList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/products"); // Adjust URL to your backend endpoint
+        const response = await axios.get("http://localhost:3000/products"); // Adjust URL to your backend endpoint
         setProducts(response.data);
       } catch (err) {
         setError("Failed to load products. Please try again later.");

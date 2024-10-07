@@ -19,7 +19,7 @@ const AddProduct = () => {
     setError(""); // Reset error message
 
     try {
-      const response = await axios.post("http://localhost:8000/createproduct", {
+      const response = await axios.post("http://localhost:3000/createproduct", {
         name,
         description,
         price,

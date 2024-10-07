@@ -13,7 +13,7 @@ const DeleteTag = ({ tags, setTags }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:8000/deletePrefTag?id=${selectedTagId}`
+        `http://localhost:3000/deletePrefTag?id=${selectedTagId}`
       );
       setTags((prevTags) =>
         prevTags.filter((tag) => tag._id !== selectedTagId)
