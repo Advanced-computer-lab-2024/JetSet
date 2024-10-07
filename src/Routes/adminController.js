@@ -18,11 +18,11 @@ const createTourismGoverner = async (req, res) => {
       Username,
       Password,
     };
-    console.log("Document being created:", tourismGovernerDoc);
-
-    await TourismGoverner.create(tourismGovernerDoc);
-
-    res.status(201).json({ msg: "Tourism Governor created successfully." });
+    const tGoverner = await TourismGoverner.create({
+      Username,
+      Password,
+    });
+    res.status(200).json({ msg: "Tourism Governer created:  ", tGoverner });
   } catch (error) {
     res.status(500).json({
       message: "Error creating Tourism Governor",

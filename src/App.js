@@ -104,11 +104,12 @@ dotenv.config();
 const app = express();
 const cors = require("cors");
 
-const port = process.env.PORT || 8000;
-const MongoURI = process.env.MONGO_URI;
+const port = process.env.PORT || 3000;
+const MongoURI = process.env.MongoURI;
 
 // Middleware
 app.use(express.json());
+
 app.use(cors());
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
