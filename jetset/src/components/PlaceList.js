@@ -34,7 +34,30 @@ const PlaceList = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setUpdatedPlaceData({ ...updatedPlaceData, [name]: value });
+
+        if (name.startsWith("coordinates.")) {
+            const coordName = name.split(".")[1];
+            setUpdatedPlaceData((prevState) => ({
+                ...prevState,
+                location: {
+                    ...prevState.location,
+                    coordinates: {
+                        ...prevState.location.coordinates,
+                        [coordName]: value
+                    }
+                }
+            }));
+        } else if (name === "location.address") {
+            setUpdatedPlaceData((prevState) => ({
+                ...prevState,
+                location: {
+                    ...prevState.location,
+                    address: value
+                }
+            }));
+        } else {
+            setUpdatedPlaceData({ ...updatedPlaceData, [name]: value });
+        }
     };
 
     const handleUpdateSubmit = async (e) => {
@@ -132,6 +155,7 @@ const PlaceList = () => {
                             ) : (
                                 <>
                                     {place.Name}
+                                    
                                     <button onClick={() => handleEditClick(place)}>Edit</button>
                                     <button onClick={() => handleDelete(place._id)}>Delete</button>
                                 </>
