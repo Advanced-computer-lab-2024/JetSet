@@ -1,48 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const ActivitiesList = () => {
-    const [activities, setActivities] = useState([]);
+const ReadAdvertiserProfileForm = ({ advertiserID }) => {
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    useEffect(() => {
-        const fetchActivities = async () => {
-            try {
-                const response = await axios.get('http://localhost:8000/getactivities');
-                setActivities(response.data);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        fetchActivities();
-    }, []);
-
-    const handleDelete = async (id) => {
+    // Fetch the advertiser profile
+    const fetchAdvertiserProfile = async (advertiserID) => {
+        setLoading(true); // Set loading state before fetching
         try {
-            await axios.delete(`http://localhost:8000/deleteactivity/${id}`);
-            setActivities(activities.filter(activity => activity._id !== id));
-        } catch (error) {
-            console.error(error);
+            const response = await axios.get(`http://localhost:8000/AdvertiserProfile/${advertiserID}`);
+            setProfile(response.data);
+            setError('');
+        } catch (err) {
+            console.error('Error fetching advertiser profile:', err); // Log the full error
+            setError(err.response?.data?.message || 'Error fetching the profile');
+            setProfile(null);
+        } finally {
+            setLoading(false);
         }
     };
 
+    useEffect(() => {
+        if (advertiserID) {
+            fetchAdvertiserProfile(advertiserID);
+        }
+    }, [advertiserID]);
+
+    // Display loading or error states
+    if (loading) return <div>Loading profile...</div>;
+    if (error) return <div style={{ color: 'red' }}>{error}</div>;
+
     return (
         <div>
-            <h3>Activities List</h3>
-            {activities.length === 0 ? (
-                <p>No activities available. Add an activity to get started!</p>
+            <h2>Advertiser Profile</h2>
+            {profile ? (
+                <div>
+                    <p><strong>Username:</strong> {profile.username}</p>
+                    <p><strong>Email:</strong> {profile.email}</p>
+                    <p><strong>Company Name:</strong> {profile.company_name}</p>
+                    <p><strong>Website:</strong> {profile.website}</p>
+                    <p><strong>Hotline:</strong> {profile.hotline}</p>
+                    <p><strong>Description:</strong> {profile.companyDescription}</p>
+                </div>
             ) : (
-                <ul>
-                    {activities.map(activity => (
-                        <li key={activity._id}>
-                            {activity.location} - {activity.date}
-                            <button onClick={() => handleDelete(activity._id)}>Delete</button>
-                        </li>
-                    ))}
-                </ul>
+                <div>No profile data found.</div>
             )}
         </div>
     );
 };
 
-export default ActivitiesList;
+export default ReadAdvertiserProfileForm;

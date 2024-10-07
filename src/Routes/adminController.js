@@ -8,21 +8,33 @@ const Product = require("../Models/Product");
 const Category = require("../Models/Category");
 const tagModel = require("../Models/Tag");
 
+//added
 //Tourism Governer
 const createTourismGoverner = async (req, res) => {
-  const { username, password } = req.body;
+  const { Username, Password } = req.body;
 
   try {
-    await TourismGoverner.create({
-      username,
-      password,
+
+    const tGoverner = await TourismGoverner.create({
+      Username,
+      Password,
     });
-    res.status(200).json({ msg: "Tourism Governer created" });
+
+    res.status(200).json({ msg: "Tourism Governer created:  ",tGoverner});
   } catch (error) {
-    res.status(400).json({
-      message: "Error creating Tourism Governer",
+    res.status(500).json({
+      message: "Error creating Tourism Governor",
       error: error.message || error,
     });
+  }
+};
+
+const gettourism = async (req, res) => {
+  try {
+    const users = await TourismGoverner.find();
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(400).json({ message: "Error retrieving users", error });
   }
 };
 
@@ -222,6 +234,7 @@ const deleteAccount = async (req, res) => {
     deletedAccount: deletedAccount,
   });
 };
+
 const createPrefTag = async (req, res) => {
   const { name, type, period } = req.body;
 
@@ -295,4 +308,5 @@ module.exports = {
   deletePrefTag,
   getProductsAdmin,
   sortProducts,
+  gettourism,
 };

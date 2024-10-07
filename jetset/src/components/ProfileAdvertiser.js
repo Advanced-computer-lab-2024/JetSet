@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const ProfileForm = ({ onProfileCreated }) => {
@@ -27,13 +27,13 @@ const ProfileForm = ({ onProfileCreated }) => {
     const getProfiles = async () => {
         setIsFetchingProfiles(true);
         try {
-            const response = await axios.get(`${BASE_URL}/getprofiles`);
+            const response = await axios.get('http://localhost:8000/getprofiles');
             console.log('Fetched profiles:', response.data); // Log the fetched data
             setProfiles(response.data);
             setStatusMessage('Profiles fetched successfully!');
         } catch (error) {
             console.error('Error fetching profiles:', error.response ? error.response.data : error.message);
-            // setStatusMessage('Error fetching profiles. Please try again.');
+            //setStatusMessage('Error fetching profiles. Please try again.');
         } finally {
             setIsFetchingProfiles(false);
         }
@@ -48,7 +48,7 @@ const ProfileForm = ({ onProfileCreated }) => {
         console.log('Submitting:', formData); 
 
         try {
-            const response = await axios.post(`${BASE_URL}/addprofiles`, formData);
+            const response = await axios.post('http://localhost:8000/addprofiles', formData);
             console.log('API Response:', response); 
 
             if (response.status === 201) {
@@ -69,13 +69,13 @@ const ProfileForm = ({ onProfileCreated }) => {
     };
 
     const handleUpdateProfile = async () => {
-        if (!profileId.trim()) {
+        if (!profileId) {
             setStatusMessage('Please enter a profile ID to update.');
             return;
         }
-
+    
         try {
-            const response = await axios.put(`${BASE_URL}/updateprofiles/${profileId}`, formData);
+            const response = await axios.put(`http://localhost:8000/updateprofiles/${profileId}`, formData);
             console.log('Update Profile Response:', response.data);
             setStatusMessage('Profile updated successfully!'); // Add success message
             getProfiles(); // Refresh profiles after updating

@@ -1,24 +1,31 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const {ObjectId} = mongoose.Schema;
+const { ObjectId } = mongoose.Schema;
 
-const sellerSchema = new Schema({
+const sellerSchema = new Schema(
+  {
     email: {
       type: String,
-      required: true
+      required: true,
     },
     username: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
-    seller_name: String, // For Sellers
-    seller_description: String, // For Sellers
-  }, { timestamps: true });
-  
-  const Seller = mongoose.model('Seller', sellerSchema);
-  module.exports = Seller;
+    seller_name: {
+      type: String,
+    }, // For Sellers
+    seller_description: {
+      type: String,
+    }, // For Sellers
+  },
+  { timestamps: true }
+);
+
+const Seller = mongoose.model("Seller", sellerSchema);
+module.exports = Seller;

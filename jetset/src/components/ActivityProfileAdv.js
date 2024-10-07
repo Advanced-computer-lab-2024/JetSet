@@ -9,7 +9,7 @@ const ActivityForm = ({ onActivityCreated }) => {
         budget: '',
         date: '',
         time: '',
-        location: { address: '', coordinates: { lat: '', lng: '' } },
+        location: { coordinates: { lat: '', lng: '' } },
         price: { fixed: '', range: { min: '', max: '' } },
         category: '',
         special_discount: '',
@@ -31,8 +31,8 @@ const ActivityForm = ({ onActivityCreated }) => {
             setActivitiesFetched(true);
             setStatusMessage('Activities fetched successfully!');
         } catch (error) {
-            console.error('Activities fetched successfully:', error);
-            setStatusMessage('Activities fetched successfully.');
+            console.error('Error fetching activities:', error);
+            setStatusMessage('Error fetching activities. Please try again.');
         } finally {
             setIsFetchingActivities(false);
         }
@@ -67,14 +67,6 @@ const ActivityForm = ({ onActivityCreated }) => {
                     fixed: value
                 }
             }));
-        } else if (name === 'location.address') {
-            setFormData((prevState) => ({
-                ...prevState,
-                location: {
-                    ...prevState.location,
-                    address: value
-                }
-            }));
         } else {
             setFormData((prevState) => ({ ...prevState, [name]: value }));
         }
@@ -85,11 +77,8 @@ const ActivityForm = ({ onActivityCreated }) => {
         try {
             const preparedData = {
                 ...formData,
-                budget: Number(formData.budget), // Ensure budget is a number
-                tags: formData.tags.split(',').map(tag => tag.trim()) // Convert tags to array
+                tags: formData.tags.split(',').map(tag => tag.trim())
             };
-
-            console.log('Prepared Data:', preparedData); // Debugging line
 
             const response = await axios.post(`${BASE_URL}/addactivity`, preparedData);
             onActivityCreated(response.data);
@@ -97,13 +86,8 @@ const ActivityForm = ({ onActivityCreated }) => {
             setStatusMessage('Activity added successfully!');
             getActivities(); // Optionally refresh the activities after adding
         } catch (error) {
-            console.error('Activity added successfully!:', error);
-            if (error.response) {
-                console.error('Response data:', error.response.data); // Debugging line
-                setStatusMessage(`Activity added successfully!: ${error.response.data.message || 'Please try again.'}`);
-            } else {
-                setStatusMessage('Activity added successfully!. Please try again.');
-            }
+            console.error('Error adding activity:', error);
+            setStatusMessage('Error adding activity. Please try again.');
         }
     };
 
@@ -116,16 +100,15 @@ const ActivityForm = ({ onActivityCreated }) => {
         try {
             const preparedData = {
                 ...formData,
-                budget: Number(formData.budget),
                 tags: formData.tags.split(',').map(tag => tag.trim())
             };
 
             await axios.put(`${BASE_URL}/updateactivity/${activityId}`, preparedData);
             setStatusMessage('Activity updated successfully!');
-            getActivities();
+            getActivities(); // Optionally refresh the activities after updating
         } catch (error) {
-            console.error('Activity updated successfully!', error);
-            setStatusMessage('Activity updated successfully!');
+            console.error('Error updating activity:', error);
+            setStatusMessage('Error updating activity. Please try again.');
         }
     };
 
@@ -138,10 +121,10 @@ const ActivityForm = ({ onActivityCreated }) => {
         try {
             await axios.delete(`${BASE_URL}/deleteactivity/${activityId}`);
             setStatusMessage('Activity deleted successfully!');
-            getActivities();
+            getActivities(); // Optionally refresh the activities after deleting
         } catch (error) {
-            console.error('Activity deleted successfully!', error);
-            setStatusMessage('Activity deleted successfully!');
+            console.error('Error deleting activity:', error);
+            setStatusMessage('Error deleting activity. Please try again.');
         }
     };
 
@@ -151,11 +134,11 @@ const ActivityForm = ({ onActivityCreated }) => {
             budget: '',
             date: '',
             time: '',
-            location: { address: '', coordinates: { lat: '', lng: '' } },
+            location: { coordinates: { lat: '', lng: '' } },
             price: { fixed: '', range: { min: '', max: '' } },
             category: '',
-            special_discount: '',
-            booking_open: true,
+            specialDiscount: '',
+            bookingOpen: '',
             tags: ''
         });
         setActivityId('');
@@ -186,15 +169,6 @@ const ActivityForm = ({ onActivityCreated }) => {
 
                 <input type="date" name="date" value={formData.date} onChange={handleChange} required />
                 <input type="time" name="time" value={formData.time} onChange={handleChange} required />
-
-                <input
-                    type="text"
-                    name="location.address"
-                    value={formData.location.address}
-                    onChange={handleChange}
-                    placeholder="Address"
-                    required
-                />
 
                 <input
                     type="number"
@@ -245,19 +219,18 @@ const ActivityForm = ({ onActivityCreated }) => {
                 />
                 <input
                     type="text"
-                    name="special_discount"
-                    value={formData.special_discount}
+                    name="specialDiscount"
+                    value={formData.specialDiscount}
                     onChange={handleChange}
                     placeholder="Special Discount"
                 />
                 <input
-                    type="checkbox"
-                    name="booking_open"
-                    checked={formData.booking_open}
-                    onChange={() => setFormData(prev => ({ ...prev, booking_open: !prev.booking_open }))}
+                    type="text"
+                    name="bookingOpen"
+                    value={formData.bookingOpen}
+                    onChange={handleChange}
+                    placeholder="Booking Open"
                 />
-                <label>Booking Open</label>
-
                 <input
                     type="text"
                     name="tags"
@@ -292,7 +265,6 @@ const ActivityForm = ({ onActivityCreated }) => {
                             <th>Budget</th>
                             <th>Date</th>
                             <th>Time</th>
-                            <th>Address</th>
                             <th>Latitude</th>
                             <th>Longitude</th>
                             <th>Fixed Price</th>
@@ -307,26 +279,25 @@ const ActivityForm = ({ onActivityCreated }) => {
                     <tbody>
                         {activities.map(activity => (
                             <tr key={activity._id}>
-                                <td>{activity.title}</td>
-                                <td>{activity.budget}</td>
-                                <td>{activity.date}</td>
-                                <td>{activity.time}</td>
-                                <td>{activity.location.address}</td>
-                                <td>{activity.location.coordinates.lat}</td>
-                                <td>{activity.location.coordinates.lng}</td>
-                                <td>{activity.price.fixed}</td>
-                                <td>{activity.price.range.min}</td>
-                                <td>{activity.price.range.max}</td>
-                                <td>{activity.category}</td>
-                                <td>{activity.special_discount}</td>
-                                <td>{activity.booking_open ? 'Yes' : 'No'}</td>
-                                <td>{activity.tags.join(', ')}</td>
+                                <td>{activity.title || 'N/A'}</td>
+                                <td>{activity.budget || 'N/A'}</td>
+                                <td>{activity.date || 'N/A'}</td>
+                                <td>{activity.time || 'N/A'}</td>
+                                <td>{activity.location?.coordinates?.lat || 'N/A'}</td>
+                                <td>{activity.location?.coordinates?.lng || 'N/A'}</td>
+                                <td>{activity.price?.fixed || 'N/A'}</td>
+                                <td>{activity.price?.range?.min || 'N/A'}</td>
+                                <td>{activity.price?.range?.max || 'N/A'}</td>
+                                <td>{activity.category || 'N/A'}</td>
+                                <td>{activity.specialDiscount || 'N/A'}</td>
+                                <td>{activity.bookingOpen ? 'Yes' : 'No'}</td>
+                                <td>{activity.tags?.join(', ') || 'N/A'}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             ) : (
-                <p>No activities found.</p>
+                activitiesFetched && <p>No activities available.</p>
             )}
         </div>
     );

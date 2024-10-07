@@ -2,64 +2,77 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const activitySchema = new Schema({
-  title: {
-      type: String,
-      required: true
-  },
-  budget: {
-      type: Number,
-      required: true
-  },
-  date: {
+    title:{
+    type:String,
+    required:true // Optional field
+    },
+    budget:{
+      type:Number,
+      required:true
+    },
+    date: {
       type: Date,
       required: true
-  },
-  time: {
+    },
+
+    time: {
       type: String,
       required: true
-  },
-  location: {
-      address: {
-          type: String,
-          required: true
-      },
-      coordinates: {
-          lat: { type: Number },
-          lng: { type: Number }
-      }
-  },
-  price: {
-      fixed: { type: Number },
-      range: {
-          min: { type: Number },
-          max: { type: Number }
-      }
-  },
-  category: {
+    },
+
+    location: {
+      type: String,
+      required: true
+      /*coordinates: {
+        lat: Number, // Optional
+        lng: Number  // Optional
+      }*/
+    },
+
+    price: {
+        fixed: Number, // Optional
+        range: {
+          min: Number, // Optional
+          max: Number  // Optional
+        },
+    },
+
+    category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
       required: true
-  },
-  tags: [{
+    },
+
+    tags: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Tag'
-  }],
-  special_discount: {
+    }], // Optional array of tags
+
+    special_discount:{ 
       type: String,
       required: true,
-      default: "0"
-  },
-  booking_open: {
+      default: "0" // Default as string
+     }, // Optional field
+
+    booking_open: {
       type: Boolean,
       default: true
-  },
-  budget: { type: Number },
-  rating: {
+    },
+
+    budget: Number, // Optional field
+
+    rating: {
       type: Number,
       min: 0,
       max: 5,
-      default: 0
-  },
+      default: 0 // Default value for rating
+    },
+
+    creator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Advertiser'
+    } // Optional reference to creator
+
 }, { timestamps: true });
 
 const Activity = mongoose.model('Activity', activitySchema);
