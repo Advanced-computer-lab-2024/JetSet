@@ -40,9 +40,8 @@ const touristItinerarySchema = new Schema({
   ], // e.g., adventure, family, luxury
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'TourGuide', // Tour Guide reference
-    required: true
-  }
+    ref: "TourGuide", // Tour Guide reference
+  },
 });
 
 const TouristItinerary = mongoose.model(
