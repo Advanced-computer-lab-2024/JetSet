@@ -1,5 +1,3 @@
-// src/components/ActivitiesList.js
-//empty commit
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -9,7 +7,7 @@ const ActivitiesList = () => {
     useEffect(() => {
         const fetchActivities = async () => {
             try {
-                const response = await axios.get('/getactivity');
+                const response = await axios.get('http://localhost:8000/getactivities');
                 setActivities(response.data);
             } catch (error) {
                 console.error(error);
@@ -31,14 +29,18 @@ const ActivitiesList = () => {
     return (
         <div>
             <h3>Activities List</h3>
-            <ul>
-                {activities.map(activity => (
-                    <li key={activity._id}>
-                        {activity.location} - {activity.date} 
-                        <button onClick={() => handleDelete(activity._id)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
+            {activities.length === 0 ? (
+                <p>No activities available. Add an activity to get started!</p>
+            ) : (
+                <ul>
+                    {activities.map(activity => (
+                        <li key={activity._id}>
+                            {activity.location} - {activity.date}
+                            <button onClick={() => handleDelete(activity._id)}>Delete</button>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };

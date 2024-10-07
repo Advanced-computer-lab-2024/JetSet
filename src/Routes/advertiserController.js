@@ -250,16 +250,18 @@ const deleteProfile = async (req, res) => {
 };
 
 const createActivity = async (req, res) => {
-    const { date, time, location, price, category, specialDiscount, bookingOpen, tags } = req.body;
+    const { title, budget, date, time, location, price, category, special_discount, bookingOpen, tags } = req.body;
 
     try {
         const activity = await Activity.create({
+            title,  // Add title here
+            budget,  // Add budget here
             date,
             time,
             location,
             price,
             category,
-            specialDiscount,
+            special_discount,
             bookingOpen,
             tags
         });
@@ -269,14 +271,15 @@ const createActivity = async (req, res) => {
     }
 };
 
+
 const updateActivity = async (req, res) => {
     const { id } = req.params;
-    const { date, time, location, price, category, specialDiscount, bookingOpen, tags } = req.body;
+    const { date, time, location, price, category, special_discount, booking_open, tags } = req.body;
 
     try {
         const activity = await Activity.findByIdAndUpdate(
             id,
-            { date, time, location, price, category, specialDiscount, bookingOpen, tags },
+            { date, time, location, price, category, special_discount, booking_open, tags },
             { new: true }
         );
 
