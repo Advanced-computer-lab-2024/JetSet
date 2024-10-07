@@ -22,7 +22,7 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "10px 20px",
-    backgroundColor: "#FFCFB3",
+    backgroundColor: "#fff5cd",
     color: "white",
   },
   logoContainer: {
@@ -45,6 +45,7 @@ const styles = {
     border: "1px solid white",
     borderRadius: "5px",
     transition: "background-color 0.5s",
+    backgroundcolor: "#b7e0ff",
   },
 };
 

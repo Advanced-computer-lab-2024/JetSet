@@ -1,33 +1,33 @@
-.App {
+/* .App {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #fff5cd; /* Background color */
+  background-color: #fff5cd; 
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h1,
 h2 {
-  color: #e78f81; /* Title color */
+  color: #e78f81; 
 }
 
 form {
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
+  flex-direction: column; 
 }
 
 input,
 select {
-  padding: 10px; /* Add padding to inputs */
-  margin: 10px 0; /* Margin between inputs */
-  border: 1px solid #ccc; /* Border for inputs */
-  border-radius: 5px; /* Rounded corners */
+  padding: 10px;
+  margin: 10px 0; 
+  border: 1px solid #ccc; 
+  border-radius: 5px; 
 }
 
 button {
-  background-color: #b7e0ff; /* Button background color */
-  color: #000; /* Text color */
+  background-color: #b7e0ff; 
+  color: #000; 
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
@@ -37,7 +37,7 @@ button {
 }
 
 button:hover {
-  background-color: #ffcfb3; /* Change on hover */
+  background-color: #ffcfb3; 
 }
 
 .success-message {
@@ -49,12 +49,12 @@ button:hover {
 }
 
 .modal {
-  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+  background-color: rgba(255, 255, 255, 0.9); 
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  position: absolute; /* Position modals */
+  position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center the modal */
-}
+  transform: translate(-50%, -50%); 
+} */

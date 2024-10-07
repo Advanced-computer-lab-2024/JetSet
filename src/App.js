@@ -77,6 +77,7 @@ const {
   getTouristProfile,
   updateTouristProfile,
   filterHistoricalByTag,
+  getTourist,
 } = require("../src/Routes/touristController");
 
 const {
@@ -183,7 +184,7 @@ app.get("/Tags", AllTags);
 
 app.use(express.json());
 app.post("/addItinerary", createItinerary);
-app.get("/Itinerary", getItineraries);
+app.get("/Itineraries", getItineraries);
 app.put("/updateItinerary/:id", updateItinerary);
 app.delete("/deleteItinerary/:id", deleteItinerary);
 app.get("/listofiternaries", viewCreatedItineraries);
@@ -223,3 +224,5 @@ app.post("/tourismgovernor", createTourismGoverner);
 app.post("/admin", createAdmin);
 
 app.get("/get", gettourism);
+
+app.get("/gets", getTourist);
