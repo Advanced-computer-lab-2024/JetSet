@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 const ActivityForm = ({ onActivityCreated }) => {
-  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
   const [formData, setFormData] = useState({
     title: "",
@@ -12,8 +12,8 @@ const ActivityForm = ({ onActivityCreated }) => {
     location: { coordinates: { lat: "", lng: "" } },
     price: { fixed: "", range: { min: "", max: "" } },
     category: "",
-    specialDiscount: "",
-    bookingOpen: "",
+    special_discount: "",
+    booking_open: true,
     tags: "",
   });
 

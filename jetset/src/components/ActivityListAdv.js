@@ -3,26 +3,26 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const ProfilesList = () => {
-    const [profiles, setProfiles] = useState([]);
+const ActivitiesList = () => {
+    const [activities, setActivities] = useState([]);
 
     useEffect(() => {
-        const fetchProfiles = async () => {
+        const fetchActivities = async () => {
             try {
-                const response = await axios.get('/profiles');
-                setProfiles(response.data);
+                const response = await axios.get('http://localhost:8000/getactivities');
+                setActivities(response.data);
             } catch (error) {
                 console.error(error);
             }
         };
 
-        fetchProfiles();
+        fetchActivities();
     }, []);
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:8000/deleteprofiles/${id}`);
-            setProfiles(profiles.filter(profile => profile._id !== id));
+            await axios.delete(`http://localhost:8000/deleteactivity/${id}`);
+            setActivities(activities.filter(activity => activity._id !== id));
         } catch (error) {
             console.error(error);
         }
@@ -30,15 +30,19 @@ const ProfilesList = () => {
 
     return (
         <div>
-            <h3>Profiles List</h3>
-            <ul>
-                {profiles.map(profile => (
-                    <li key={profile._id}>
-                        {profile.company_name} - {profile.email} 
-                        <button onClick={() => handleDelete(profile._id)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
+            <h3>Activities List</h3>
+            {activities.length === 0 ? (
+                <p>No activities available. Add an activity to get started!</p>
+            ) : (
+                <ul>
+                    {activities.map(activity => (
+                        <li key={activity._id}>
+                            {activity.location} - {activity.date}
+                            <button onClick={() => handleDelete(activity._id)}>Delete</button>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };
@@ -55,7 +59,7 @@ const ActivitiesList = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/getactivities`);
+        const response = await axios.get(`http://localhost:8000/getactivities`);
         setActivities(response.data);
       } catch (error) {
         console.error(error);

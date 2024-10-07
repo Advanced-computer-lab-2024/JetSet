@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const ProfileForm = ({ onProfileCreated }) => {
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
+
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -25,7 +27,7 @@ const ProfileForm = ({ onProfileCreated }) => {
   const getProfiles = async () => {
     setIsFetchingProfiles(true);
     try {
-      const response = await axios.get("http://localhost:3000/getprofiles");
+      const response = await axios.get("http://localhost:8000/getprofiles");
       console.log("Fetched profiles:", response.data); // Log the fetched data
       setProfiles(response.data);
       setStatusMessage("Profiles fetched successfully!");
