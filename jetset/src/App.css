@@ -33,4 +33,34 @@ button:hover {
 
 .error-message {
   color: red;
+
+}
+li {
+  background-color: #ffffff; /* White background for list items */
+  border: 2px solid #0077b6; /* Blue border */
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between; /* Align items */
+}
+li button {
+  background-color: #ff3333; /* Red for delete button */
+  border-radius: 5px;
+}
+li button:hover {
+  background-color: #cc0000; /* Darker red on hover */
+}
+/* Footer Styles */
+footer {
+  background-color: rgba(255, 255, 255, 0.9); /* Light white background */
+  color: #0077b6; /* Deep blue */
+  text-align: center;
+  padding: 15px 0;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  border-top-left-radius: 30px; /* Rounded corners */
+  border-top-right-radius: 30px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
