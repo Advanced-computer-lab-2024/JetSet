@@ -3,6 +3,7 @@ import PlaceList from "./PlaceList";
 import PlaceForm from "./PlaceForm";
 import TagForm from "./TagForm";
 import ActivitiesList from "./ActivityListAdv";
+import ItineraryList from "./ItinerariesList.js";
 
 const PlaceManagement = () => {
   return (
@@ -13,6 +14,7 @@ const PlaceManagement = () => {
       <h1>Create Tag</h1>
       <TagForm />
       <ActivitiesList />
+      <ItineraryList />
     </div>
   );
 };
