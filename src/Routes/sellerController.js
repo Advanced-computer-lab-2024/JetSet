@@ -1,72 +1,89 @@
 const Seller = require("../Models/Seller.js");
 const Product = require("../Models/Product");
 const { default: mongoose } = require("mongoose");
-let user;
+
+//added
+//Create/ Read/ Update my profile with my information as a Seller including name and description.  if accepted as a seller on the system
 const createSeller = async (req, res) => {
   const { username, name, password, email, desciption } = req.body;
   try {
-    user = username;
-    await Seller.create({
+    const user = await Seller.create({
+      email: email,
       username: username,
       password: password,
-      email: email,
-      name: name,
-      desciption: desciption,
+      seller_name: name,
+      seller_description: desciption,
     });
+    await user.save();
     res.status(200).json({ msg: "Seller created" });
-  } catch {
+  } catch (error) {
     res.status(400).json({ message: "Error retrieving users", error });
   }
 };
 
 const getSeller = async (req, res) => {
   try {
-    const users = await Seller.findOne({ user });
+    const users = await Seller.find();
     res.status(200).json({ users });
   } catch (error) {
     res.status(400).json({ message: "Error retrieving users", error });
   }
 };
 
-const updateSeller = async (req, res) => {
+const getSellerById = async (req, res) => {
   const { id } = req.params;
-  const { name, description } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ message: "Seller ID is required." });
+  }
+
+  console.log("Fetching seller for ID:", id); // Debug log
+  const sanitizedId = id.replace(/:/g, "");
+  try {
+    const seller = await Seller.findById(sanitizedId); // Use findById to find by MongoDB ID
+    //console.log("Fetched seller:", seller); // Debug log
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found." });
+    }
+    await seller.save();
+    res.status(200).json({ seller });
+  } catch (error) {
+    console.error("Error retrieving seller profile:", error); // Debug log
+    res
+      .status(400)
+      .json({ message: "Error retrieving seller profile.", error });
+  }
+};
+
+const updateSeller = async (req, res) => {
+  const { id } = req.params; // Extract ID from the URL
+  const { seller_name, seller_description } = req.body; // Extract name and description from the body
+
+  console.log(`Received ID: ${id}`); // Log the received ID
+
+  // Sanitize ID if necessary (remove any unexpected characters)
+  const sanitizedId = id.replace(/:/g, "");
+
   try {
     const profile = await Seller.findByIdAndUpdate(
-      id,
-      { name, description },
-      { new: true }
+      sanitizedId, // Use the sanitized ID
+      { seller_name, seller_description },
+      { new: true } // Return the updated profile
     );
 
     if (!profile) {
       return res.status(404).json({ error: "Profile not found" });
     }
 
-    res.status(200).json(profile);
+    res.status(200).json(profile); // Respond with the updated profile
   } catch (err) {
+    console.error(err); // Log the error for debugging
     res.status(400).json({ error: err.message });
   }
 };
 
-//Product
-const createProduct = async (req, res) => {
-  const { name, desciption, price, quantity, seller_id } = req.body;
-  try {
-    await Product.create({
-      name: name,
-      price: price,
-      description: desciption,
-      quantity: quantity,
-      seller_id: seller_id,
-    });
-    res.status(200).json({ msg: "Product created" });
-  } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Error creating Admin", error: error.message || error });
-  }
-};
-
+//View a list of all available products(including picture of product, price, description, seller, ratings and reviews)
 const getProducts = async (req, res) => {
   try {
     const products = await productModel
@@ -78,10 +95,35 @@ const getProducts = async (req, res) => {
   }
 };
 
-//Sort products by ratings
-const sortProducts = async (req, res) => {
-  const { sortBy = "ratings", sortOrder = -1 } = req.body; // Default to sort by ratings in descending order
+//Search for a product based on product name
+const searchProductSeller = async (req, res) => {
+  const { name } = req.query;
+  try {
+    const product = await Product.find({ name });
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving product", error });
+  }
+};
 
+//Filter product based on price
+const filterProductSeller = async (req, res) => {
+  const { limit } = req.query; // Use req.query for GET requests
+  try {
+    const products = await Product.find({ price: { $lte: limit } }).populate(
+      "reviews.userId",
+      "name"
+    );
+    res.status(200).json(products);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+//Sort products by ratings
+const sortProductsSeller = async (req, res) => {
+  const { sortBy = "ratings", sortOrder } = req.query;
+  // Default to sort by ratings in descending order
   try {
     let sortOption = {};
     if (sortBy === "ratings") {
@@ -100,13 +142,83 @@ const sortProducts = async (req, res) => {
   }
 };
 
-const searchProductSeller = async (req, res) => {
-  const { name } = req.body;
+// Add a product with its details, price, and available quantity
+const createProductSeller = async (req, res) => {
+  const {
+    name,
+    description,
+    price,
+    quantity,
+    seller_username,
+    images,
+    rating,
+    reviews,
+  } = req.body;
   try {
-    const product = await Product.find({ name });
-    res.status(200).json(product);
+    // Create a new product
+    const newProduct = await Product.create({
+      name: name,
+      price: price,
+      description: description || "", // Default empty string if description is not provided
+      quantity: quantity || 0, // Default 0 if quantity is not provided
+      seller_username: seller_username,
+      images: images || [], // Default to an empty array if no images are provided
+      ratings: rating || 0, // Default rating to 0
+      reviews: reviews || [], // Default to an empty array if no reviews are provided
+    });
+
+    // Return the newly created product along with a success message
+    res
+      .status(201)
+      .json({ msg: "Product created successfully", product: newProduct });
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving product", error });
+    res.status(400).json({
+      message: "Error creating product",
+      error: error.message || error,
+    });
+  }
+};
+
+//Edit product details and price
+const updateProductSeller = async (req, res) => {
+  let { id } = req.params;
+  const { price, description, ratings, reviews, quantity } = req.body;
+
+  // Strip any unwanted characters (like a leading colon)
+  id = id.replace(/^:/, "");
+
+  // Check if the id is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid product ID format" });
+  }
+
+  try {
+    // Prepare the fields to update only if they are provided in the request
+    const updateFields = {};
+
+    if (price !== undefined) updateFields.price = price;
+    if (description !== undefined) updateFields.description = description;
+    if (ratings !== undefined) updateFields.ratings = ratings;
+    if (reviews !== undefined) updateFields.reviews = reviews;
+    if (quantity !== undefined) updateFields.quantity = quantity;
+
+    // Update the product by ID
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      updateFields,
+      { new: true } // This option returns the updated document
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ msg: "Product updated", product: updatedProduct });
+  } catch (error) {
+    res.status(400).json({
+      message: "Error updating product",
+      error: error.message || error,
+    });
   }
 };
 
@@ -114,8 +226,11 @@ module.exports = {
   createSeller,
   getSeller,
   updateSeller,
-  createProduct,
+  createProductSeller,
   getProducts,
   searchProductSeller,
-  sortProducts,
+  sortProductsSeller,
+  filterProductSeller,
+  updateProductSeller,
+  getSellerById,
 };

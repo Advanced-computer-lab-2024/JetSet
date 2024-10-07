@@ -30,13 +30,23 @@ const {
   guestFilterItineraries,
   register,
 } = require("./Routes/guestController");
-const { searchProductSeller } = require("./Routes/sellerController");
+const {
+  searchProductSeller,
+  getSeller,
+  createProductSeller,
+  updateProductSeller,
+  createSeller,
+  updateSeller,
+  filterProductSeller,
+  getSellerById,
+} = require("./Routes/sellerController");
 const {
   createPrefTag,
   getPrefTag,
   updatePrefTag,
   deletePrefTag,
   sortProducts,
+  gettourism,
 } = require("./Routes/adminController");
 
 const {
@@ -92,12 +102,14 @@ dotenv.config();
 
 // App variables
 const app = express();
+const cors = require("cors");
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 const MongoURI = process.env.MONGO_URI;
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
@@ -121,8 +133,6 @@ app.use(express.json());
 app.post("/addTourist", createTourist);
 app.post("/register", register);
 
-app.get("/sortProducts", sortProducts);
-
 app.get("/getTourist", getTouristProfile);
 app.put("/updateTourist", updateTouristProfile);
 
@@ -136,9 +146,6 @@ app.delete("/deleteactivity/:id", deleteActivity);
 app.get("/getactivity", getlistActivities);
 app.get("/viewactivity", viewCreatedActivities);
 
-app.post("/tourism-governor", createTourismGoverner);
-app.post("/admin", createAdmin);
-app.post("/product", createProduct);
 app.put("/updateProduct/:id", updateProduct);
 
 app.get("/activities", getActivities);
@@ -148,8 +155,7 @@ app.get("/TourGuide", getTourGuides);
 app.post("/TourGuideProfile/:tourGuideID", createTourGuideProfile);
 app.get("/TourGuideProfile/:tourGuideID", readTourGuideProfile);
 app.patch("/TourGuideProfile/:tourGuideID", createTourGuideProfile);
-app.delete("/deleteAccount", deleteAccount);
-app.get("/filterProducts", filterProducts);
+
 app.get("/products", getProducts);
 app.get("/productsAdmin", getProductsAdmin);
 
@@ -161,7 +167,6 @@ app.get("/filterActivity", filterActivity);
 app.get("/filterActivityGuest", filterActivityGuest);
 app.get("/searchProductTourist", searchProductTourist);
 app.get("/searchProductAdmin", searchProductAdmin);
-app.get("/searchProductSeller", searchProductSeller);
 
 app.get("/viewAllPlaces", viewAllPlaces);
 app.post("/addPlace", createPlaces);
@@ -192,5 +197,24 @@ app.get("/getTouristItineraries/:id", readTouristItinerary);
 app.put("/updateTouristItineraries/:id", updateTouristItinerary);
 app.delete("/deleteTouristItineraries/:id", deleteTouristItinerary);
 app.get("/tourist-itineraries", getItinerariesByDateRange);
-
+app.get("/filterProducts", filterProducts);
 app.get("/filterHistoricalTags", filterHistoricalByTag);
+
+//seller Controller
+app.post("/createSeller", createSeller);
+app.get("/getSeller", getSeller);
+app.put("/updateSeller/:id", updateSeller);
+app.get("/searchProductSeller", searchProductSeller);
+app.get("/filterProduct", filterProductSeller);
+app.get("/sortProducts", sortProducts);
+app.post("/createproduct", createProductSeller);
+app.put("/editproduct/:id", updateProductSeller);
+// Add the new route to fetch seller by username
+app.get("/getSellerById/:id", getSellerById);
+
+//Admin Controlleryyy
+app.delete("/deleteAccount", deleteAccount);
+app.post("/tourismgovernor", createTourismGoverner);
+app.post("/admin", createAdmin);
+
+app.get("/get", gettourism);
