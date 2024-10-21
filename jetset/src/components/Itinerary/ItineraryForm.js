@@ -1,23 +1,23 @@
 // src/ItineraryForm.js
 
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
 const ItineraryForm = () => {
   const [formData, setFormData] = useState({
-    activities: '',
-    locations: '',
-    timeline: '',
-    duration: '',
-    language: '',
-    price: '',
-    availability_dates: '',
-    pickup_location: '',
-    dropoff_location: '',
-    accessibility: '',
-    budget: '',
-    created_by: '',
-    tags: '',
+    name: "",
+    activities: "",
+    locations: "",
+    timeline: "",
+    duration: "",
+    language: "",
+    availability_dates: "",
+    pickup_location: "",
+    dropoff_location: "",
+    accessibility: "",
+    budget: "",
+    created_by: "",
+    tags: "",
   });
 
   const handleChange = (e) => {
@@ -31,10 +31,10 @@ const ItineraryForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/create-itinerary', {
-        method: 'POST',
+      const response = await fetch("/api/create-itinerary", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -43,26 +43,26 @@ const ItineraryForm = () => {
       if (response.ok) {
         alert(data.msg);
         setFormData({
-          activities: '',
-          locations: '',
-          timeline: '',
-          duration: '',
-          language: '',
-          price: '',
-          availability_dates: '',
-          pickup_location: '',
-          dropoff_location: '',
-          accessibility: '',
-          budget: '',
-          created_by: '',
-          tags: '',
+          name: "",
+          activities: "",
+          locations: "",
+          timeline: "",
+          duration: "",
+          language: "",
+          availability_dates: "",
+          pickup_location: "",
+          dropoff_location: "",
+          accessibility: "",
+          budget: "",
+          created_by: "",
+          tags: "",
         });
       } else {
         alert(data.error);
       }
     } catch (error) {
-      console.error('Error creating itinerary:', error);
-      alert('An error occurred while creating the itinerary.');
+      console.error("Error creating itinerary:", error);
+      alert("An error occurred while creating the itinerary.");
     }
   };
 
@@ -72,7 +72,7 @@ const ItineraryForm = () => {
       {Object.keys(formData).map((key) => (
         <div key={key}>
           <label>
-            {key.replace(/_/g, ' ')}:
+            {key.replace(/_/g, " ")}:
             <input
               type="text"
               name={key}

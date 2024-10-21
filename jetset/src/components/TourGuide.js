@@ -1,20 +1,20 @@
 import React, { useState } from "react";
-import ItineraryList from "./ItinerariesList.js";
-import TourGuideProfileForm from "./TourGuideProfileForm.js";
-import ReadTourGuideProfileForm from "./ReadTourGuideProfileForm.js";
-import CreateItineraryForm from "./CreateItineraryForm.js";
-import UpdateItineraryForm from "./UpdateItineraryForm.js";
-import DeleteItineraryForm from "./DeleteItineraryForm.js";
-import CreateTouristItineraryForm from "./CreateTouristItineraryForm.js";
-import UpdateTouristItineraryForm from "./UpdateTouristItineraryForm.js";
-import DeleteTouristItineraryForm from "./DeleteTouristItineraryForm.js";
-import ViewCreatedItineraries from "./ViewCreatedItineraries.js";
-import ReadItineraryList from "./ReadItineraryList.js";
+import ItineraryList from "./Itinerary/ItinerariesList.js";
+import TourGuideProfileForm from "./Tourguide/TourGuideProfileForm.js";
+import ReadTourGuideProfileForm from "./Tourguide/ReadTourGuideProfileForm.js";
+import CreateItineraryForm from "./Itinerary/CreateItineraryForm.js";
+import UpdateItineraryForm from "./Itinerary/UpdateItineraryForm.js";
+import DeleteItineraryForm from "./Itinerary/DeleteItineraryForm.js";
+import CreateTouristItineraryForm from "./TouristItinerary/CreateTouristItineraryForm.js";
+import UpdateTouristItineraryForm from "./TouristItinerary/UpdateTouristItineraryForm.js";
+import DeleteTouristItineraryForm from "./TouristItinerary/DeleteTouristItineraryForm.js";
+import ViewCreatedItineraries from "./Itinerary/ViewCreatedItineraries.js";
+import ReadItineraryList from "./Itinerary/ReadItineraryList.js";
 
 function TourGuide() {
   const [view, setView] = useState("itineraries"); // State to toggle between views
   const tourGuideID = "66fff1c213c1a607c2caa0c6"; // Replace with actual ID or fetch dynamically
-  const itineraryID = "66fd3b7c4cbb146dc4da1afb";
+  const itineraryID = "66fd08a45089bdf6b2ccca65";
   const TouristitineraryID = "6702626ec741235c6ae2d87c";
 
   return (

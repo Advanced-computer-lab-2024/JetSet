@@ -10,7 +10,9 @@ const TouristProfile = () => {
     if (touristId) {
       try {
         // Sending the touristId in the body of a POST request
-        const response = await axios.get("/getTourist", { id: touristId });
+        const response = await axios.get(
+          "/getTourist/67024f808e5755ccfde222bb"
+        );
         setTourist(response.data);
       } catch (error) {
         alert(
@@ -28,10 +30,12 @@ const TouristProfile = () => {
     e.preventDefault();
     try {
       // Sending the touristId and update fields in the body of the PUT request
-      const response = await axios.put("/updateTourist", {
-        id: touristId, // Include the tourist ID
-        ...updateFields, // Include all fields to update
-      });
+      const response = await axios.put(
+        "/updateTourist/67024f808e5755ccfde222bb",
+        {
+          ...updateFields, // Include all fields to update
+        }
+      );
       setTourist(response.data); // Update the local state with the response
       alert("Tourist profile updated!"); // Notify user of success
     } catch (error) {

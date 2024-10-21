@@ -1,79 +1,82 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const activitySchema = new Schema({
-    title:{
-    type:String,
-    required:true // Optional field
+const activitySchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: true, // Optional field
     },
-    budget:{
-      type:Number,
-      required:true
+    budget: {
+      type: Number,
+      required: true,
     },
     date: {
       type: Date,
-      required: true
+      required: true,
     },
 
     time: {
       type: String,
-      required: true
+      required: true,
     },
 
     location: {
       type: String,
-      required: true
+      required: true,
       /*coordinates: {
         lat: Number, // Optional
         lng: Number  // Optional
       }*/
     },
 
-    price: {
-        fixed: Number, // Optional
-        range: {
-          min: Number, // Optional
-          max: Number  // Optional
-        },
-    },
+    // price: {
+    //     fixed: Number, // Optional
+    //     range: {
+    //       min: Number, // Optional
+    //       max: Number  // Optional
+    //     },
+    // },
 
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: true
+      ref: "Category",
+      required: true,
     },
 
-    tags: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tag'
-    }], // Optional array of tags
+    tags: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Tag",
+      },
+    ], // Optional array of tags
 
-    special_discount:{ 
+    special_discount: {
       type: String,
       required: true,
-      default: "0" // Default as string
-     }, // Optional field
+      default: "0", // Default as string
+    }, // Optional field
 
     booking_open: {
       type: Boolean,
-      default: true
+      //default: true,
     },
 
     budget: Number, // Optional field
-
     rating: {
       type: Number,
       min: 0,
       max: 5,
-      default: 0 // Default value for rating
+      default: 0, // Default value for rating
     },
 
     creator: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Advertiser'
-    } // Optional reference to creator
+      ref: "Advertiser",
+    }, // Optional reference to creator
+  },
+  { timestamps: true }
+);
 
-}, { timestamps: true });
-
-const Activity = mongoose.model('Activity', activitySchema);
+const Activity = mongoose.model("Activity", activitySchema);
 module.exports = Activity;

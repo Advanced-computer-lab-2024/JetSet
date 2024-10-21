@@ -25,7 +25,7 @@ const TourGuideProfileForm = ({ tourGuideID }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `http://localhost:3000/TourGuideProfile/${tourGuideID}`,
+        `http://localhost:3000/TourGuideProfile`,
         formData
       );
       setMessage(response.data.msg);

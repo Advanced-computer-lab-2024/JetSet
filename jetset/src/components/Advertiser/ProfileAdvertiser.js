@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ActivityForm from "./ActivityProfileAdv"; // Import ActivityForm
+import ActivityForm from "../Activity/ActivityProfileAdv"; // Import ActivityForm
 
 const ProfileForm = ({ onProfileCreated }) => {
   const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
@@ -14,6 +14,11 @@ const ProfileForm = ({ onProfileCreated }) => {
     hotline: "",
     companyDescription: "",
   });
+
+  const id = "6701a375077eb6e57b56802f";
+  const [advertiser, setAdvertiser] = useState(null); // State to hold advertiser data
+  const [loading, setLoading] = useState(true); // State to handle loading state
+  const [error, setError] = useState(null);
 
   const [statusMessage, setStatusMessage] = useState(""); // For success/error messages
   const [profileId, setProfileId] = useState(""); // For profile ID if needed for update/delete
@@ -103,6 +108,28 @@ const ProfileForm = ({ onProfileCreated }) => {
     setSelectedAdvertiserId(null); // Reset selected advertiser ID
   };
 
+  useEffect(() => {
+    const fetchAdvertiser = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/getAdv/${id}`); // Adjust the API endpoint as needed
+        setAdvertiser(response.data.adv); // Assuming your response is structured like this
+      } catch (err) {
+        setError(
+          err.response
+            ? err.response.data.message
+            : "Error fetching advertiser profile."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdvertiser();
+  }, []);
+
+  if (loading) return <p>Loading...</p>; // Show loading state
+  if (error) return <p>Error: {error}</p>; // Show error message if any
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -173,20 +200,33 @@ const ProfileForm = ({ onProfileCreated }) => {
       </form>
 
       {/* Display the list of profiles */}
-      {isFetchingProfiles ? (
-        <p>Loading profiles...</p>
-      ) : (
-        <ul>
-          {profiles.map((profile) => (
-            <li key={profile._id}>
-              <strong>{profile.username}</strong> - {profile.company_name}
-              <button onClick={() => setSelectedAdvertiserId(profile._id)}>
-                View Profile
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div>
+        <h1>Advertiser Profile</h1>
+        {advertiser ? (
+          <div>
+            <h2>{advertiser.username}</h2> {/* Displaying username */}
+            <p>Email: {advertiser.email}</p> {/* Displaying email */}
+            <p>Company Name: {advertiser.company_name}</p>{" "}
+            {/* Displaying company name */}
+            <p>
+              Website:{" "}
+              <a
+                href={advertiser.website}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {advertiser.website}
+              </a>
+            </p>{" "}
+            {/* Displaying website */}
+            <p>Hotline: {advertiser.hotline}</p> {/* Displaying hotline */}
+            <p>Company Description: {advertiser.companyDescription}</p>{" "}
+            {/* Displaying company description */}
+          </div>
+        ) : (
+          <div>No advertiser found.</div>
+        )}
+      </div>
 
       {/* Integrate ActivityForm component */}
       <ActivityForm

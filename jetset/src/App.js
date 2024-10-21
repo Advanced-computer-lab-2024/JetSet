@@ -5,10 +5,10 @@ import HomePage from "./components/HomePage";
 import Register from "./components/Register";
 import RegisterASt from "./components/RegisterAST";
 import AdminFrontend from "./components/AdminFrontend";
-import RegisterTourist from "./components/RegisterTourist";
+import RegisterTourist from "./components/tourist/RegisterTourist";
 import CreateSeller from "./components/Seller/CreateSeller";
 import SellerFrontend from "./components/SellerFrontend";
-import ProfileForm from "./components/ProfileAdvertiser";
+import ProfileForm from "./components/Advertiser/ProfileAdvertiser";
 import Place from "./components/Place";
 import Tourist from "./components/TouristApp"; // Ensure the correct case here
 import TourGuide from "./components/TourGuide";

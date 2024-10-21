@@ -3,12 +3,12 @@ import React, { useState } from "react";
 import GetSeller from "./Seller/GetSeller"; // Correct import for GetSeller
 import UpdateSeller from "./Seller/UpdateSeller"; // Correct import for UpdateSeller
 
-import AddProduct from "./Seller/AddProduct"; // Import AddProduct
-import EditProduct from "./Seller/EditProduct"; // Import EditProduct
-import FilterProducts from "./Seller/FilterProducts"; // Import FilterProducts
-import ProductList from "./Seller/ProductList"; // Import ProductList
-import SearchProduct from "./Seller/SearchProduct"; // Import SearchProduct
-import SortProducts from "./Seller/SortProducts"; // Import SortProducts
+import AddProduct from "./Products/AddProduct"; // Import AddProduct
+import EditProduct from "./Products/EditProduct"; // Import EditProduct
+import FilterProducts from "./Products/FilterProducts"; // Import FilterProducts
+import ProductList from "./Products/ProductList"; // Import ProductList
+import SearchProduct from "./Products/SearchProduct"; // Import SearchProduct
+import SortProducts from "./Products/SortProducts"; // Import SortProducts
 
 const SellerFrontend = () => {
   const sellerId = "66fc4923b6a7073d648f1bc0"; // Hardcoded seller ID

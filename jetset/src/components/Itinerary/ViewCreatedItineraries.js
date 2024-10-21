@@ -42,6 +42,7 @@ const ViewCreatedItineraries = ({ id }) => {
         {itineraries.length > 0 ? (
           itineraries.map((itinerary) => (
             <li key={itinerary._id}>
+              <p>Name: {itinerary.name}</p>
               <h4>
                 Activities:{" "}
                 {itinerary.activities
@@ -55,7 +56,6 @@ const ViewCreatedItineraries = ({ id }) => {
               <p>Timeline: {itinerary.timeline || "N/A"}</p>
               <p>Duration: {itinerary.duration || "N/A"}</p>
               <p>Language: {itinerary.language || "N/A"}</p>
-              <p>Price: ${itinerary.price || "N/A"}</p>
               <p>
                 Availability Dates:{" "}
                 {itinerary.availability_dates

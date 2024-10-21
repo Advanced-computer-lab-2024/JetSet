@@ -2,24 +2,24 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 // Import components for Tag Management
-import CreateTag from "./Admin/CreateTag";
-import TagList from "./Admin/TagList";
-import UpdateTag from "./Admin/UpdateTag";
-import DeleteTag from "./Admin/DeleteTag";
+import CreateTag from "./Tag/CreateTag";
+import TagList from "./Tag/TagList";
+import UpdateTag from "./Tag/UpdateTag";
+import DeleteTag from "./Tag/DeleteTag";
 
 // Import components for Category Management
-import CreateCategory from "./Admin/CreateCategory ";
-import UpdateCategory from "./Admin/UpdateCategory";
-import DeleteCategory from "./Admin/DeleteCategory";
-import CategoryList from "./Admin/CategoryList ";
+import CreateCategory from "./Category/CreateCategory ";
+import UpdateCategory from "./Category/UpdateCategory";
+import DeleteCategory from "./Category/DeleteCategory";
+import CategoryList from "./Category/CategoryList ";
 
 // Import components for Product Management
-import AddProduct from "./Seller/AddProduct";
-import EditProduct from "./Seller/EditProduct";
-import FilterProducts from "./Seller/FilterProducts";
-import ProductList from "./Seller/ProductList";
-import SearchProduct from "./Seller/SearchProduct";
-import SortProducts from "./Seller/SortProducts";
+import AddProduct from "./Products/AddProduct";
+import EditProduct from "./Products/EditProduct";
+import FilterProducts from "./Products/FilterProducts";
+import ProductList from "./Products/ProductList";
+import SearchProduct from "./Products/SearchProduct";
+import SortProducts from "./Products/SortProducts";
 
 // Import new components for account management
 import DeleteAccount from "./Admin/DeleteAccount";

@@ -1,9 +1,9 @@
 import React from "react";
-import PlaceList from "./PlaceList";
-import PlaceForm from "./PlaceForm";
-import TagForm from "./TagForm";
-import ActivitiesList from "./ActivityListAdv";
-import ItineraryList from "./ItinerariesList.js";
+import PlaceList from "./Place/PlaceList";
+import PlaceForm from "./Place/PlaceForm";
+import TagForm from "./Tag/TagForm";
+import ActivitiesList from "./Activity/ActivityListAdv";
+import ItineraryList from "./Itinerary/ItinerariesList";
 
 const PlaceManagement = () => {
   return (

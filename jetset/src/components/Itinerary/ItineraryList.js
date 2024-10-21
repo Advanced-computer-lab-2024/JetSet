@@ -10,14 +10,14 @@ const ItineraryList = () => {
     tag: "",
     language: "",
   });
-  const [sortBy, setSortBy] = useState("price");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortBy, setSortBy] = useState("budget");
+  const [sortOrder, setSortOrder] = useState(1);
 
   // Fetch itineraries based on sorting
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
-        const response = await axios.get("/itineraries", {
+        const response = await axios.get("/SortItineraries", {
           params: { sortBy, sortOrder },
         });
         setItineraries(response.data);
@@ -118,17 +118,17 @@ const ItineraryList = () => {
       />
       <button onClick={handleClearFilters}>Clear Filters</button>
       <select onChange={(e) => setSortBy(e.target.value)}>
-        <option value="price">Price</option>
+        <option value="budget">budget</option>
         <option value="ratings">Ratings</option>
       </select>
       <select onChange={(e) => setSortOrder(e.target.value)}>
-        <option value="asc">Ascending</option>
-        <option value="desc">Descending</option>
+        <option value={1}>Ascending</option>
+        <option value={-1}>Descending</option>
       </select>
       <ul>
         {itineraries.map((itinerary) => (
           <li key={itinerary._id}>
-            <strong>Title:</strong> {itinerary.title}
+            <strong>Title:</strong> {itinerary.name}
             <br />
             <strong>Locations:</strong>{" "}
             {itinerary.locations ? itinerary.locations.join(", ") : "N/A"}
@@ -139,7 +139,7 @@ const ItineraryList = () => {
             <br />
             <strong>Language:</strong> {itinerary.language}
             <br />
-            <strong>Price:</strong> ${itinerary.price}
+            <strong>Budget:</strong> ${itinerary.budget}
             <br />
             <strong>Availability Dates:</strong>{" "}
             {itinerary.availability_dates
@@ -151,8 +151,6 @@ const ItineraryList = () => {
             <strong>Dropoff Location:</strong> {itinerary.dropoff_location}
             <br />
             <strong>Accessibility:</strong> {itinerary.accessibility}
-            <br />
-            <strong>Budget:</strong> ${itinerary.budget}
             <br />
             <strong>Tags:</strong>{" "}
             {Array.isArray(itinerary.tags) && itinerary.tags.length > 0

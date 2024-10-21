@@ -1,128 +1,216 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const SearchComponent = () => {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
-  const [tag, setTag] = useState("");
+  const [searchType, setSearchType] = useState("place"); // Default search type
+  const [query, setQuery] = useState({ name: "", category: "", tags: "" });
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setQuery((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSearch = async () => {
-    setLoading(true);
-    setError(null); // Reset error state
-
+    setError(null); // Reset any previous errors
     try {
-      // Construct the search API URL with query parameters
-      const response = await fetch(
-        `/search?query=${encodeURIComponent(
-          query
-        )}&category=${encodeURIComponent(category)}&tag=${encodeURIComponent(
-          tag
-        )}`
-      );
-
-      // Check if the response is ok
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Network response was not ok");
+      let response;
+      if (searchType === "place") {
+        response = await axios.get(`http://localhost:3000/searchplace`, {
+          params: query,
+        });
+      } else if (searchType === "activity") {
+        response = await axios.get(`http://localhost:3000/searchactivity`, {
+          params: query,
+        });
+      } else if (searchType === "itinerary") {
+        response = await axios.get(`http://localhost:3000/searchitinerary`, {
+          params: query,
+        });
       }
-
-      // Parse the JSON data
-      const data = await response.json();
-      console.log("Search results:", data); // Log the response data
-
-      // Check if the data is an array
-      if (Array.isArray(data)) {
-        setResults(data); // Set results only if data is an array
-      } else {
-        setResults([]); // Reset to empty array if the response is not an array
-        console.error("Unexpected response format:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching search results:", error);
-      setError("An error occurred while fetching search results.");
-    } finally {
-      setLoading(false); // Reset loading state
+      setResults(response.data);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   return (
     <div>
       <h1>Search</h1>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search..."
-      />
-      <input
-        type="text"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        placeholder="Category..."
-      />
-      <input
-        type="text"
-        value={tag}
-        onChange={(e) => setTag(e.target.value)}
-        placeholder="Tags (comma separated)..."
-      />
-      <button onClick={handleSearch}>Search</button>
-
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <h2>Results</h2>
       <div>
-        {results.length > 0 ? (
-          results.map((result) => (
-            <div
-              key={result._id}
-              style={{
-                marginBottom: "20px",
-                border: "1px solid #ccc",
-                padding: "10px",
-              }}
-            >
-              <h3>{result.title || "No Title Available"}</h3>{" "}
-              {/* Title or fallback */}
-              <p>
-                <strong>Location: </strong>
-                {result.location?.address || "No Location Available"}{" "}
-                {/* Location field */}
-              </p>
-              <p>Date: {new Date(result.date).toLocaleDateString()}</p>
-              <p>Time: {result.time}</p>
-              <p>
-                <strong>Price: </strong>
-                {result.price?.fixed !== undefined
-                  ? `$${result.price.fixed}`
-                  : `${result.price?.range?.min} - ${result.price?.range?.max}`}
-              </p>
-              <p>
-                <strong>Rating: </strong>
-                {result.rating || "No Rating"}
-              </p>
-              <p>
-                <strong>Category: </strong>
-                {result.category
-                  ? result.category.name
-                  : "No Category Available"}
-              </p>
-              <p>
-                <strong>Tags: </strong>
-                {result.tags.length > 0 ? result.tags.join(", ") : "No Tags"}
-              </p>
-              <p>
-                <strong>Booking Open: </strong>
-                {result.booking_open ? "Yes" : "No"}
-              </p>
-            </div>
-          ))
-        ) : (
-          <p>No results available</p>
-        )}
+        <label>
+          Search Type:
+          <select
+            onChange={(e) => setSearchType(e.target.value)}
+            value={searchType}
+          >
+            <option value="place">Place</option>
+            <option value="activity">Activity</option>
+            <option value="itinerary">Itinerary</option>
+          </select>
+        </label>
+      </div>
+      <div>
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          value={query.name}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="category"
+          placeholder="Category"
+          value={query.category}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="tags"
+          placeholder="Tags (comma separated)"
+          value={query.tags}
+          onChange={handleChange}
+        />
+        <button onClick={handleSearch}>Search</button>
+      </div>
+      {error && <div style={{ color: "red" }}>{error}</div>}
+      <div>
+        <h2>Results:</h2>
+        <ul>
+          {results.map((result) => (
+            <li key={result._id}>
+              {/* Check if the result is a Place */}
+              {result.Name ? (
+                <div>
+                  <h3>Place: {result.Name}</h3>
+                  <p>
+                    <strong>Description:</strong> {result.Description || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Opening Hours:</strong>{" "}
+                    {result.opening_hours || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Ticket Prices (Family):</strong> $
+                    {result.TicketPricesF || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Ticket Prices (Normal):</strong> $
+                    {result.TicketPricesN || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Ticket Prices (Student):</strong> $
+                    {result.TicketPricesS || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Tags:</strong>{" "}
+                    {Array.isArray(result.tags) && result.tags.length > 0
+                      ? result.tags.join(", ")
+                      : "N/A"}
+                  </p>
+                  <p>
+                    <strong>Created At:</strong>{" "}
+                    {new Date(result.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ) : null}
+
+              {/* Check if the result is an Activity */}
+              {result.title ? (
+                <div>
+                  <h3>Activity: {result.title}</h3>
+                  <p>
+                    <strong>Budget:</strong> ${result.budget || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {new Date(result.date).toLocaleDateString() || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Time:</strong> {result.time || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {result.location || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Category:</strong> {result.category || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Tags:</strong>{" "}
+                    {Array.isArray(result.tags) && result.tags.length > 0
+                      ? result.tags.join(", ")
+                      : "N/A"}
+                  </p>
+                  <p>
+                    <strong>Special Discount:</strong>{" "}
+                    {result.special_discount || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Rating:</strong> {result.rating || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Booking Open:</strong>{" "}
+                    {result.booking_open ? "Yes" : "No"}
+                  </p>
+                  <p>
+                    <strong>Created At:</strong>{" "}
+                    {new Date(result.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ) : null}
+
+              {/* Check if the result is an Itinerary */}
+              {result.name ? (
+                <div>
+                  <h3>Itinerary: {result.name}</h3>
+                  <p>
+                    <strong>Budget:</strong> ${result.budget || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Locations:</strong>{" "}
+                    {Array.isArray(result.locations) &&
+                    result.locations.length > 0
+                      ? result.locations.join(", ")
+                      : "N/A"}
+                  </p>
+                  <p>
+                    <strong>Timeline:</strong> {result.timeline || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Duration:</strong> {result.duration || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Language:</strong> {result.language || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Pickup Location:</strong>{" "}
+                    {result.pickup_location || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Dropoff Location:</strong>{" "}
+                    {result.dropoff_location || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Accessibility:</strong>{" "}
+                    {result.accessibility || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Tags:</strong>{" "}
+                    {Array.isArray(result.tags) && result.tags.length > 0
+                      ? result.tags.join(", ")
+                      : "N/A"}
+                  </p>
+                  <p>
+                    <strong>Created At:</strong>{" "}
+                    {new Date(result.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ) : null}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ActivityList from "./tourist/ActivitiesList.js";
-import ItineraryList from "./tourist/ItineraryList.js";
-import HistoricalPlaces from "./tourist/HistoricalPlacesList.js";
+import ActivityList from "./Activity/ActivitiesList.js";
+import ItineraryList from "./Itinerary/ItineraryList.js";
+import HistoricalPlaces from "./Place/HistoricalPlacesList.js";
 import Search from "./tourist/SearchComponent.js";
 import "./styles.css";
 

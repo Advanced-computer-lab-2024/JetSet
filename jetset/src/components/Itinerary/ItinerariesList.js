@@ -53,12 +53,8 @@ const ItineraryList = () => {
         {itineraries.length > 0 ? (
           itineraries.map((itinerary) => (
             <li key={itinerary._id}>
-              <h4>
-                Activities:{" "}
-                {itinerary.activities
-                  ?.map((activity) => activity.name)
-                  .join(", ") || "No activities listed"}
-              </h4>
+              <p>Name: {itinerary.name || "N/A"}</p>
+              <h4>Activities: {itinerary.activities}</h4>
               <p>
                 Locations:{" "}
                 {itinerary.locations?.join(", ") || "No locations listed"}
@@ -66,7 +62,6 @@ const ItineraryList = () => {
               <p>Timeline: {itinerary.timeline || "N/A"}</p>
               <p>Duration: {itinerary.duration || "N/A"}</p>
               <p>Language: {itinerary.language || "N/A"}</p>
-              <p>Price: ${itinerary.price || "N/A"}</p>
               <p>
                 Availability Dates:{" "}
                 {itinerary.availability_dates

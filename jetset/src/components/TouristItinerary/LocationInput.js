@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const LocationInput = ({ onChange }) => {
   const [location, setLocation] = useState({
-    address: '',
-    coordinates: { lat: '', lng: '' },
+    address: "",
+    coordinates: { lat: "", lng: "" },
   });
 
   // Handle the change for individual fields
@@ -11,9 +11,9 @@ const LocationInput = ({ onChange }) => {
     const { name, value } = e.target;
     setLocation((prevLocation) => {
       // Update coordinates or address based on the name
-      if (name === 'address') {
+      if (name === "address") {
         return { ...prevLocation, address: value };
-      } else if (name === 'lat' || name === 'lng') {
+      } else if (name === "lat" || name === "lng") {
         return {
           ...prevLocation,
           coordinates: {

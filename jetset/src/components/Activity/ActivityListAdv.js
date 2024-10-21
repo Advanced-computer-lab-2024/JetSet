@@ -41,9 +41,6 @@ const ActivitiesList = () => {
               <th>Time</th>
               <th>Latitude</th>
               <th>Longitude</th>
-              <th>Fixed Price</th>
-              <th>Min Price</th>
-              <th>Max Price</th>
               <th>Category</th>
               <th>Special Discount</th>
               <th>Booking Open</th>
@@ -59,9 +56,6 @@ const ActivitiesList = () => {
                 <td>{activity.time || "N/A"}</td>
                 <td>{activity.location?.coordinates?.lat || "N/A"}</td>
                 <td>{activity.location?.coordinates?.lng || "N/A"}</td>
-                <td>{activity.price?.fixed || "N/A"}</td>
-                <td>{activity.price?.range?.min || "N/A"}</td>
-                <td>{activity.price?.range?.max || "N/A"}</td>
                 <td>{activity.category || "N/A"}</td>
                 <td>{activity.specialDiscount || "N/A"}</td>
                 <td>{activity.bookingOpen ? "Yes" : "No"}</td>

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { createTag } from './tagService';
+import React, { useState } from "react";
+import { createTag } from "./tagService";
 const TagForm = () => {
   const [tag, setTag] = useState({
-    name: '',
-    type: '',
-    period: '',
+    name: "",
+    type: "",
+    period: "",
   });
 
   const handleChange = (e) => {
@@ -26,7 +26,12 @@ const TagForm = () => {
       <input name="type" value={tag.type} onChange={handleChange} required />
 
       <label>Period:</label>
-      <input name="period" value={tag.period} onChange={handleChange} required />
+      <input
+        name="period"
+        value={tag.period}
+        onChange={handleChange}
+        required
+      />
 
       <button type="submit">Create Tag</button>
     </form>

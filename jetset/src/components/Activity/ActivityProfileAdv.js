@@ -10,7 +10,6 @@ const ActivityForm = ({ onActivityCreated }) => {
     date: "",
     time: "",
     location: "",
-    price: { fixed: "", range: { min: "", max: "" } },
     category: "",
     special_discount: "",
     booking_open: true,
@@ -38,31 +37,21 @@ const ActivityForm = ({ onActivityCreated }) => {
     }
   };
 
+  // const handleChange = (e) => {
+  //   const { name, value, type, checked } = e.target;
+
+  //   if (type === "checkbox" && name === "booking_open") {
+  //     setFormData((prevState) => ({ ...prevState, booking_open: checked }));
+  //   } else {
+  //     setFormData((prevState) => ({ ...prevState, [name]: value }));
+  //   }
+  // };
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
-    if (type === "checkbox" && name === "booking_open") {
-      setFormData((prevState) => ({ ...prevState, booking_open: checked }));
-    } else if (name.startsWith("price.range")) {
-      const field = name.split(".")[2];
-      setFormData((prevState) => ({
-        ...prevState,
-        price: {
-          ...prevState.price,
-          range: { ...prevState.price.range, [field]: value },
-        },
-      }));
-    } else if (name === "price.fixed") {
-      setFormData((prevState) => ({
-        ...prevState,
-        price: {
-          ...prevState.price,
-          fixed: value,
-        },
-      }));
-    } else {
-      setFormData((prevState) => ({ ...prevState, [name]: value }));
-    }
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: type === "checkbox" ? checked : value, // Handle checkbox separately
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -131,7 +120,6 @@ const ActivityForm = ({ onActivityCreated }) => {
       date: "",
       time: "",
       location: "",
-      price: { fixed: "", range: { min: "", max: "" } },
       category: "",
       special_discount: "",
       booking_open: true,
@@ -185,28 +173,6 @@ const ActivityForm = ({ onActivityCreated }) => {
           onChange={handleChange}
           placeholder="Location (Address)"
           required
-        />
-
-        <input
-          type="number"
-          name="price.fixed"
-          value={formData.price.fixed}
-          onChange={handleChange}
-          placeholder="Fixed Price"
-        />
-        <input
-          type="number"
-          name="price.range.min"
-          value={formData.price.range.min}
-          onChange={handleChange}
-          placeholder="Min Price"
-        />
-        <input
-          type="number"
-          name="price.range.max"
-          value={formData.price.range.max}
-          onChange={handleChange}
-          placeholder="Max Price"
         />
 
         <input
@@ -274,9 +240,6 @@ const ActivityForm = ({ onActivityCreated }) => {
               <th>Date</th>
               <th>Time</th>
               <th>Location</th>
-              <th>Fixed Price</th>
-              <th>Min Price</th>
-              <th>Max Price</th>
               <th>Category</th>
               <th>Special Discount</th>
               <th>Booking Open</th>
@@ -295,12 +258,15 @@ const ActivityForm = ({ onActivityCreated }) => {
                 </td>
                 <td>{activity.time || "N/A"}</td>
                 <td>{activity.location || "N/A"}</td>
-                <td>{activity.price?.fixed || "N/A"}</td>
-                <td>{activity.price?.range?.min || "N/A"}</td>
-                <td>{activity.price?.range?.max || "N/A"}</td>
                 <td>{activity.category || "N/A"}</td>
                 <td>{activity.special_discount || "N/A"}</td>
-                <td>{activity.booking_open?.toString() || "N/A"}</td>
+                <td>
+                  {activity.booking_open !== undefined
+                    ? activity.booking_open
+                      ? "True"
+                      : "False"
+                    : "N/A"}
+                </td>
                 <td>{activity.tags?.join(", ") || "N/A"}</td>
               </tr>
             ))}

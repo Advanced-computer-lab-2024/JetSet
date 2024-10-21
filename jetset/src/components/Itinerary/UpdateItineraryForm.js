@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const CreateItineraryForm = () => {
+const UpdateItineraryForm = ({ itineraryID }) => {
   const [formData, setFormData] = useState({
+    name: "",
     activities: "",
     locations: "",
     timeline: "",
@@ -34,16 +35,16 @@ const CreateItineraryForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:3000/addItinerary",
+      const response = await axios.put(
+        `http://localhost:3000/updateItinerary/${itineraryID}`,
         formData
       );
-      setMessage(response.data.msg);
+      setMessage("Itinerary updated successfully!");
       setError(""); // Clear any previous error
     } catch (err) {
       setError(
         err.response?.data?.error ||
-          "An error occurred while creating the itinerary."
+          "An error occurred while updating the itinerary."
       );
       setMessage(""); // Clear success message
     }
@@ -51,10 +52,20 @@ const CreateItineraryForm = () => {
 
   return (
     <div>
-      <h2>Create Itinerary</h2>
+      <h2>Update Itinerary</h2>
       {message && <p style={{ color: "green" }}>{message}</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
+        <div>
+          <label>Name:</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
         <div>
           <label>Activities:</label>
           <input
@@ -100,16 +111,6 @@ const CreateItineraryForm = () => {
             type="text"
             name="language"
             value={formData.language}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Price:</label>
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
             onChange={handleChange}
             required
           />
@@ -177,10 +178,10 @@ const CreateItineraryForm = () => {
             onChange={handleChange}
           />
         </div>
-        <button type="submit">Create Itinerary</button>
+        <button type="submit">Update Itinerary</button>
       </form>
     </div>
   );
 };
 
-export default CreateItineraryForm;
+export default UpdateItineraryForm;

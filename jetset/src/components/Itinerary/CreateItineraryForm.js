@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const UpdateItineraryForm = ({ itineraryID }) => {
+const CreateItineraryForm = () => {
   const [formData, setFormData] = useState({
+    name: "",
     activities: "",
+    budget: "",
     locations: "",
     timeline: "",
     duration: "",
     language: "",
-    price: "",
     availability_dates: "",
     pickup_location: "",
     dropoff_location: "",
     accessibility: "",
-    budget: "",
     created_by: "",
     tags: "",
   });
@@ -34,16 +34,16 @@ const UpdateItineraryForm = ({ itineraryID }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(
-        `http://localhost:3000/updateItinerary/${itineraryID}`,
+      const response = await axios.post(
+        "http://localhost:3000/addItinerary",
         formData
       );
-      setMessage("Itinerary updated successfully!");
+      setMessage(response.data.msg);
       setError(""); // Clear any previous error
     } catch (err) {
       setError(
         err.response?.data?.error ||
-          "An error occurred while updating the itinerary."
+          "An error occurred while creating the itinerary."
       );
       setMessage(""); // Clear success message
     }
@@ -51,10 +51,20 @@ const UpdateItineraryForm = ({ itineraryID }) => {
 
   return (
     <div>
-      <h2>Update Itinerary</h2>
+      <h2>Create Itinerary</h2>
       {message && <p style={{ color: "green" }}>{message}</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
+        <div>
+          <label>Name:</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
         <div>
           <label>Activities:</label>
           <input
@@ -63,6 +73,15 @@ const UpdateItineraryForm = ({ itineraryID }) => {
             value={formData.activities}
             onChange={handleChange}
             required
+          />
+        </div>
+        <div>
+          <label>Budget:</label>
+          <input
+            type="number"
+            name="budget"
+            value={formData.budget}
+            onChange={handleChange}
           />
         </div>
         <div>
@@ -105,16 +124,6 @@ const UpdateItineraryForm = ({ itineraryID }) => {
           />
         </div>
         <div>
-          <label>Price:</label>
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
           <label>Availability Dates:</label>
           <input
             type="text"
@@ -150,15 +159,7 @@ const UpdateItineraryForm = ({ itineraryID }) => {
             onChange={handleChange}
           />
         </div>
-        <div>
-          <label>Budget:</label>
-          <input
-            type="number"
-            name="budget"
-            value={formData.budget}
-            onChange={handleChange}
-          />
-        </div>
+
         <div>
           <label>Created By:</label>
           <input
@@ -177,10 +178,10 @@ const UpdateItineraryForm = ({ itineraryID }) => {
             onChange={handleChange}
           />
         </div>
-        <button type="submit">Update Itinerary</button>
+        <button type="submit">Create Itinerary</button>
       </form>
     </div>
   );
 };
 
-export default UpdateItineraryForm;
+export default CreateItineraryForm;

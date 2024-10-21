@@ -1,24 +1,24 @@
 // src/UpdateItinerary.js
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 const UpdateItinerary = () => {
   const { id } = useParams();
   const [formData, setFormData] = useState({
-    activities: '',
-    locations: '',
-    timeline: '',
-    duration: '',
-    language: '',
-    price: '',
-    availability_dates: '',
-    pickup_location: '',
-    dropoff_location: '',
-    accessibility: '',
-    budget: '',
-    created_by: '',
-    tags: '',
+    name: "",
+    activities: "",
+    locations: "",
+    timeline: "",
+    duration: "",
+    language: "",
+    availability_dates: "",
+    pickup_location: "",
+    dropoff_location: "",
+    accessibility: "",
+    budget: "",
+    created_by: "",
+    tags: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +29,7 @@ const UpdateItinerary = () => {
       try {
         const response = await fetch(`/api/itineraries/${id}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch itinerary');
+          throw new Error("Failed to fetch itinerary");
         }
         const data = await response.json();
         setFormData(data);
@@ -55,21 +55,21 @@ const UpdateItinerary = () => {
     e.preventDefault();
     try {
       const response = await fetch(`/api/itineraries/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to update itinerary');
+        throw new Error(data.error || "Failed to update itinerary");
       }
 
       const updatedItinerary = await response.json();
-      alert('Itinerary updated successfully');
-      navigate('/itineraries'); // Redirect to the itineraries list
+      alert("Itinerary updated successfully");
+      navigate("/itineraries"); // Redirect to the itineraries list
     } catch (err) {
       setError(err.message);
     }
@@ -84,7 +84,7 @@ const UpdateItinerary = () => {
       {Object.keys(formData).map((key) => (
         <div key={key}>
           <label>
-            {key.replace(/_/g, ' ')}:
+            {key.replace(/_/g, " ")}:
             <input
               type="text"
               name={key}

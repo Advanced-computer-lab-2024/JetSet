@@ -7,10 +7,19 @@ const TouristItinerary = require("../Models/TouristsItinerary.js");
 const Tag = require("../Models/Tag.js"); // Assuming tags are stored here
 
 const createTourGuideProfile = async (req, res) => {
-  const { mobile_number, years_of_experience, previous_work } = req.body;
-  const tourGuideID = req.params.tourGuideID;
+  const {
+    username,
+    password,
+    email,
+    mobile_number,
+    years_of_experience,
+    previous_work,
+  } = req.body;
   try {
-    await TourGuide.findByIdAndUpdate(tourGuideID, {
+    await TourGuide.create({
+      email: email,
+      username: username,
+      password: password,
       mobile_number: mobile_number,
       years_of_experience: years_of_experience,
       previous_work: previous_work,
@@ -62,34 +71,34 @@ const validateObjectId = (id) => {
 };
 const createItinerary = async (req, res) => {
   const {
+    name,
     activities,
+    budget,
     locations,
     timeline,
     duration,
     language,
-    price,
     availability_dates,
     pickup_location,
     dropoff_location,
     accessibility,
-    budget,
     created_by,
     tags,
   } = req.body;
 
   try {
     const itinerary = await itineraryModel.create({
+      name,
       activities,
+      budget,
       locations,
       timeline,
       duration,
       language,
-      price,
       availability_dates,
       pickup_location,
       dropoff_location,
       accessibility,
-      budget,
       created_by,
       tags,
     });
@@ -118,17 +127,17 @@ const updateItinerary = async (req, res) => {
 
   // Extracting fields from the request body
   const {
+    name,
     activities,
+    budget,
     locations,
     timeline,
     duration,
     language,
-    price,
     availability_dates,
     pickup_location,
     dropoff_location,
     accessibility,
-    budget,
     created_by,
     tags,
   } = req.body;
@@ -137,17 +146,17 @@ const updateItinerary = async (req, res) => {
     const itinerary = await itineraryModel.findByIdAndUpdate(
       id,
       {
+        name,
         activities,
+        budget,
         locations,
         timeline,
         duration,
         language,
-        price,
         availability_dates,
         pickup_location,
         dropoff_location,
         accessibility,
-        budget,
         created_by,
         tags,
       },
@@ -172,17 +181,17 @@ const deleteItinerary = async (req, res) => {
     return res.status(400).json({ error: "Invalid itinerary ID format" });
   }
   const {
+    name,
     activities,
+    budget,
     locations,
     timeline,
     duration,
     language,
-    price,
     availability_dates,
     pickup_location,
     dropoff_location,
     accessibility,
-    budget,
     created_by,
     tags,
   } = req.body;
@@ -200,17 +209,17 @@ const deleteItinerary = async (req, res) => {
     const itinerary = await itineraryModel.findByIdAndDelete(
       id,
       {
+        name,
         activities,
+        budget,
         locations,
         timeline,
         duration,
         language,
-        price,
         availability_dates,
         pickup_location,
         dropoff_location,
         accessibility,
-        budget,
         created_by,
         tags,
       },
@@ -346,6 +355,15 @@ const getItinerariesByDateRange = async (req, res) => {
   }
 };
 
+const gettourguide = async (req, res) => {
+  try {
+    const users = await TourGuide.find();
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(400).json({ message: "Error retrieving users", error });
+  }
+};
+
 module.exports = {
   createTourGuideProfile,
   getTourGuides,
@@ -360,4 +378,5 @@ module.exports = {
   updateTouristItinerary,
   deleteTouristItinerary,
   getItinerariesByDateRange,
+  gettourguide,
 };
