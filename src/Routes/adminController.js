@@ -302,6 +302,41 @@ const deletePrefTag = async (req, res) => {
   }
 };
 
+
+const getadmin = async (req, res) => {
+  try {
+    const users = await Admin.find();
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(400).json({ message: "Error retrieving users", error });
+  }
+};
+
+const changePasswordAdmin = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const adminId = req.params.id;
+
+  try {
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (admin.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    admin.password = newPassword;
+    await admin.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -320,4 +355,6 @@ module.exports = {
   getProductsAdmin,
   sortProducts,
   gettourism,
+  changePasswordAdmin,
+  getadmin,
 };

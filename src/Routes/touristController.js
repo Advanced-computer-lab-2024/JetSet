@@ -429,6 +429,32 @@ const filterHistoricalByTag = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+////////////////////////////////////////////////////
+const changePasswordTourist = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const touristId = req.params.id;
+
+  try {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (tourist.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    tourist.password = newPassword;
+    await tourist.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
+
 
 module.exports = {
   getProducts,
@@ -450,4 +476,5 @@ module.exports = {
   seacrhPlace,
   searchActivity,
   searchItinerary,
+  changePasswordTourist,
 };

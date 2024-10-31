@@ -143,6 +143,31 @@ const createTag = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const changePasswordTourismGoverner = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const tourismgovernerId = req.params.id;
+
+  try {
+    const tourismgoverner = await TourismGoverner.findById(tourismgovernerId);
+    if (!tourismgoverner) {
+      return res.status(404).json({ message: "Tourismgoverner not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (tourismgoverner.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    tourismgoverner.password = newPassword;
+    await tourismgoverner.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
 module.exports = {
   viewAllPlaces,
   createPlaces,
@@ -151,4 +176,5 @@ module.exports = {
   updatePlace,
   deletePlace,
   createTag,
+  changePasswordTourismGoverner,
 };

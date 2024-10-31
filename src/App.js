@@ -16,6 +16,8 @@ const {
   getlistActivities,
   viewCreatedActivities,
   getAdsById,
+  changePasswordAdvertiser,
+  getadvertiser,
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const itinerary = require("./Models/Itinerary");
@@ -27,6 +29,7 @@ const {
   updatePlace,
   deletePlace,
   createTag,
+  changePasswordTourismGoverner,
 } = require("./Routes/tourismgovernerController");
 const {
   filterActivityGuest,
@@ -42,6 +45,7 @@ const {
   updateSeller,
   filterProductSeller,
   getSellerById,
+  changePasswordSeller,
 } = require("./Routes/sellerController");
 const {
   createPrefTag,
@@ -50,6 +54,8 @@ const {
   deletePrefTag,
   sortProducts,
   gettourism,
+  changePasswordAdmin,
+  getadmin,
 } = require("./Routes/adminController");
 
 const {
@@ -81,6 +87,7 @@ const {
   seacrhPlace,
   searchActivity,
   searchItinerary,
+  changePasswordTourist,
 } = require("../src/Routes/touristController");
 
 const {
@@ -94,6 +101,7 @@ const {
   viewCreatedItineraries,
   getItinerariesByDateRange,
   gettourguide,
+  changePasswordTourGuide,
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -240,3 +248,13 @@ app.get("/gets", getTourist);
 
 //Advertisor
 app.get("/getAdv/:id", getAdsById);
+
+////////////////////////////////////////////
+app.put("/cpTourist/:id", changePasswordTourist);
+app.put("/cpAdmin/:id", changePasswordAdmin);
+app.get("/getadmin", getadmin);
+app.put("/cpAdvertiser/:id", changePasswordAdvertiser);
+app.get("/getadvertiser", getadvertiser);
+app.put("/cpSeller/:id", changePasswordSeller);
+app.put("/cpTourguide/:id", changePasswordTourGuide);
+app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
