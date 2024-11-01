@@ -21,7 +21,10 @@ const touristSchema = new Schema(
     nationality: String,
     DOB: Date,
     job: String,
-    wallet: Number,
+    wallet:
+    { type:Number,
+      default:0,
+    },
     loyaltyPoints: {
       type: Number,
       default: 0,
