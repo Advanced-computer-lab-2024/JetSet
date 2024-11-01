@@ -62,7 +62,15 @@ const createAdmin = async (req, res) => {
       .json({ message: "Error creating Admin", error: error.message || error });
   }
 };
-
+const viewAllComplaints= async (req, res) => {
+  try {
+    const complaints = await Complaint.find(); // Fetch all complaints from the database
+    res.status(200).json(complaints); // Send complaints in the response
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch complaints from database' });
+  }
+};
 //Product
 const createProduct = async (req, res) => {
   const { name, desciption, price, quantity, seller_id } = req.body;
@@ -357,4 +365,5 @@ module.exports = {
   gettourism,
   changePasswordAdmin,
   getadmin,
+  viewAllComplaints,
 };

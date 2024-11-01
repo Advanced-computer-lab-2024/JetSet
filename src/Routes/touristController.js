@@ -3,6 +3,7 @@ const Activity = require("../Models/Activity");
 const Itinerary = require("../Models/Itinerary");
 const Historical = require("../Models/Historical");
 const Tourist = require("../Models/Tourist.js");
+const Complaint = require("../Models/Complaint.js");
 const Category = require("../Models/Category.js");
 const { default: mongoose } = require("mongoose");
 
@@ -455,6 +456,92 @@ const changePasswordTourist = async (req, res) => {
   }
 };
 
+//Sprint 2 requirements requirement 70 & 71
+function calculatePoints(paymentAmount, level) {
+  if (level === 1) {
+    return paymentAmount * 0.5;
+  } else if (level === 2) {
+    return paymentAmount * 1;
+  } else if (level === 3) {
+    return paymentAmount * 1.5;
+  }
+  return 0;
+}
+function calculateBadge  (points) {
+  if (points <= 100000) {
+    return "Bronze";
+  } else if (points <= 500000) {
+    return "Silver";
+  } else {
+    return "Gold";
+  }
+};
+function determineLevel(loyaltyPoints) {
+  if (loyaltyPoints <= 100000) {
+    return 1;
+  } else if (loyaltyPoints <= 500000) {
+    return 2;
+  } else {
+    return 3;
+  }
+}
+const addLoyaltyPoints = async (req, res) => {
+  try {
+
+    const { paymentAmount } = req.body;
+    const touristId = req.params.id;
+
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist is not found" });
+    }
+
+    const pointsEarned = calculatePoints(paymentAmount, tourist.level);
+    const badge = calculateBadge(tourist.loyaltyPoints); // Calculate badge based on updated points
+
+    tourist.loyaltyPoints += pointsEarned;
+    tourist.level = determineLevel(tourist.loyaltyPoints);
+    tourist.badge = badge;
+
+    // await tourist.save();
+    // const badge = Tourist.calculateBadge(tourist.loyaltyPoints); 
+
+    await tourist.save();
+    res.status(200).json({
+      message: "Loyalty points was added successfully",
+      loyaltyPoints: tourist.loyaltyPoints,
+      level: tourist.level,
+      badge: tourist.badge
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to add loyalty points" });
+  }
+};
+
+
+const fileComplaint= async (req, res) => {
+  const { title, body, date } = req.body;
+  
+  try {
+    const newComplaint = new Complaint({ title, body, date });
+    await newComplaint.save();
+    res.status(201).json({ message: 'Complaint filed successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to file the complaint' });
+  }
+};
+
+// const viewAllComplaints= async (req, res) => {
+//   try {
+//     const complaints = await Complaint.find(); // Fetch all complaints from the database
+//     res.status(200).json(complaints); // Send complaints in the response
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Failed to fetch complaints from database' });
+//   }
+// };
+
 
 module.exports = {
   getProducts,
@@ -477,4 +564,7 @@ module.exports = {
   searchActivity,
   searchItinerary,
   changePasswordTourist,
+  addLoyaltyPoints,
+  fileComplaint,
+  viewAllComplaints,
 };
