@@ -542,6 +542,24 @@ const fileComplaint= async (req, res) => {
 //   }
 // };
 
+const redeemMyPoints= async (req, res) =>{
+  const touristID = req.params.id;
+  try{
+    const tourist= await Tourist.findById(touristID);
+  if(tourist.loyaltyPoints>=10000){
+    tourist.loyaltyPoints-=10000;
+    tourist.wallet+=100;
+    await tourist.save();
+    return res.status(200).json({ message: 'Points redeemed successfully', tourist });
+  }
+  else 
+    return res.status(400).json({error: 'Not Enough Points'});
+  }catch(error){
+    console.error(error); 
+    return res.status(500).json({ error: 'An error occurred', details: error.message });
+  }
+}
+
 
 module.exports = {
   getProducts,
@@ -566,5 +584,6 @@ module.exports = {
   changePasswordTourist,
   addLoyaltyPoints,
   fileComplaint,
-  viewAllComplaints,
+  //viewAllComplaints,
+  redeemMyPoints,
 };

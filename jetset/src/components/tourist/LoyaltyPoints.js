@@ -8,6 +8,8 @@ const LoyaltyPointsForm = () => {
   const [level, setLevel] = useState(null);
   const [badge, setBadge] = useState(''); // Initialize the badge state
 
+
+  const [redeemMessage, setRedeemMessage] = useState('');
   // Example function to update the badge
  
 //   const [touristId, setTouristId] = useState('');
@@ -45,6 +47,23 @@ const touristId="672495d97330ef8196c0859b";
     }
   };
 
+  const handleRedeem = async (event) => {
+    event.preventDefault(); // Prevent page reload on submit
+
+    try {
+      const response = await axios.put(`http://localhost:3000/redeemMyPoints/${touristId}`);
+      const result = await response.json();
+
+      if (response.ok) {
+        setRedeemMessage('Points redeemed successfully! 100 EGP added to your wallet.');
+      } else {
+        setRedeemMessage(result.error || 'Failed to redeem points. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error redeeming points:', error);
+      setRedeemMessage('An error occurred. Please try again later.');
+    }
+  };
   return (
     <div>
       <h2>Add Loyalty Points</h2>
@@ -62,6 +81,17 @@ const touristId="672495d97330ef8196c0859b";
         </label>
         <button type="submit">Submit</button>
       </form>
+
+      <form onSubmit={handleRedeem}>
+        
+         
+        <label>
+          <h2>Redeem My points:</h2>
+          <h3>Redeem 10,000 loyalty points for 100 EGP.</h3>
+        </label>
+        <button type="submit">Redeem</button>
+      </form>
+      {redeemMessage && <p>{redeemMessage}</p>}
 
       {message && <p>{message}</p>}
       {loyaltyPoints !== null && (

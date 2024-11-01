@@ -2,8 +2,10 @@
 
 const express = require("express");
 const mongoose = require("mongoose");
-// const dotenv = require("dotenv");
+const dotenv = require("dotenv");
 const cors = require("cors");
+const multer = require('multer');
+const path = require('path');
 
 const {
   createProfile,
@@ -69,6 +71,8 @@ const {
   searchProductAdmin,
   deleteAccount,
   createTourismGoverner,
+  viewAllComplaints,
+  uploadProductImg,
 } = require("./Routes/adminController");
 
 const {
@@ -90,7 +94,7 @@ const {
   changePasswordTourist,
   addLoyaltyPoints,
   fileComplaint,
-  viewAllComplaints,
+  redeemMyPoints,
 } = require("../src/Routes/touristController");
 
 const {
@@ -116,17 +120,15 @@ const {
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
-// dotenv.config();
+ dotenv.config();
 
 // App variables
 const app = express();
 
-const port =  3000;
-
-const MongoURI = 'mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/';
-
 app.use(express.json());
 
+const MongoURI= process.env.MONGO_URI;
+const port= process.env.PORT;
 app.use(cors());
 
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
@@ -204,6 +206,9 @@ app.get("/Itineraries", getItineraries);
 app.put("/updateItinerary/:id", updateItinerary);
 app.delete("/deleteItinerary", deleteItinerary);
 app.get("/listofiternaries/:id", viewCreatedItineraries);
+app.put("/redeemMyPoints/:id",redeemMyPoints);
+//app.put("/monicaLoyaltyPoints", monica)
+
 
 app.use(express.json());
 app.post("/addPreferancetag", createPrefTag);
@@ -252,7 +257,6 @@ app.get("/searchitinerary", searchItinerary);
 app.get("/gets", getTourist);
 app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
 app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
-
 //Advertisor
 app.get("/getAdv/:id", getAdsById);
 
@@ -265,3 +269,15 @@ app.get("/getadvertiser", getadvertiser);
 app.put("/cpSeller/:id", changePasswordSeller);
 app.put("/cpTourguide/:id", changePasswordTourGuide);
 app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
+
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'uploads/'); // Specify the directory for storing uploaded files
+  },
+  filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+  },
+});
+const upload = multer({ storage });
+app.post('/productsUpload', upload.single('photo'),uploadProductImg);

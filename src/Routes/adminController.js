@@ -7,6 +7,7 @@ const Admin = require("../Models/Admin");
 const Product = require("../Models/Product");
 const Category = require("../Models/Category");
 const tagModel = require("../Models/Tag");
+const Complaint = require("../Models/Complaint");
 
 //added
 //Tourism Governer
@@ -345,6 +346,26 @@ const changePasswordAdmin = async (req, res) => {
   }
 };
 
+const uploadProductImg = async (req, res) => {
+  try {
+    const {productID}= req.body;
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const sProduct= await Product.findByIdAndUpdate(productID, 
+      { $push: { images: req.file.path } },
+      { new: true });
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    return res.status(200).json({ message: 'Image uploaded successfully', product: sProduct });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'An error occurred while uploading the image', details: error.message });
+  }
+}
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -366,4 +387,5 @@ module.exports = {
   changePasswordAdmin,
   getadmin,
   viewAllComplaints,
+  uploadProductImg
 };
