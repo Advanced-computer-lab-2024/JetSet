@@ -2,7 +2,7 @@
 
 const express = require("express");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+// const dotenv = require("dotenv");
 const cors = require("cors");
 
 const {
@@ -88,6 +88,9 @@ const {
   searchActivity,
   searchItinerary,
   changePasswordTourist,
+  addLoyaltyPoints,
+  fileComplaint,
+  viewAllComplaints,
 } = require("../src/Routes/touristController");
 
 const {
@@ -113,16 +116,15 @@ const {
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
-dotenv.config();
+// dotenv.config();
 
 // App variables
 const app = express();
 
-const port = process.env.PORT || 3000;
+const port =  3000;
 
-const MongoURI = process.env.MONGO_URI;
+const MongoURI = 'mongodb+srv://janagado1:Jana%40Gado%40200156@cluster0.a3j2m.mongodb.net/';
 
-// Middleware
 app.use(express.json());
 
 app.use(cors());
@@ -131,7 +133,7 @@ app.use(cors());
 
 // MongoDB Connection
 mongoose
-  .connect(MongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(MongoURI)
   .then(() => {
     console.log("MongoDB connected!");
     app.listen(port, () => {
@@ -192,6 +194,9 @@ app.delete("/deletePlace/:id", deletePlace);
 app.post("/addTourismGoverner", createTourismGoverner);
 app.post("/addTag", createTag);
 app.get("/Tags", AllTags);
+app.post("/complaints", fileComplaint);
+app.get("/viewAllComplaints", viewAllComplaints);
+// const response = await axios.get('http://localhost:3000/viewAllComplaints');
 
 app.use(express.json());
 app.post("/addItinerary", createItinerary);
@@ -245,6 +250,8 @@ app.get("/searchplace", seacrhPlace);
 app.get("/searchactivity", searchActivity);
 app.get("/searchitinerary", searchItinerary);
 app.get("/gets", getTourist);
+app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
+app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
 
 //Advertisor
 app.get("/getAdv/:id", getAdsById);

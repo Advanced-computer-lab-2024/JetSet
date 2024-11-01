@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+// import axios from "axios";
 import TouristProfile from "./tourist/TouristProfile"; // Ensure the casing matches the file
 import ActivityList from "./Activity/ActivitiesList"; // Ensure the casing matches the file
 import ItineraryList from "./Itinerary/ItineraryList"; // Ensure the casing matches the file
@@ -9,7 +9,14 @@ import SearchProduct from "./Products/SearchProduct"; // Ensure the casing match
 import ProductList from "./Products/ProductList"; // Ensure the casing matches the file
 import FilterProducts from "./Products/FilterProducts"; // Ensure the casing matches the file
 import SortProducts from "./Products/SortProducts"; // Ensure the casing matches the file
+import LoyaltyPointsForm from "./tourist/LoyaltyPoints";
+import ComplaintForm from "./tourist/complaintForm";
+
+// import ComplaintForm from "./tourist/complaintForm";
+// import viewComplaint from "./tourist/viewComplaints";
+
 import "./styles.css";
+
 
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("home"); // Initial page
@@ -34,6 +41,11 @@ const Tourist = () => {
         return <FilterProducts />;
       case "SortProduct":
         return <SortProducts />;
+      case "loyaltyPoints":
+        return <LoyaltyPointsForm />;
+      case "ComplaintForm":
+        return <ComplaintForm />;
+      
       default:
         return (
           <div>
@@ -53,6 +65,9 @@ const Tourist = () => {
             <button onClick={() => setCurrentPage("historicalPlaces")}>
               View Historical Places
             </button>
+            <button onClick={() => setCurrentPage("loyaltyPoints")}>
+              Loyalty Points 
+            </button>
             <button onClick={() => setCurrentPage("search")}>Search</button>
             <button onClick={() => setCurrentPage("SortProduct")}>
               Sort Product
@@ -63,6 +78,10 @@ const Tourist = () => {
             <button onClick={() => setCurrentPage("searchProduct")}>
               Search Products
             </button>
+            <button onClick={() => setCurrentPage("ComplaintForm")}>
+              File Your Complaints
+            </button>
+           
           </div>
         );
     }

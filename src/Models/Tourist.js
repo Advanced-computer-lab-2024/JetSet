@@ -22,6 +22,19 @@ const touristSchema = new Schema(
     DOB: Date,
     job: String,
     wallet: Number,
+    loyaltyPoints: {
+      type: Number,
+      default: 0,
+    },
+    level: {
+      type: Number,
+      default: 1,
+    },
+    badge:{
+      type: String, 
+      default:"Bronze",     
+      required: true,
+    }
   },
   { timestamps: true }
 );
