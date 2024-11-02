@@ -21,7 +21,7 @@ const LoyaltyPointsForm = () => {
 //       setTouristId(storedTouristId);
 //     }
 //   }, []);
-const touristId="672495d97330ef8196c0859b";
+const touristId="672635325490518dc4cd46cc";
   const handleSubmit = async (e) => {
     e.preventDefault();
     const parsedPaymentAmount = parseFloat(paymentAmount);
@@ -49,13 +49,15 @@ const touristId="672495d97330ef8196c0859b";
 
   const handleRedeem = async (event) => {
     event.preventDefault(); // Prevent page reload on submit
-
+    setMessage("");
+    setRedeemMessage("");
     try {
       const response = await axios.put(`http://localhost:3000/redeemMyPoints/${touristId}`);
-      const result = await response.json();
+      const result = await response.data;
 
-      if (response.ok) {
+      if (response.status === 200) {
         setRedeemMessage('Points redeemed successfully! 100 EGP added to your wallet.');
+        setLoyaltyPoints(result.tourist.loyaltyPoints);
       } else {
         setRedeemMessage(result.error || 'Failed to redeem points. Please try again.');
       }
