@@ -7,6 +7,7 @@ const Admin = require("../Models/Admin");
 const Product = require("../Models/Product");
 const Category = require("../Models/Category");
 const tagModel = require("../Models/Tag");
+const Complaint = require("../Models/Complaint");
 
 //added
 //Tourism Governer
@@ -62,7 +63,15 @@ const createAdmin = async (req, res) => {
       .json({ message: "Error creating Admin", error: error.message || error });
   }
 };
-
+const viewAllComplaints= async (req, res) => {
+  try {
+    const complaints = await Complaint.find(); // Fetch all complaints from the database
+    res.status(200).json(complaints); // Send complaints in the response
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch complaints from database' });
+  }
+};
 //Product
 const createProduct = async (req, res) => {
   const { name, desciption, price, quantity, seller_id } = req.body;
@@ -302,6 +311,61 @@ const deletePrefTag = async (req, res) => {
   }
 };
 
+
+const getadmin = async (req, res) => {
+  try {
+    const users = await Admin.find();
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(400).json({ message: "Error retrieving users", error });
+  }
+};
+
+const changePasswordAdmin = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const adminId = req.params.id;
+
+  try {
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (admin.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    admin.password = newPassword;
+    await admin.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
+
+const uploadProductImg = async (req, res) => {
+  try {
+    const {productID}= req.body;
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const sProduct= await Product.findByIdAndUpdate(productID, 
+      { $push: { images: req.file.path } },
+      { new: true });
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    return res.status(200).json({ message: 'Image uploaded successfully', product: sProduct });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'An error occurred while uploading the image', details: error.message });
+  }
+}
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -320,4 +384,8 @@ module.exports = {
   getProductsAdmin,
   sortProducts,
   gettourism,
+  changePasswordAdmin,
+  getadmin,
+  viewAllComplaints,
+  uploadProductImg
 };

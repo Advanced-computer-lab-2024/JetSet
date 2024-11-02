@@ -364,6 +364,31 @@ const gettourguide = async (req, res) => {
   }
 };
 
+const changePasswordTourGuide = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const tourguideId = req.params.id;
+
+  try {
+    const tourguide = await TourGuide.findById(tourguideId);
+    if (!tourguide) {
+      return res.status(404).json({ message: "Tourguide not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (tourguide.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    tourguide.password = newPassword;
+    await tourguide.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
+
 const activateItinerary = async (req, res) => {
   const { id } = req.params;
 

@@ -4,6 +4,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const multer = require('multer');
+const path = require('path');
 
 const {
   createProfile,
@@ -16,6 +18,8 @@ const {
   getlistActivities,
   viewCreatedActivities,
   getAdsById,
+  changePasswordAdvertiser,
+  getadvertiser,
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const itinerary = require("./Models/Itinerary");
@@ -27,6 +31,7 @@ const {
   updatePlace,
   deletePlace,
   createTag,
+  changePasswordTourismGoverner,
 } = require("./Routes/tourismgovernerController");
 const {
   filterActivityGuest,
@@ -42,6 +47,7 @@ const {
   updateSeller,
   filterProductSeller,
   getSellerById,
+  changePasswordSeller,
 } = require("./Routes/sellerController");
 const {
   createPrefTag,
@@ -50,6 +56,8 @@ const {
   deletePrefTag,
   sortProducts,
   gettourism,
+  changePasswordAdmin,
+  getadmin,
 } = require("./Routes/adminController");
 
 const {
@@ -63,6 +71,8 @@ const {
   searchProductAdmin,
   deleteAccount,
   createTourismGoverner,
+  viewAllComplaints,
+  uploadProductImg,
 } = require("./Routes/adminController");
 
 const {
@@ -112,25 +122,22 @@ const {
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
-dotenv.config();
+ dotenv.config();
 
 // App variables
 const app = express();
 
-const port = process.env.PORT || 3000;
-
-const MongoURI = process.env.MONGO_URI;
-
-// Middleware
 app.use(express.json());
 
+const MongoURI= process.env.MONGO_URI;
+const port= process.env.PORT;
 app.use(cors());
 
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
 mongoose
-  .connect(MongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(MongoURI)
   .then(() => {
     console.log("MongoDB connected!");
     app.listen(port, () => {
@@ -191,6 +198,9 @@ app.delete("/deletePlace/:id", deletePlace);
 app.post("/addTourismGoverner", createTourismGoverner);
 app.post("/addTag", createTag);
 app.get("/Tags", AllTags);
+app.post("/complaints", fileComplaint);
+app.get("/viewAllComplaints", viewAllComplaints);
+// const response = await axios.get('http://localhost:3000/viewAllComplaints');
 
 app.use(express.json());
 app.post("/addItinerary", createItinerary);
@@ -259,3 +269,25 @@ app.put("/tourist/preferences/:id", updateTouristPreferences);
 
 //Advertisor
 app.get("/getAdv/:id", getAdsById);
+
+////////////////////////////////////////////
+app.put("/cpTourist/:id", changePasswordTourist);
+app.put("/cpAdmin/:id", changePasswordAdmin);
+app.get("/getadmin", getadmin);
+app.put("/cpAdvertiser/:id", changePasswordAdvertiser);
+app.get("/getadvertiser", getadvertiser);
+app.put("/cpSeller/:id", changePasswordSeller);
+app.put("/cpTourguide/:id", changePasswordTourGuide);
+app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
+
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'uploads/'); // Specify the directory for storing uploaded files
+  },
+  filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+  },
+});
+const upload = multer({ storage });
+app.post('/productsUpload', upload.single('photo'),uploadProductImg);

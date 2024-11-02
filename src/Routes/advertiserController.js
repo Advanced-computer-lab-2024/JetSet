@@ -201,6 +201,39 @@ const viewCreatedActivities = async (req, res) => {
   }
 };
 
+const changePasswordAdvertiser = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const advertiserId = req.params.id;
+
+  try {
+    const advertiser = await advertiserModel.findById(advertiserId);
+    if (!advertiser) {
+      return res.status(404).json({ message: "Advertiser not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (advertiser.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    advertiser.password = newPassword;
+    await advertiser.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
+
+const getadvertiser = async (req, res) => {
+  try {
+    const users = await advertiserModel.find();
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(400).json({ message: "Error retrieving users", error });
+  }
+};
 module.exports = {
   createProfile,
   getProfile,
@@ -212,4 +245,6 @@ module.exports = {
   getlistActivities,
   viewCreatedActivities,
   getAdsById,
+  changePasswordAdvertiser,
+  getadvertiser,
 };
