@@ -4,8 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const multer = require('multer');
-const path = require('path');
+
 
 const {
   createProfile,
@@ -72,7 +71,6 @@ const {
   deleteAccount,
   createTourismGoverner,
   viewAllComplaints,
-  uploadProductImg,
 } = require("./Routes/adminController");
 
 const {
@@ -288,14 +286,3 @@ app.put("/cpSeller/:id", changePasswordSeller);
 app.put("/cpTourguide/:id", changePasswordTourGuide);
 app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
 
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-      cb(null, 'uploads/'); // Specify the directory for storing uploaded files
-  },
-  filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
-});
-const upload = multer({ storage });
-app.post('/productsUpload', upload.single('photo'),uploadProductImg);
