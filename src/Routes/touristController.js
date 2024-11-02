@@ -715,9 +715,9 @@ const addLoyaltyPoints = async (req, res) => {
 
 const fileComplaint= async (req, res) => {
   const { title, body, date } = req.body;
-  
+  const {touristId} = req.params;
   try {
-    const newComplaint = new Complaint({ title, body, date });
+    const newComplaint = new Complaint({ title, body, date, userId: touristId });
     await newComplaint.save();
     res.status(201).json({ message: 'Complaint filed successfully' });
   } catch (error) {
@@ -725,15 +725,16 @@ const fileComplaint= async (req, res) => {
   }
 };
 
-// const viewAllComplaints= async (req, res) => {
-//   try {
-//     const complaints = await Complaint.find(); // Fetch all complaints from the database
-//     res.status(200).json(complaints); // Send complaints in the response
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Failed to fetch complaints from database' });
-//   }
-// };
+const viewMyComplaints= async (req, res) => {
+  const touristID = new mongoose.Types.ObjectId(req.params.touristId);
+  try {
+    const complaints = await Complaint.find({userId: touristID}); 
+    res.status(200).json(complaints); 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch complaints from database' });
+  }
+};
 
 const redeemMyPoints= async (req, res) =>{
   const touristID = req.params.id;
@@ -781,6 +782,6 @@ module.exports = {
   changePasswordTourist,
   addLoyaltyPoints,
   fileComplaint,
-  //viewAllComplaints,
+  viewMyComplaints,
   redeemMyPoints,
 };

@@ -18,6 +18,10 @@ const complaintSchema = new Schema({
     type: String,
     default:"Pending",
   },
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Tourist', 
+    required: false },
 });
 
 const Complaint = mongoose.model('Complaint', complaintSchema);

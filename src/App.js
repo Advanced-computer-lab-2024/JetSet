@@ -96,6 +96,7 @@ const {
   changePasswordTourist,
   addLoyaltyPoints,
   fileComplaint,
+  viewMyComplaints,
   redeemMyPoints,
 } = require("../src/Routes/touristController");
 
@@ -200,7 +201,8 @@ app.delete("/deletePlace/:id", deletePlace);
 app.post("/addTourismGoverner", createTourismGoverner);
 app.post("/addTag", createTag);
 app.get("/Tags", AllTags);
-app.post("/complaints", fileComplaint);
+app.post("/complaints/:touristId", fileComplaint);
+app.get("/complaints/:touristId",viewMyComplaints)
 app.get("/viewAllComplaints", viewAllComplaints);
 // const response = await axios.get('http://localhost:3000/viewAllComplaints');
 
@@ -264,7 +266,6 @@ app.post("/comment/:id", addRatingAndComment);
 app.put("/tourist/preferences/:id", updateTouristPreferences);
 
 app.put("/redeemMyPoints/:id",redeemMyPoints);
-//app.put("/monicaLoyaltyPoints", monica)
 app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
 app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
 

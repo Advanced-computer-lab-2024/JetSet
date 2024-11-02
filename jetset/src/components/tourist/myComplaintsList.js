@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const ComplaintList = () => {
+const MyComplaintList = ({touristID}) => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -11,7 +11,7 @@ const ComplaintList = () => {
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/viewAllComplaints');
+        const response = await axios.get(`http://localhost:3000/complaints/${touristID}`);
         setComplaints(response.data);
       } catch (err) {
         setError('Failed to fetch complaints.HEREE');
@@ -40,7 +40,7 @@ const ComplaintList = () => {
 
   return (
     <div>
-      <h2>List of Complaints</h2>
+      <h2>List of My Complaints</h2>
       <ul>
         {complaints.map((complaint) => (
           <li key={complaint._id} onClick={()=>handleToggleDetails(complaint._id)} style={{ cursor: 'pointer' }}>
@@ -58,4 +58,4 @@ const ComplaintList = () => {
     </div>
   );
 };
-export default ComplaintList;
+export default MyComplaintList;
