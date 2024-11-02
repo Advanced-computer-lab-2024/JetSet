@@ -81,6 +81,10 @@ const {
   seacrhPlace,
   searchActivity,
   searchItinerary,
+  rateandcommentItinerary,
+  rateandcommentactivity,
+  addRatingAndComment,
+  updateTouristPreferences
 } = require("../src/Routes/touristController");
 
 const {
@@ -94,6 +98,9 @@ const {
   viewCreatedItineraries,
   getItinerariesByDateRange,
   gettourguide,
+  activateItinerary,
+  deactivateItinerary
+  
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -191,6 +198,8 @@ app.get("/Itineraries", getItineraries);
 app.put("/updateItinerary/:id", updateItinerary);
 app.delete("/deleteItinerary", deleteItinerary);
 app.get("/listofiternaries/:id", viewCreatedItineraries);
+app.post("/activateItinerary/:id",activateItinerary);
+app.post("/deactivateItinerary/:id",deactivateItinerary);
 
 app.use(express.json());
 app.post("/addPreferancetag", createPrefTag);
@@ -217,7 +226,7 @@ app.get("/searchProductSeller", searchProductSeller);
 app.get("/filterProduct", filterProductSeller);
 app.get("/sortProducts", sortProducts);
 app.post("/createproduct", createProductSeller);
-app.put("/editproduct/:id", updateProductSeller);
+app.put("/editproduct/:id", updateProductSeller); //update rating for product (shahd and habiba)
 // Add the new route to fetch seller by username
 app.get("/getSellerById/:id", getSellerById);
 
@@ -237,6 +246,16 @@ app.get("/searchplace", seacrhPlace);
 app.get("/searchactivity", searchActivity);
 app.get("/searchitinerary", searchItinerary);
 app.get("/gets", getTourist);
+app.post("/rateandcommentItinerary/:id",rateandcommentItinerary);
+app.post("/rateandcommentactivity/:id",rateandcommentactivity);
+app.post("/comment/:id", addRatingAndComment);
+app.put("/tourist/preferences/:id", updateTouristPreferences);
+
+
+
+
+
+
 
 //Advertisor
 app.get("/getAdv/:id", getAdsById);

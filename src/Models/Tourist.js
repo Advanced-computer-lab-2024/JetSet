@@ -17,6 +17,14 @@ const touristSchema = new Schema(
       type: String,
       required: true,
     },
+    preferences: {
+      historicAreas: { type: Boolean, default: false },
+      beaches: { type: Boolean, default: false },
+      familyFriendly: { type: Boolean, default: false },
+      shopping: { type: Boolean, default: false },
+      budget: { type: Number, default: 0 }, // Default budget
+    },
+    
     mobile_number: String,
     nationality: String,
     DOB: Date,
