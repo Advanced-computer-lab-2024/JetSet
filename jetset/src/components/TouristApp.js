@@ -11,13 +11,14 @@ import FilterProducts from "./Products/FilterProducts"; // Ensure the casing mat
 import SortProducts from "./Products/SortProducts"; // Ensure the casing matches the file
 import LoyaltyPointsForm from "./tourist/LoyaltyPoints";
 import ComplaintForm from "./tourist/complaintForm";
+import MyComplaintList from "./tourist/myComplaintsList";
 
 // import ComplaintForm from "./tourist/complaintForm";
 // import viewComplaint from "./tourist/viewComplaints";
 
 import "./styles.css";
 
-
+const touristId="672635325490518dc4cd46cc";
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("home"); // Initial page
 
@@ -44,7 +45,9 @@ const Tourist = () => {
       case "loyaltyPoints":
         return <LoyaltyPointsForm />;
       case "ComplaintForm":
-        return <ComplaintForm />;
+        return <ComplaintForm touristId={touristId}/>;
+      case "MyComplaintsList":
+        return <MyComplaintList touristID={touristId}/>
       
       default:
         return (
@@ -81,7 +84,9 @@ const Tourist = () => {
             <button onClick={() => setCurrentPage("ComplaintForm")}>
               File Your Complaints
             </button>
-           
+            <button onClick={() => setCurrentPage("MyComplaintsList")}>
+              View All My Complaints
+            </button>
           </div>
         );
     }

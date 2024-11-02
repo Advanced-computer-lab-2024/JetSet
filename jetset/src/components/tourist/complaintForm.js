@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const ComplaintForm = () => {
+const ComplaintForm = ({touristId}) => {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Default to today's date
@@ -16,7 +16,7 @@ const ComplaintForm = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:3000/complaints', complaintData);
+      const response = await axios.post(`http://localhost:3000/complaints/${touristId}`, complaintData);
       setMessage(response.data.message);
       // Clear the form after submission
       setTitle('');
