@@ -457,5 +457,6 @@ module.exports = {
   getItinerariesByDateRange,
   gettourguide,
   activateItinerary,
-  deactivateItinerary
+  deactivateItinerary,
+  changePasswordTourGuide,
 };

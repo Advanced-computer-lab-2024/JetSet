@@ -94,7 +94,11 @@ const {
   rateandcommentItinerary,
   rateandcommentactivity,
   addRatingAndComment,
-  updateTouristPreferences
+  updateTouristPreferences,
+  changePasswordTourist,
+  addLoyaltyPoints,
+  fileComplaint,
+  redeemMyPoints,
 } = require("../src/Routes/touristController");
 
 const {
@@ -109,8 +113,8 @@ const {
   getItinerariesByDateRange,
   gettourguide,
   activateItinerary,
-  deactivateItinerary
-  
+  deactivateItinerary,
+  changePasswordTourGuide,
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -261,6 +265,10 @@ app.post("/rateandcommentactivity/:id",rateandcommentactivity);
 app.post("/comment/:id", addRatingAndComment);
 app.put("/tourist/preferences/:id", updateTouristPreferences);
 
+app.put("/redeemMyPoints/:id",redeemMyPoints);
+//app.put("/monicaLoyaltyPoints", monica)
+app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
+app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
 
 
 

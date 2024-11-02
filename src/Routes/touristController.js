@@ -5,6 +5,7 @@ const Historical = require("../Models/Historical");
 const Tourist = require("../Models/Tourist.js");
 const TourGuide=require("../Models/TourGuide.js");
 const Category = require("../Models/Category.js");
+const Complaint = require("../Models/Complaint.js");
 const { default: mongoose } = require("mongoose");
 
 const createTourist = async (req, res) => {
@@ -623,6 +624,135 @@ const updateTouristPreferences = async (req, res) => {
   }
 };
 
+const changePasswordTourist = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const touristId = req.params.id;
+
+  try {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (tourist.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    tourist.password = newPassword;
+    await tourist.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
+
+//Sprint 2 requirements requirement 70 & 71
+function calculatePoints(paymentAmount, level) {
+  if (level === 1) {
+    return paymentAmount * 0.5;
+  } else if (level === 2) {
+    return paymentAmount * 1;
+  } else if (level === 3) {
+    return paymentAmount * 1.5;
+  }
+  return 0;
+}
+function calculateBadge  (points) {
+  if (points <= 100000) {
+    return "Bronze";
+  } else if (points <= 500000) {
+    return "Silver";
+  } else {
+    return "Gold";
+  }
+};
+function determineLevel(loyaltyPoints) {
+  if (loyaltyPoints <= 100000) {
+    return 1;
+  } else if (loyaltyPoints <= 500000) {
+    return 2;
+  } else {
+    return 3;
+  }
+}
+const addLoyaltyPoints = async (req, res) => {
+  try {
+
+    const { paymentAmount } = req.body;
+    const touristId = req.params.id;
+
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist is not found" });
+    }
+
+    const pointsEarned = calculatePoints(paymentAmount, tourist.level);
+    const badge = calculateBadge(tourist.loyaltyPoints); // Calculate badge based on updated points
+
+    tourist.loyaltyPoints += pointsEarned;
+    tourist.level = determineLevel(tourist.loyaltyPoints);
+    tourist.badge = badge;
+
+    // await tourist.save();
+    // const badge = Tourist.calculateBadge(tourist.loyaltyPoints); 
+
+    await tourist.save();
+    res.status(200).json({
+      message: "Loyalty points was added successfully",
+      loyaltyPoints: tourist.loyaltyPoints,
+      level: tourist.level,
+      badge: tourist.badge
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to add loyalty points" });
+  }
+};
+
+
+const fileComplaint= async (req, res) => {
+  const { title, body, date } = req.body;
+  
+  try {
+    const newComplaint = new Complaint({ title, body, date });
+    await newComplaint.save();
+    res.status(201).json({ message: 'Complaint filed successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to file the complaint' });
+  }
+};
+
+// const viewAllComplaints= async (req, res) => {
+//   try {
+//     const complaints = await Complaint.find(); // Fetch all complaints from the database
+//     res.status(200).json(complaints); // Send complaints in the response
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Failed to fetch complaints from database' });
+//   }
+// };
+
+const redeemMyPoints= async (req, res) =>{
+  const touristID = req.params.id;
+  try{
+    const tourist= await Tourist.findById(touristID);
+  if(tourist.loyaltyPoints>=10000){
+    tourist.loyaltyPoints-=10000;
+    tourist.wallet+=100;
+    await tourist.save();
+    return res.status(200).json({ message: 'Points redeemed successfully', tourist });
+  }
+  else 
+    return res.status(400).json({error: 'Not Enough Points'});
+  }catch(error){
+    console.error(error); 
+    return res.status(500).json({ error: 'An error occurred', details: error.message });
+  }
+}
+
 
 module.exports = {
   getProducts,
@@ -647,5 +777,10 @@ module.exports = {
   rateandcommentItinerary,
   rateandcommentactivity,
   addRatingAndComment,
-  updateTouristPreferences
+  updateTouristPreferences,
+  changePasswordTourist,
+  addLoyaltyPoints,
+  fileComplaint,
+  //viewAllComplaints,
+  redeemMyPoints,
 };
