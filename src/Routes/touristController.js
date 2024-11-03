@@ -547,61 +547,49 @@ const rateandcommentactivity = async (req, res) => {
 };
 
 const addRatingAndComment = async (req, res) => {
-  const { tourGuideId, rating, comment, touristId } = req.body;
+    console.log("Received data:", req.body); // Log the request body
+    const { tourGuideId, rating, comment } = req.body;
+    const touristId = "672635325490518dc4cd46cc"; // Hard-coded tourist ID
+    console.log("Received tourist ID:", touristId);
 
-  console.log("Received tourist ID:", touristId);
-
-  // Ensure touristId is a valid ObjectId
-  if (!mongoose.Types.ObjectId.isValid(touristId)) {
-    return res.status(400).json({ message: "Invalid tourist ID" });
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(tourGuideId)) {
-    return res.status(400).json({ message: "Invalid tour guide ID" });
-  }
-
-  try {
-    // Find the tour guide by ID
-    const tourGuide = await TourGuide.findById(tourGuideId);
-    if (!tourGuide) {
-      return res.status(404).json({ message: "Tour guide not found" });
+    // Validate IDs
+    if (!mongoose.Types.ObjectId.isValid(touristId) || !mongoose.Types.ObjectId.isValid(tourGuideId)) {
+        return res.status(400).json({ message: "Invalid IDs" });
+    }
+    if (!tourGuideId || !rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Invalid data" });
     }
 
-    // Convert touristId to ObjectId for comparisons
-    const touristObjectId = new mongoose.Types.ObjectId(touristId);
+    try {
+        const tourGuide = await TourGuide.findById(tourGuideId);
+        if (!tourGuide) {
+            return res.status(404).json({ message: "Tour guide not found" });
+        }
 
-    // Check if the tourist has already rated this tour guide
-    const existingRating = tourGuide.ratings.find(r => r.touristId.equals(touristObjectId));
-    
-    if (existingRating) {
-      // Update existing rating and comment
-      existingRating.rating = rating;
-      existingRating.comment = comment;
-    } else {
-      // Create a new rating entry
-      const newRating = {
-        touristId: touristObjectId, // Use existing touristId here
-        rating: rating,
-        comment: comment,
-      };
-      tourGuide.ratings.push(newRating);
+        // Check for existing rating
+        const existingRatingIndex = tourGuide.ratings.findIndex(r => r.touristId.equals(touristId));
+        
+        if (existingRatingIndex !== -1) {
+            // Update existing rating
+            tourGuide.ratings[existingRatingIndex].rating = rating;
+            tourGuide.ratings[existingRatingIndex].comment = comment;
+        } else {
+            // Add new rating
+            tourGuide.ratings.push({ touristId, rating, comment });
+        }
+
+        await tourGuide.save();
+        res.status(200).json({ message: "Rating added successfully" });
+    } catch (error) {
+        console.error("Error adding rating:", error);
+        res.status(500).json({ message: "Error adding rating", error: error.message });
     }
-
-    // Save the updated tour guide
-    await tourGuide.save();
-    
-    res.status(200).json({ message: "Rating and comment added successfully", tourGuide });
-  } catch (error) {
-    console.error("Error details:", error);
-    
-    // Handle specific error types if necessary
-    if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(400).json({ message: "Validation error", error: error.message });
-    }
-
-    res.status(500).json({ message: "Error adding rating and comment", error: error.message });
-  }
 };
+
+module.exports = addRatingAndComment;
+
+
+
 
 const updateTouristPreferences = async (req, res) => {
   const { preferences } = req.body;

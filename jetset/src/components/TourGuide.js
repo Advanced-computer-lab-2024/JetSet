@@ -10,80 +10,63 @@ import UpdateTouristItineraryForm from "./TouristItinerary/UpdateTouristItinerar
 import DeleteTouristItineraryForm from "./TouristItinerary/DeleteTouristItineraryForm.js";
 import ViewCreatedItineraries from "./Itinerary/ViewCreatedItineraries.js";
 import ReadItineraryList from "./Itinerary/ReadItineraryList.js";
+import Activate from "./Tourguide/Activate";  
+import Deactivate from "./Tourguide/Deactivate"; 
 
 function TourGuide() {
-  const [view, setView] = useState("itineraries"); // State to toggle between views
-  const tourGuideID = "66fff1c213c1a607c2caa0c6"; // Replace with actual ID or fetch dynamically
-  const itineraryID = "66fd08a45089bdf6b2ccca65";
-  const TouristitineraryID = "6702626ec741235c6ae2d87c";
+  const [view, setView] = useState("itineraries");
+  const [itineraryID, setItineraryID] = useState("");
+
+  // Define the IDs
+  const tourGuideID = "66fff1c213c1a607c2caa0c6"; // Replace with the actual tour guide ID
+  const touristItineraryID = "6702626ec741235c6ae2d87c"; // Ensure consistency in naming
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>Itinerary App</h1>
-        {/* Buttons to toggle views */}
         <nav>
-          <button onClick={() => setView("itineraries")}>
-            View Itineraries
-          </button>
-          <button onClick={() => setView("tourGuideProfile")}>
-            Create and Update Tour Guide Profile
-          </button>
-          <button onClick={() => setView("readtourGuideProfile")}>
-            My Profile
-          </button>
-          <button onClick={() => setView("createItinerary")}>
-            Create Itinerary
-          </button>
-          <button onClick={() => setView("updateItinerary")}>
-            Update Itinerary
-          </button>
-          <button onClick={() => setView("deleteItinerary")}>
-            Delete Itinerary
-          </button>
-          <button onClick={() => setView("createTouristItinerary")}>
-            Create Tourist Itinerary
-          </button>
-          <button onClick={() => setView("updateTouristItinerary")}>
-            Update Tourist Itinerary
-          </button>
-          <button onClick={() => setView("deleteTouristItinerary")}>
-            Delete Tourist Itinerary
-          </button>
-          <button onClick={() => setView("ViewCreatedItineraries")}>
-            View My Created Itineraries
-          </button>
-          <button onClick={() => setView("ReadTouristItinerary")}>
-            Read Tourist Itinerary
-          </button>
+          <button onClick={() => setView("itineraries")}>View Itineraries</button>
+          <button onClick={() => setView("tourGuideProfile")}>Create and Update Tour Guide Profile</button>
+          <button onClick={() => setView("readtourGuideProfile")}>My Profile</button>
+          <button onClick={() => setView("createItinerary")}>Create Itinerary</button>
+          <button onClick={() => setView("updateItinerary")}>Update Itinerary</button>
+          <button onClick={() => setView("deleteItinerary")}>Delete Itinerary</button>
+          <button onClick={() => setView("createTouristItinerary")}>Create Tourist Itinerary</button>
+          <button onClick={() => setView("updateTouristItinerary")}>Update Tourist Itinerary</button>
+          <button onClick={() => setView("deleteTouristItinerary")}>Delete Tourist Itinerary</button>
+          <button onClick={() => setView("ViewCreatedItineraries")}>View My Created Itineraries</button>
+          <button onClick={() => setView("ReadTouristItinerary")}>Read Tourist Itinerary</button>
+          <button onClick={() => setView("activate")}>Activate Itinerary</button>
+          <button onClick={() => setView("deactivate")}>Deactivate Itinerary</button>
         </nav>
 
-        {/* Conditionally render components based on the view */}
+        {/* Input for itinerary ID */}
+        {(view === "activate" || view === "deactivate") && (
+          <div>
+            <input
+              type="text"
+              placeholder="Enter Itinerary ID"
+              value={itineraryID}
+              onChange={(e) => setItineraryID(e.target.value)}
+            />
+          </div>
+        )}
+
+        {/* Conditional rendering based on view */}
         {view === "itineraries" && <ItineraryList />}
-        {view === "tourGuideProfile" && (
-          <TourGuideProfileForm tourGuideID={tourGuideID} />
-        )}
-        {view === "readtourGuideProfile" && (
-          <ReadTourGuideProfileForm tourGuideID={tourGuideID} />
-        )}
+        {view === "tourGuideProfile" && <TourGuideProfileForm tourGuideID={tourGuideID} />}
+        {view === "readtourGuideProfile" && <ReadTourGuideProfileForm tourGuideID={tourGuideID} />}
         {view === "createItinerary" && <CreateItineraryForm />}
-        {view === "updateItinerary" && (
-          <UpdateItineraryForm itineraryID={itineraryID} />
-        )}
+        {view === "updateItinerary" && <UpdateItineraryForm itineraryID={itineraryID} />}
         {view === "deleteItinerary" && <DeleteItineraryForm />}
-        {view === "createTouristItinerary" && (
-          <CreateTouristItineraryForm id={tourGuideID} />
-        )}
+        {view === "createTouristItinerary" && <CreateTouristItineraryForm id={tourGuideID} />}
         {view === "ReadTouristItinerary" && <ReadItineraryList />}
-        {view === "updateTouristItinerary" && (
-          <UpdateTouristItineraryForm TouristitineraryID={TouristitineraryID} />
-        )}
-        {view === "deleteTouristItinerary" && (
-          <DeleteTouristItineraryForm TouristitineraryID={TouristitineraryID} />
-        )}
-        {view === "ViewCreatedItineraries" && (
-          <ViewCreatedItineraries id={tourGuideID} />
-        )}
+        {view === "updateTouristItinerary" && <UpdateTouristItineraryForm TouristitineraryID={touristItineraryID} />}
+        {view === "deleteTouristItinerary" && <DeleteTouristItineraryForm TouristitineraryID={touristItineraryID} />}
+        {view === "ViewCreatedItineraries" && <ViewCreatedItineraries id={tourGuideID} />}
+        {view === "activate" && <Activate itineraryId={itineraryID} />}
+        {view === "deactivate" && <Deactivate itineraryId={itineraryID} />}
       </header>
     </div>
   );

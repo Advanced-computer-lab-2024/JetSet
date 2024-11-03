@@ -1,10 +1,11 @@
 // app.js
-
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-
+const TourGuide = require("./Models/TourGuide.js");
+const Itinerary = require("./Models/Itinerary"); // Adjust path as necessary
+const Activity = require('./Models/Activity'); // Adjust the path 
 
 const {
   createProfile,
@@ -137,6 +138,35 @@ const port= process.env.PORT;
 app.use(cors());
 
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
+app.get("/api/tourGuides", async (req, res) => {
+  try {
+      const tourGuides = await TourGuide.find({}, 'username _id'); // Fetch usernames and IDs
+      res.json(tourGuides);
+  } catch (error) {
+      console.error("Error fetching tour guides:", error);
+      res.status(500).json({ message: 'Error fetching tour guides' });
+  }
+});
+
+app.get("/api/itineraryIds", async (req, res) => {
+  try {
+    const itineraryIds = await Itinerary.find({}, '_id name'); // Fetch IDs and names
+    res.json(itineraryIds);
+  } catch (error) {
+    console.error('Error fetching itinerary IDs:', error);
+    res.status(500).json({ error: 'Failed to fetch itinerary1 IDs' });
+  }
+});
+
+app.get("/api/activities", async (req, res) => {
+  try {
+    const activities = await Activity.find({}, '_id title'); // Adjust fields as necessary
+    res.json(activities);
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    res.status(500).json({ error: 'Failed to fetch activities' });
+  }
+});
 
 // MongoDB Connection
 mongoose

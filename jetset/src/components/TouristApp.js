@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import axios from "axios";
 import TouristProfile from "./tourist/TouristProfile"; // Ensure the casing matches the file
 import ActivityList from "./Activity/ActivitiesList"; // Ensure the casing matches the file
 import ItineraryList from "./Itinerary/ItineraryList"; // Ensure the casing matches the file
@@ -12,13 +11,15 @@ import SortProducts from "./Products/SortProducts"; // Ensure the casing matches
 import LoyaltyPointsForm from "./tourist/LoyaltyPoints";
 import ComplaintForm from "./tourist/complaintForm";
 import MyComplaintList from "./tourist/myComplaintsList";
-
-// import ComplaintForm from "./tourist/complaintForm";
-// import viewComplaint from "./tourist/viewComplaints";
+import RatingForm from "./tourist/RatingForm"; // Import the new RatingForm
+import RateandcommentActivity from "./tourist/RateandcommentActivity";
+import RateandcommentItinerary from "./tourist/RateandcommentItinerary";
+import UpdatePreferencesForm from "./tourist/Prefrences"; // Import the preferences update form
 
 import "./styles.css";
 
-const touristId="672635325490518dc4cd46cc";
+const touristId = "672635325490518dc4cd46cc";
+
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("home"); // Initial page
 
@@ -45,10 +46,18 @@ const Tourist = () => {
       case "loyaltyPoints":
         return <LoyaltyPointsForm />;
       case "ComplaintForm":
-        return <ComplaintForm touristId={touristId}/>;
+        return <ComplaintForm touristId={touristId} />;
       case "MyComplaintsList":
-        return <MyComplaintList touristID={touristId}/>
-      
+        return <MyComplaintList touristID={touristId} />;
+      case "ratingForm":
+        return <RatingForm touristId={touristId} />;
+      case "RateandcommentActivity":
+        return <RateandcommentActivity touristId={touristId} />;
+      case "RateandcommentItinerary":
+        return <RateandcommentItinerary touristId={touristId} />;
+      case "updatePreferences": // New case for updating preferences
+        return <UpdatePreferencesForm touristId={touristId} />;
+
       default:
         return (
           <div>
@@ -69,7 +78,7 @@ const Tourist = () => {
               View Historical Places
             </button>
             <button onClick={() => setCurrentPage("loyaltyPoints")}>
-              Loyalty Points 
+              Loyalty Points
             </button>
             <button onClick={() => setCurrentPage("search")}>Search</button>
             <button onClick={() => setCurrentPage("SortProduct")}>
@@ -87,6 +96,18 @@ const Tourist = () => {
             <button onClick={() => setCurrentPage("MyComplaintsList")}>
               View All My Complaints
             </button>
+            <button onClick={() => setCurrentPage("ratingForm")}>
+              Rate a Tour Guide
+            </button>
+            <button onClick={() => setCurrentPage("RateandcommentActivity")}>
+             Rate and comment your activities
+            </button>
+            <button onClick={() => setCurrentPage("RateandcommentItinerary")}>
+             Rate and comment your itinerraries
+            </button>
+            <button onClick={() => setCurrentPage("updatePreferences")}>
+              Update Preferences
+            </button> {/* New button for updating preferences */}
           </div>
         );
     }

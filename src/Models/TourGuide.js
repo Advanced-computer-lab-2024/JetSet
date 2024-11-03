@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const { ObjectId } = mongoose.Schema;
 
 const tourGuideSchema = new Schema(
   {
@@ -36,8 +35,6 @@ const tourGuideSchema = new Schema(
       type: String,
       required: false,
     },
-    
- 
   },
   { timestamps: true }
 );
