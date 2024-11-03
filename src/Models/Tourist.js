@@ -4,6 +4,10 @@ const { ObjectId } = mongoose.Schema;
 
 const touristSchema = new Schema(
   {
+    preferredCurrency: {
+      type: String,
+      default: "USD" // Set a default currency, like USD
+    },
     username: {
       type: String,
       required: true,
@@ -23,6 +27,7 @@ const touristSchema = new Schema(
     job: String,
     wallet: Number,
   },
+  
   { timestamps: true }
 );
 

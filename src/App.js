@@ -4,6 +4,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+require('dotenv').config();
+
 
 const {
   createProfile,
@@ -35,6 +37,7 @@ const {
   filterActivityGuest,
   guestFilterItineraries,
   register,
+  getActivitiesByCategoryForGuest
 } = require("./Routes/guestController");
 const {
   searchProductSeller,
@@ -72,6 +75,8 @@ const {
 } = require("./Routes/adminController");
 
 const {
+  getActivitiesByCategory,
+  shareItem,
   SortActivities,
   filterActivity,
   searchProductTourist,
@@ -88,6 +93,7 @@ const {
   searchActivity,
   searchItinerary,
   changePasswordTourist,
+  setPreferredCurrency,
 } = require("../src/Routes/touristController");
 
 const {
@@ -146,7 +152,8 @@ app.get("/home", (req, res) => {
 });
 
 app.use(express.json());
-
+app.get("/activities/by-category",getActivitiesByCategory);
+app.post("/share",shareItem);
 app.post("/addTourist", createTourist);
 app.post("/register", register);
 
@@ -216,6 +223,8 @@ app.delete("/deleteTouristItineraries/:id", deleteTouristItinerary);
 app.get("/tourist-itineraries", getItinerariesByDateRange);
 app.get("/filterProducts", filterProducts);
 app.get("/filterHistoricalTags", filterHistoricalByTag);
+app.get("/activities/category",getActivitiesByCategoryForGuest);
+
 
 //seller Controller
 app.post("/createSeller", createSeller);
@@ -251,6 +260,7 @@ app.get("/getAdv/:id", getAdsById);
 
 ////////////////////////////////////////////
 app.put("/cpTourist/:id", changePasswordTourist);
+app.put("/cpTourist/:id/currency", setPreferredCurrency);
 app.put("/cpAdmin/:id", changePasswordAdmin);
 app.get("/getadmin", getadmin);
 app.put("/cpAdvertiser/:id", changePasswordAdvertiser);
