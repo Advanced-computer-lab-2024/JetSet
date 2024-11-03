@@ -115,9 +115,39 @@ const filterHistoricalByTag = async (req, res) => {
   }
 };
 
+const getActivitiesByCategoryForGuest = async (req, res) => {
+  const { category } = req.query; // Expecting category ID as a query parameter
+
+  if (!category) {
+    return res.status(400).json({ error: "Category is required to view activities." });
+  }
+   // Check if the category is a valid MongoDB ObjectId
+   if (!mongoose.Types.ObjectId.isValid(category)) {
+    return res.status(400).json({ error: "Invalid category ID format." });
+  }
+
+  try {
+    // Find activities that belong to the specified category, with populated category data
+    const activities = await Activity.find({ category })
+      .populate("category", "name") // Populate category with only the name field
+      .populate("tags", "name")     // Optional: Populate tags with name field
+      .populate("creator", "name"); // Optional: Populate creator with name field
+
+    if (activities.length === 0) {
+      return res.status(404).json({ message: "No activities found for this category." });
+    }
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error("Error fetching activities by category:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 module.exports = {
   filterActivityGuest,
   guestFilterItineraries,
   register,
   filterHistoricalByTag,
+  getActivitiesByCategoryForGuest
 };

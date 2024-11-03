@@ -5,8 +5,74 @@ const Historical = require("../Models/Historical");
 const Tourist = require("../Models/Tourist.js");
 const TourGuide=require("../Models/TourGuide.js");
 const Category = require("../Models/Category.js");
+
+const nodemailer = require("nodemailer");
+
 const Complaint = require("../Models/Complaint.js");
+
 const { default: mongoose } = require("mongoose");
+
+
+// Function to retrieve activities by category
+const getActivitiesByCategory = async (req, res) => {
+  const { category } = req.query; // Expecting 'category' as a query parameter
+
+  if (!category) {
+    return res.status(400).json({ error: "Category is required for filtering activities." });
+  }
+
+  // Check if the category is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(category)) {
+    return res.status(400).json({ error: "Invalid category ID format." });
+  }
+
+  try {
+    // Find activities that belong to the specified category, with populated category data
+    const activities = await Activity.find({ category })
+      .populate("category", "name") // Populate category with only the name field
+      .populate("tags", "name")     // Optional: Populate tags with name field
+      .populate("creator", "name"); // Optional: Populate creator with name field
+
+    if (activities.length === 0) {
+      return res.status(404).json({ message: "No activities found for this category." });
+    }
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error("Error fetching activities by category:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const generateShareableLink = (itemType, itemId) => {
+  return `${process.env.BASE_URL}/${itemType}/${itemId}`;
+};
+
+// Method to share via copy link or email
+const shareItem = async (req, res) => {
+  const { itemId, itemType } = req.body;
+
+  let item;
+  try {
+    // Fetch the item based on type and id
+    if (itemType === "activity") item = await Activity.findById(itemId);
+    else if (itemType === "itinerary") item = await Itinerary.findById(itemId);
+    else if (itemType === "historical") item = await Historical.findById(itemId);
+    else return res.status(400).json({ message: "Invalid item type." });
+
+    if (!item) return res.status(404).json({ message: "Item not found." });
+
+    // Generate the link
+    const shareableLink = generateShareableLink(itemType, itemId);
+
+    // Return the shareable link
+    res.status(200).json({ link: shareableLink });
+  } catch (error) {
+    res.status(500).json({ message: "Error generating share link", error });
+  }
+};
+
+
 
 const createTourist = async (req, res) => {
   const { username, password, email, mobile, nationality, dob, job } = req.body;
@@ -648,6 +714,34 @@ const changePasswordTourist = async (req, res) => {
     res.status(500).json({ message: "Error updating password", error });
   }
 };
+// Method to set preferred currency for a tourist
+const setPreferredCurrency = async (req, res) => {
+  const { currency } = req.body; // Expecting 'currency' in the request body
+  const touristId = req.params.id; // Get the tourist's ID from the request params
+
+  if (!currency) {
+    return res.status(400).json({ error: "Currency is required to set preferred currency." });
+  }
+
+  try {
+    const tourist = await Tourist.findByIdAndUpdate(
+      touristId,
+      { preferredCurrency: currency }, // Set the preferred currency
+      { new: true } // Return the updated document
+    );
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    res.status(200).json({ message: "Preferred currency updated successfully", tourist });
+  } catch (error) {
+    console.error("Error updating preferred currency:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
 
 //Sprint 2 requirements requirement 70 & 71
 function calculatePoints(paymentAmount, level) {
@@ -756,6 +850,8 @@ const redeemMyPoints= async (req, res) =>{
 
 
 module.exports = {
+  getActivitiesByCategory,
+  shareItem,
   getProducts,
   SortActivities,
   getItineraries,
@@ -780,8 +876,10 @@ module.exports = {
   addRatingAndComment,
   updateTouristPreferences,
   changePasswordTourist,
+
+  setPreferredCurrency,
+
   addLoyaltyPoints,
   fileComplaint,
   viewMyComplaints,
-  redeemMyPoints,
 };
