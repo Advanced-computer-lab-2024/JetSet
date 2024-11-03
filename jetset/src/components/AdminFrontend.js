@@ -25,9 +25,11 @@ import SortProducts from "./Products/SortProducts";
 import DeleteAccount from "./Admin/DeleteAccount";
 import CreateAdmin from "./Admin/CreateAdmin";
 import CreateTourismGovernor from "./Admin/CreateTourismGovernor";
+import ComplaintList from "./Admin/viewComplaints"; // Assuming this is the correct path and filename
 
 function AdminFrontend() {
   // State for managing tags
+
   const [tags, setTags] = useState([]);
   const [tagLoading, setTagLoading] = useState(true);
   const [tagError, setTagError] = useState(null);
@@ -149,7 +151,11 @@ function AdminFrontend() {
       <DeleteAccount />
       <CreateAdmin />
       <CreateTourismGovernor />
+      <ComplaintList />
+
     </div>
+ 
+    
   );
 }
 

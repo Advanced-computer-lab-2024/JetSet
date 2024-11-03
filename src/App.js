@@ -7,6 +7,7 @@ const cors = require("cors");
 require('dotenv').config();
 
 
+
 const {
   createProfile,
   getProfile,
@@ -72,6 +73,7 @@ const {
   searchProductAdmin,
   deleteAccount,
   createTourismGoverner,
+  viewAllComplaints,
 } = require("./Routes/adminController");
 
 const {
@@ -92,8 +94,17 @@ const {
   seacrhPlace,
   searchActivity,
   searchItinerary,
+  rateandcommentItinerary,
+  rateandcommentactivity,
+  addRatingAndComment,
+  updateTouristPreferences,
   changePasswordTourist,
+
   setPreferredCurrency,
+  addLoyaltyPoints,
+  fileComplaint,
+  viewMyComplaints,
+  redeemMyPoints,
 } = require("../src/Routes/touristController");
 
 const {
@@ -107,6 +118,8 @@ const {
   viewCreatedItineraries,
   getItinerariesByDateRange,
   gettourguide,
+  activateItinerary,
+  deactivateItinerary,
   changePasswordTourGuide,
 } = require("../src/Routes/tourguideController");
 
@@ -119,25 +132,22 @@ const {
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
-dotenv.config();
+ dotenv.config();
 
 // App variables
 const app = express();
 
-const port = process.env.PORT || 3000;
-
-const MongoURI = process.env.MONGO_URI;
-
-// Middleware
 app.use(express.json());
 
+const MongoURI= process.env.MONGO_URI;
+const port= process.env.PORT;
 app.use(cors());
 
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 
 // MongoDB Connection
 mongoose
-  .connect(MongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(MongoURI)
   .then(() => {
     console.log("MongoDB connected!");
     app.listen(port, () => {
@@ -199,6 +209,10 @@ app.delete("/deletePlace/:id", deletePlace);
 app.post("/addTourismGoverner", createTourismGoverner);
 app.post("/addTag", createTag);
 app.get("/Tags", AllTags);
+app.post("/complaints/:touristId", fileComplaint);
+app.get("/complaints/:touristId",viewMyComplaints)
+app.get("/viewAllComplaints", viewAllComplaints);
+// const response = await axios.get('http://localhost:3000/viewAllComplaints');
 
 app.use(express.json());
 app.post("/addItinerary", createItinerary);
@@ -206,6 +220,8 @@ app.get("/Itineraries", getItineraries);
 app.put("/updateItinerary/:id", updateItinerary);
 app.delete("/deleteItinerary", deleteItinerary);
 app.get("/listofiternaries/:id", viewCreatedItineraries);
+app.post("/activateItinerary/:id",activateItinerary);
+app.post("/deactivateItinerary/:id",deactivateItinerary);
 
 app.use(express.json());
 app.post("/addPreferancetag", createPrefTag);
@@ -234,7 +250,7 @@ app.get("/searchProductSeller", searchProductSeller);
 app.get("/filterProduct", filterProductSeller);
 app.get("/sortProducts", sortProducts);
 app.post("/createproduct", createProductSeller);
-app.put("/editproduct/:id", updateProductSeller);
+app.put("/editproduct/:id", updateProductSeller); //update rating for product (shahd and habiba)
 // Add the new route to fetch seller by username
 app.get("/getSellerById/:id", getSellerById);
 
@@ -254,6 +270,19 @@ app.get("/searchplace", seacrhPlace);
 app.get("/searchactivity", searchActivity);
 app.get("/searchitinerary", searchItinerary);
 app.get("/gets", getTourist);
+app.post("/rateandcommentItinerary/:id",rateandcommentItinerary);
+app.post("/rateandcommentactivity/:id",rateandcommentactivity);
+app.post("/comment/:id", addRatingAndComment);
+app.put("/tourist/preferences/:id", updateTouristPreferences);
+
+app.put("/redeemMyPoints/:id",redeemMyPoints);
+app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
+app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
+
+
+
+
+
 
 //Advertisor
 app.get("/getAdv/:id", getAdsById);
@@ -268,3 +297,4 @@ app.get("/getadvertiser", getadvertiser);
 app.put("/cpSeller/:id", changePasswordSeller);
 app.put("/cpTourguide/:id", changePasswordTourGuide);
 app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
+

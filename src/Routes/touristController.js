@@ -3,8 +3,13 @@ const Activity = require("../Models/Activity");
 const Itinerary = require("../Models/Itinerary");
 const Historical = require("../Models/Historical");
 const Tourist = require("../Models/Tourist.js");
+const TourGuide=require("../Models/TourGuide.js");
 const Category = require("../Models/Category.js");
+
 const nodemailer = require("nodemailer");
+
+const Complaint = require("../Models/Complaint.js");
+
 const { default: mongoose } = require("mongoose");
 
 
@@ -492,7 +497,199 @@ const filterHistoricalByTag = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
-////////////////////////////////////////////////////
+
+
+const rateandcommentItinerary = async (req, res) => {
+  const {itineraryId ,rating, comment } = req.body; // Expecting these fields in the request body
+  const touristId = req.params.id; // Assuming the tourist ID is passed in the URL
+  
+
+  try {
+    // Validate input
+    if (!itineraryId || !rating) {
+      return res.status(400).json({ error: "Itinerary ID and rating are required." });
+    }
+
+    // Ensure rating is between 1 and 5
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Rating must be between 1 and 5." });
+    }
+
+    // Find the itinerary
+    const itinerary = await Itinerary.findById(itineraryId);
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found." });
+    }
+
+    // Check if the tourist has already rated this itinerary
+    // const existingRating = itinerary.ratings.find(r => r.touristId.toString() === touristId);
+    // if (existingRating) {
+    //   return res.status(400).json({ error: "You have already rated this itinerary." });
+    // }
+
+    // Add the rating and comment
+    itinerary.ratings.push({ touristId, rating, comment });
+    await itinerary.save();
+
+    return res.status(200).json({ message: "Itinerary rated successfully.", itinerary });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error.", details: error.message });
+  }
+};
+
+// const rateproduct = async (req, res) => {
+//   const { productId, rating } = req.body; // Expecting these fields in the request body
+//   const touristId = req.params.id; // Assuming the tourist ID is passed in the URL
+
+//   try {
+//     // Validate input
+//     if (!productId || rating === undefined) {
+//       return res.status(400).json({ error: "Product ID and rating are required." });
+//     }
+
+//     // Ensure rating is between 0 and 5
+//     if (rating < 0 || rating > 5) {
+//       return res.status(400).json({ error: "Rating must be between 0 and 5." });
+//     }
+
+//     // Find the product
+//     const product = await Product.findById(productId);
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found." });
+//     }
+
+//     // Calculate the new average rating
+//     const existingRating = product.ratings || 0; // Default to 0 if no rating exists
+//     const newRating = (existingRating + rating) / 2; // Example averaging; adjust logic as needed
+//     product.ratings = newRating;
+
+//     // Save the updated product
+//     await product.save();
+
+//     return res.status(200).json({ message: "Product rated successfully.", product });
+//   } catch (error) {
+//     console.error('Error:', error);
+//     return res.status(500).json({ error: "Internal server error.", details: error.message });
+//   }
+// };
+
+const rateandcommentactivity = async (req, res) => {
+  const {activityId ,rating, comment } = req.body; // Expecting these fields in the request body
+  const touristId = req.params.id; // Assuming the tourist ID is passed in the URL
+  
+
+  try {
+    // Validate input
+    if (!activityId || !rating) {
+      return res.status(400).json({ error: "Activity ID and rating are required." });
+    }
+
+    // Ensure rating is between 1 and 5
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Rating must be between 1 and 5." });
+    }
+    
+    // Find the itinerary
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found." });
+    }
+   
+    
+    // Check if the tourist has already rated this itinerary
+    // const existingRating = activity.ratings.find(r => r.touristId.toString() === touristId);
+    // if (existingRating) {
+    //   return res.status(400).json({ error: "You have already rated this activity." });
+    // }
+
+    // Add the rating and comment
+    activity.ratings.push({ touristId, rating, comment });
+    await activity.save();
+
+    return res.status(200).json({ message: "Activity rated successfully.", activity });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error.", details: error.message });
+  }
+};
+
+const addRatingAndComment = async (req, res) => {
+  const { tourGuideId, rating, comment, touristId } = req.body;
+
+  console.log("Received tourist ID:", touristId);
+
+  // Ensure touristId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(touristId)) {
+    return res.status(400).json({ message: "Invalid tourist ID" });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(tourGuideId)) {
+    return res.status(400).json({ message: "Invalid tour guide ID" });
+  }
+
+  try {
+    // Find the tour guide by ID
+    const tourGuide = await TourGuide.findById(tourGuideId);
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Tour guide not found" });
+    }
+
+    // Convert touristId to ObjectId for comparisons
+    const touristObjectId = new mongoose.Types.ObjectId(touristId);
+
+    // Check if the tourist has already rated this tour guide
+    const existingRating = tourGuide.ratings.find(r => r.touristId.equals(touristObjectId));
+    
+    if (existingRating) {
+      // Update existing rating and comment
+      existingRating.rating = rating;
+      existingRating.comment = comment;
+    } else {
+      // Create a new rating entry
+      const newRating = {
+        touristId: touristObjectId, // Use existing touristId here
+        rating: rating,
+        comment: comment,
+      };
+      tourGuide.ratings.push(newRating);
+    }
+
+    // Save the updated tour guide
+    await tourGuide.save();
+    
+    res.status(200).json({ message: "Rating and comment added successfully", tourGuide });
+  } catch (error) {
+    console.error("Error details:", error);
+    
+    // Handle specific error types if necessary
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res.status(400).json({ message: "Validation error", error: error.message });
+    }
+
+    res.status(500).json({ message: "Error adding rating and comment", error: error.message });
+  }
+};
+
+const updateTouristPreferences = async (req, res) => {
+  const { preferences } = req.body;
+
+  try {
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      req.params.id,
+      { $set: { preferences } },
+      { new: true }
+    );
+
+    if (!updatedTourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    res.status(200).json(updatedTourist);
+  } catch (error) {
+    console.error("Error updating preferences:", error);
+    res.status(400).json({ message: "Error updating preferences", error });
+  }
+};
+
 const changePasswordTourist = async (req, res) => {
   const { oldPassword, newPassword } = req.body;
   const touristId = req.params.id;
@@ -546,6 +743,111 @@ const setPreferredCurrency = async (req, res) => {
 
 
 
+//Sprint 2 requirements requirement 70 & 71
+function calculatePoints(paymentAmount, level) {
+  if (level === 1) {
+    return paymentAmount * 0.5;
+  } else if (level === 2) {
+    return paymentAmount * 1;
+  } else if (level === 3) {
+    return paymentAmount * 1.5;
+  }
+  return 0;
+}
+function calculateBadge  (points) {
+  if (points <= 100000) {
+    return "Bronze";
+  } else if (points <= 500000) {
+    return "Silver";
+  } else {
+    return "Gold";
+  }
+};
+function determineLevel(loyaltyPoints) {
+  if (loyaltyPoints <= 100000) {
+    return 1;
+  } else if (loyaltyPoints <= 500000) {
+    return 2;
+  } else {
+    return 3;
+  }
+}
+const addLoyaltyPoints = async (req, res) => {
+  try {
+
+    const { paymentAmount } = req.body;
+    const touristId = req.params.id;
+
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist is not found" });
+    }
+
+    const pointsEarned = calculatePoints(paymentAmount, tourist.level);
+    const badge = calculateBadge(tourist.loyaltyPoints); // Calculate badge based on updated points
+
+    tourist.loyaltyPoints += pointsEarned;
+    tourist.level = determineLevel(tourist.loyaltyPoints);
+    tourist.badge = badge;
+
+    // await tourist.save();
+    // const badge = Tourist.calculateBadge(tourist.loyaltyPoints); 
+
+    await tourist.save();
+    res.status(200).json({
+      message: "Loyalty points was added successfully",
+      loyaltyPoints: tourist.loyaltyPoints,
+      level: tourist.level,
+      badge: tourist.badge
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to add loyalty points" });
+  }
+};
+
+
+const fileComplaint= async (req, res) => {
+  const { title, body, date } = req.body;
+  const {touristId} = req.params;
+  try {
+    const newComplaint = new Complaint({ title, body, date, userId: touristId });
+    await newComplaint.save();
+    res.status(201).json({ message: 'Complaint filed successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to file the complaint' });
+  }
+};
+
+const viewMyComplaints= async (req, res) => {
+  const touristID = new mongoose.Types.ObjectId(req.params.touristId);
+  try {
+    const complaints = await Complaint.find({userId: touristID}); 
+    res.status(200).json(complaints); 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch complaints from database' });
+  }
+};
+
+const redeemMyPoints= async (req, res) =>{
+  const touristID = req.params.id;
+  try{
+    const tourist= await Tourist.findById(touristID);
+  if(tourist.loyaltyPoints>=10000){
+    tourist.loyaltyPoints-=10000;
+    tourist.wallet+=100;
+    await tourist.save();
+    return res.status(200).json({ message: 'Points redeemed successfully', tourist });
+  }
+  else 
+    return res.status(400).json({error: 'Not Enough Points'});
+  }catch(error){
+    console.error(error); 
+    return res.status(500).json({ error: 'An error occurred', details: error.message });
+  }
+}
+
 
 module.exports = {
   getActivitiesByCategory,
@@ -569,6 +871,15 @@ module.exports = {
   seacrhPlace,
   searchActivity,
   searchItinerary,
+  rateandcommentItinerary,
+  rateandcommentactivity,
+  addRatingAndComment,
+  updateTouristPreferences,
   changePasswordTourist,
+
   setPreferredCurrency,
+
+  addLoyaltyPoints,
+  fileComplaint,
+  viewMyComplaints,
 };
