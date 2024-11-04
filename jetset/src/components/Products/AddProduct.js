@@ -1,38 +1,56 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const AddProduct = () => {
+const AddProduct = ({ sellerId }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [sellerUsername, setSellerUsername] = useState(""); // Changed from sellerId to sellerUsername
-  const [images, setImages] = useState([]); // State to store images
-  const [rating, setRating] = useState(""); // State to store rating
-  const [reviews, setReviews] = useState([]); // State to store reviews
-  const [message, setMessage] = useState(""); // State to store success message
-  const [error, setError] = useState(""); // State to store error message
+  const [images, setImages] = useState([]); // State to store image files
+  const [rating, setRating] = useState("");
+  const [reviews, setReviews] = useState([]);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(""); // Reset message on form submission
-    setError(""); // Reset error message
+    setMessage("");
+    setError("");
+
+    const formData = new FormData(); // Create a new FormData object
+
+    // Append the product details to FormData
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("quantity", quantity);
+    formData.append("seller_id", sellerId || ""); // Use sellerId instead of sellerUsername
+    formData.append("rating", Number(rating));
+
+    // Append each review to FormData individually
+    reviews.forEach((review, index) => {
+      formData.append(`reviews[${index}]`, review); // Append each review
+    });
+
+    // Append each image file to FormData
+    images.forEach((image) => {
+      formData.append("images", image); // Append each image file
+    });
 
     try {
-      const response = await axios.post("http://localhost:3000/createproduct", {
-        name,
-        description,
-        price,
-        quantity,
-        seller_username: sellerUsername, // Changed to seller_username
-        images, // Send images array
-        rating: Number(rating), // Send rating as a number
-        reviews, // Send reviews array
-      });
-      console.log(response.data); // Log the response from the server
-      setMessage("Product created successfully!"); // Set success message
+      const response = await axios.post(
+        "http://localhost:3000/createproducts",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Set the content type to multipart/form-data
+          },
+        }
+      );
+      console.log(response.data);
+      setMessage("Product created successfully!");
     } catch (error) {
-      console.error("Error creating product:", error.response.data); // Handle errors
+      console.error("Error creating product:", error.response.data);
       setError(
         "Error creating product: " +
           (error.response?.data?.message || error.message)
@@ -40,19 +58,17 @@ const AddProduct = () => {
     }
   };
 
-  // Function to handle adding reviews
-  const handleAddReview = () => {
-    const reviewText = prompt("Enter your review:"); // Basic prompt for adding reviews
-    if (reviewText) {
-      setReviews([...reviews, reviewText]); // Add new review to reviews array
-    }
+  // Function to handle image file selection
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files); // Convert FileList to array
+    setImages(files); // Set the selected image files in state
   };
 
-  // Function to handle adding image URLs
-  const handleAddImage = () => {
-    const imageUrl = prompt("Enter image URL:");
-    if (imageUrl) {
-      setImages([...images, imageUrl]); // Add new image to images array
+  // Function to handle adding reviews
+  const handleAddReview = () => {
+    const reviewText = prompt("Enter your review:");
+    if (reviewText) {
+      setReviews([...reviews, reviewText]);
     }
   };
 
@@ -88,12 +104,6 @@ const AddProduct = () => {
           required
         />
         <input
-          type="text"
-          placeholder="Seller Username" // Changed label to "Seller Username"
-          value={sellerUsername}
-          onChange={(e) => setSellerUsername(e.target.value)} // Changed from setSellerId to setSellerUsername
-        />
-        <input
           type="number"
           placeholder="Rating (0-5)"
           value={rating}
@@ -102,12 +112,17 @@ const AddProduct = () => {
           max="5"
         />
 
-        {/* Button to add image URLs */}
-        <button type="button" onClick={handleAddImage}>
-          Add Image
-        </button>
+        {/* File input for images */}
+        <input
+          type="file"
+          onChange={handleImageChange}
+          multiple // Allow multiple file selection
+        />
         <div>
-          <strong>Images:</strong> {images.join(", ")}
+          <strong>Selected Images:</strong>{" "}
+          {images.length > 0
+            ? images.map((image) => image.name).join(", ")
+            : "No images selected."}
         </div>
 
         {/* Button to add reviews */}

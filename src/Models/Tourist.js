@@ -22,6 +22,12 @@ const touristSchema = new Schema(
     DOB: Date,
     job: String,
     wallet: Number,
+    products: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   { timestamps: true }
 );

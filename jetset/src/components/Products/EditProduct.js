@@ -9,6 +9,7 @@ const EditProduct = () => {
   const [newRatings, setNewRatings] = useState(""); // State for new ratings
   const [newReviews, setNewReviews] = useState(""); // State for new reviews
   const [newQuantity, setNewQuantity] = useState(""); // State for new quantity
+  const [newImage, setNewImage] = useState(null); // State for new image file
   const [message, setMessage] = useState(null); // State for success/error messages
   const [error, setError] = useState(null); // State for error messages
 
@@ -16,7 +17,7 @@ const EditProduct = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/products"); // Adjust this endpoint as necessary
+        const response = await axios.get("http://localhost:3000/productsAdmin");
         setProducts(response.data);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -32,15 +33,27 @@ const EditProduct = () => {
     setMessage(null);
     setError(null);
 
+    // Create a FormData object to handle image uploads
+    const formData = new FormData();
+
+    // Only append fields that have values
+    if (newPrice) formData.append("price", newPrice);
+    if (newDescription) formData.append("description", newDescription);
+    if (newRatings) formData.append("ratings", newRatings);
+    if (newReviews) formData.append("reviews", newReviews);
+    if (newQuantity) formData.append("quantity", newQuantity);
+    if (newImage) {
+      formData.append("image", newImage); // Add the image file to FormData
+    }
+
     try {
       const response = await axios.put(
         `http://localhost:3000/editproduct/${selectedProductId}`,
+        formData,
         {
-          price: newPrice,
-          description: newDescription,
-          ratings: newRatings,
-          reviews: newReviews,
-          quantity: newQuantity,
+          headers: {
+            "Content-Type": "multipart/form-data", // Set the appropriate content type for file upload
+          },
         }
       );
       setMessage(
@@ -52,8 +65,10 @@ const EditProduct = () => {
       setNewRatings("");
       setNewReviews("");
       setNewQuantity("");
+      setNewImage(null); // Reset image input
       setSelectedProductId("");
     } catch (err) {
+      console.error("Error response:", err.response);
       setError(err.response?.data?.message || "Error updating product");
     }
   };
@@ -86,14 +101,12 @@ const EditProduct = () => {
           placeholder="New Price"
           value={newPrice}
           onChange={(e) => setNewPrice(e.target.value)}
-          required
         />
         <input
           type="text"
           placeholder="New Description"
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
-          required
         />
         <input
           type="number"
@@ -112,6 +125,11 @@ const EditProduct = () => {
           placeholder="New Quantity"
           value={newQuantity}
           onChange={(e) => setNewQuantity(e.target.value)}
+        />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setNewImage(e.target.files[0])}
         />
         <button type="submit">Update Product</button>
       </form>

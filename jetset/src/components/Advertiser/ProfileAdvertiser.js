@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ActivityForm from "../Activity/ActivityProfileAdv"; // Import ActivityForm
+import ActivityForm from "../Activity/ActivityProfileAdv";
 
 const ProfileForm = ({ onProfileCreated }) => {
   const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
-
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -13,81 +12,84 @@ const ProfileForm = ({ onProfileCreated }) => {
     website: "",
     hotline: "",
     companyDescription: "",
+    image: null,
   });
 
-  const id = "6701a375077eb6e57b56802f";
-  const [advertiser, setAdvertiser] = useState(null); // State to hold advertiser data
-  const [loading, setLoading] = useState(true); // State to handle loading state
+  const id = "6701a52d077eb6e57b568035";
+  const [advertiser, setAdvertiser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const [statusMessage, setStatusMessage] = useState(""); // For success/error messages
-  const [profileId, setProfileId] = useState(""); // For profile ID if needed for update/delete
-  const [profiles, setProfiles] = useState([]); // State to store profiles
-  const [isFetchingProfiles, setIsFetchingProfiles] = useState(false); // State to indicate fetching
-  const [selectedAdvertiserId, setSelectedAdvertiserId] = useState(null); // For selected advertiser ID
-
-  // Fetch profiles when the component mounts
-  useEffect(() => {
-    getProfiles();
-  }, []);
-
-  const getProfiles = async () => {
-    setIsFetchingProfiles(true);
-    try {
-      const response = await axios.get(`${BASE_URL}/profiles`);
-      console.log("Fetched profiles:", response.data); // Log the fetched data
-      setProfiles(response.data);
-      setStatusMessage("Profiles fetched successfully!");
-    } catch (error) {
-      console.error(
-        "Error fetching profiles:",
-        error.response ? error.response.data : error.message
-      );
-    } finally {
-      setIsFetchingProfiles(false);
-    }
-  };
+  const [statusMessage, setStatusMessage] = useState("");
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === "image") {
+      setFormData({ ...formData, image: e.target.files[0] });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting:", formData);
+    const formDataToSend = new FormData();
+    Object.keys(formData).forEach((key) => {
+      formDataToSend.append(key, formData[key]);
+    });
 
     try {
-      const response = await axios.post(`${BASE_URL}/addprofiles`, formData);
-      console.log("API Response:", response);
-
+      const response = await axios.post(
+        `${BASE_URL}/addprofiles`,
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       if (response.status === 201) {
         onProfileCreated(response.data);
         setStatusMessage("Profile created successfully!");
-        resetForm(); // Reset form data
-        getProfiles(); // Refresh profiles after adding
+        resetForm();
       } else {
         throw new Error("Unexpected response status: " + response.status);
       }
     } catch (error) {
       console.error("Submit error:", error);
-      setStatusMessage("Profile created successfully");
+      setStatusMessage("Error creating profile.");
     }
   };
 
-  const handleUpdateProfile = async () => {
-    if (!profileId) {
-      setStatusMessage("Please enter a profile ID to update.");
-      return;
-    }
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+
+    // Create a FormData object to hold the updated fields and image
+    const formDataToSend = new FormData();
+
+    // Only append fields that have been changed and are not empty
+    if (formData.email) formDataToSend.append("email", formData.email);
+    if (formData.username) formDataToSend.append("username", formData.username);
+    if (formData.password) formDataToSend.append("password", formData.password);
+    if (formData.company_name)
+      formDataToSend.append("company_name", formData.company_name);
+    if (formData.website) formDataToSend.append("website", formData.website);
+    if (formData.hotline) formDataToSend.append("hotline", formData.hotline);
+    if (formData.companyDescription)
+      formDataToSend.append("companyDescription", formData.companyDescription);
+    if (formData.image) formDataToSend.append("image", formData.image); // Append the image if it exists
 
     try {
       const response = await axios.put(
-        `${BASE_URL}/updateprofiles/${profileId}`,
-        formData
+        `${BASE_URL}/updateprofiles/${id}`,
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
-      console.log("Update Profile Response:", response.data);
+      console.log(response.data); // Log response data for debugging
       setStatusMessage("Profile updated successfully!");
-      getProfiles(); // Refresh profiles after updating
+      setAdvertiser(response.data); // Update advertiser with the response data
     } catch (error) {
       console.error("Error updating profile:", error);
       setStatusMessage("Error updating profile.");
@@ -103,16 +105,15 @@ const ProfileForm = ({ onProfileCreated }) => {
       website: "",
       hotline: "",
       companyDescription: "",
+      image: null,
     });
-    setProfileId(""); // Reset profile ID if needed
-    setSelectedAdvertiserId(null); // Reset selected advertiser ID
   };
 
   useEffect(() => {
     const fetchAdvertiser = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/getAdv/${id}`); // Adjust the API endpoint as needed
-        setAdvertiser(response.data.adv); // Assuming your response is structured like this
+        const response = await axios.get(`${BASE_URL}/getAdv/${id}`);
+        setAdvertiser(response.data.adv);
       } catch (err) {
         setError(
           err.response
@@ -125,15 +126,16 @@ const ProfileForm = ({ onProfileCreated }) => {
     };
 
     fetchAdvertiser();
-  }, []);
+  }, [BASE_URL, id]);
 
-  if (loading) return <p>Loading...</p>; // Show loading state
-  if (error) return <p>Error: {error}</p>; // Show error message if any
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div>
       <form onSubmit={handleSubmit}>
         <h3>Create Profile</h3>
+        {/* Input fields */}
         <input
           type="email"
           name="email"
@@ -186,28 +188,40 @@ const ProfileForm = ({ onProfileCreated }) => {
           onChange={handleChange}
           placeholder="Company Description"
         ></textarea>
+        <input
+          type="file"
+          name="image"
+          onChange={handleChange}
+          accept="image/*"
+        />
+        {formData.image && (
+          <img
+            src={URL.createObjectURL(formData.image)}
+            alt="Uploaded Preview"
+            style={{ width: "100px", height: "100px", objectFit: "cover" }}
+          />
+        )}
         <button type="submit">Add Profile</button>
         <button type="button" onClick={handleUpdateProfile}>
           Update Profile
         </button>
-        <input
-          type="text"
-          value={profileId}
-          onChange={(e) => setProfileId(e.target.value)}
-          placeholder="Profile ID"
-        />
         {statusMessage && <p>{statusMessage}</p>}
       </form>
 
-      {/* Display the list of profiles */}
       <div>
         <h1>Advertiser Profile</h1>
         {advertiser ? (
           <div>
-            <h2>{advertiser.username}</h2> {/* Displaying username */}
-            <p>Email: {advertiser.email}</p> {/* Displaying email */}
-            <p>Company Name: {advertiser.company_name}</p>{" "}
-            {/* Displaying company name */}
+            {advertiser.images && advertiser.images.length > 0 && (
+              <img
+                src={`http://localhost:3000/uploads/${advertiser.images}`}
+                alt={`${advertiser.username} Profile`}
+                style={{ width: "100px", height: "100px", objectFit: "cover" }}
+              />
+            )}
+            <h2>{advertiser.username}</h2>
+            <p>Email: {advertiser.email}</p>
+            <p>Company Name: {advertiser.company_name}</p>
             <p>
               Website:{" "}
               <a
@@ -217,22 +231,19 @@ const ProfileForm = ({ onProfileCreated }) => {
               >
                 {advertiser.website}
               </a>
-            </p>{" "}
-            {/* Displaying website */}
-            <p>Hotline: {advertiser.hotline}</p> {/* Displaying hotline */}
-            <p>Company Description: {advertiser.companyDescription}</p>{" "}
-            {/* Displaying company description */}
+            </p>
+            <p>Hotline: {advertiser.hotline}</p>
+            <p>Company Description: {advertiser.companyDescription}</p>
           </div>
         ) : (
           <div>No advertiser found.</div>
         )}
       </div>
 
-      {/* Integrate ActivityForm component */}
       <ActivityForm
-        onActivityCreated={(activity) => {
-          console.log("Activity created:", activity);
-        }}
+        onActivityCreated={(activity) =>
+          console.log("Activity created:", activity)
+        }
       />
     </div>
   );

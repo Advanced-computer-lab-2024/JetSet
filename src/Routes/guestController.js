@@ -7,6 +7,7 @@ const { default: mongoose } = require("mongoose");
 //added
 const register = async (req, res) => {
   const { username, password, email, role } = req.body;
+  const documentNames = req.files ? req.files.map((file) => file.filename) : [];
 
   try {
     const user = await Guest.create({
@@ -14,8 +15,10 @@ const register = async (req, res) => {
       password,
       email,
       role,
+      document: documentNames, // Stores array of document filenames
     });
-    res.status(200).json({ msg: "Account created" });
+
+    res.status(200).json({ msg: "Account created", user });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

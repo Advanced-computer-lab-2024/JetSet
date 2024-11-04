@@ -6,6 +6,7 @@ const bookingModel = require("../Models/Activity.js");
 const TouristItinerary = require("../Models/TouristsItinerary.js");
 const Tag = require("../Models/Tag.js"); // Assuming tags are stored here
 
+const path = require("path");
 const createTourGuideProfile = async (req, res) => {
   const {
     username,
@@ -16,6 +17,7 @@ const createTourGuideProfile = async (req, res) => {
     previous_work,
   } = req.body;
   try {
+    const imageFilename = req.file ? path.basename(req.file.path) : "";
     await TourGuide.create({
       email: email,
       username: username,
@@ -23,11 +25,49 @@ const createTourGuideProfile = async (req, res) => {
       mobile_number: mobile_number,
       years_of_experience: years_of_experience,
       previous_work: previous_work,
+      images: imageFilename,
     });
     res.status(200).json({ msg: "profile is created" });
   } catch (error) {
     res.status(400).json({
       message: "Error creating Tour Guide profile",
+      error: error.message || error,
+    });
+  }
+};
+
+const updateTourGuideProfile = async (req, res) => {
+  const { mobile_number, years_of_experience, previous_work } = req.body;
+  const tourGuideId = req.params.tourGuideId; // Ensure this matches your route definition
+  console.log("Tour Guide ID:", tourGuideId);
+
+  try {
+    // Find the tour guide by ID
+    const tourGuide = await TourGuide.findById(tourGuideId);
+
+    // If the tour guide does not exist, return an error response
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Tour Guide not found" });
+    }
+
+    // Update the tour guide's profile with provided fields
+    if (mobile_number) tourGuide.mobile_number = mobile_number;
+    if (years_of_experience)
+      tourGuide.years_of_experience = years_of_experience;
+    if (previous_work) tourGuide.previous_work = previous_work;
+
+    // Update the image filename if a new image is uploaded
+    if (req.file) {
+      const imageFilename = path.basename(req.file.path);
+      tourGuide.images = imageFilename;
+    }
+
+    await tourGuide.save(); // Save the updated profile
+    res.status(200).json({ msg: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating Tour Guide profile:", error); // Log the error for debugging
+    res.status(400).json({
+      message: "Error updating Tour Guide profile",
       error: error.message || error,
     });
   }
@@ -39,11 +79,7 @@ const readTourGuideProfile = async (req, res) => {
   try {
     const myProfile = await TourGuide.findById(tourGuideID);
     res.status(200).json({
-      username: myProfile.username,
-      email: myProfile.email,
-      mobile_number: myProfile.mobile_number,
-      years_of_experience: myProfile.years_of_experience,
-      previous_work: myProfile.previous_work,
+      myProfile,
     });
   } catch (error) {
     res.status(400).json({
@@ -379,4 +415,5 @@ module.exports = {
   deleteTouristItinerary,
   getItinerariesByDateRange,
   gettourguide,
+  updateTourGuideProfile,
 };

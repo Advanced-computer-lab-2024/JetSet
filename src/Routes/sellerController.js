@@ -2,17 +2,23 @@ const Seller = require("../Models/Seller.js");
 const Product = require("../Models/Product");
 const { default: mongoose } = require("mongoose");
 
+const path = require("path");
+
 //added
 //Create/ Read/ Update my profile with my information as a Seller including name and description.  if accepted as a seller on the system
 const createSeller = async (req, res) => {
   const { username, name, password, email, desciption } = req.body;
+
   try {
+    const imageFilename = req.file ? path.basename(req.file.path) : "";
+
     const user = await Seller.create({
       email: email,
       username: username,
       password: password,
       seller_name: name,
       seller_description: desciption,
+      images: imageFilename,
     });
     await user.save();
     res.status(200).json({ msg: "Seller created" });
@@ -37,7 +43,6 @@ const getSellerById = async (req, res) => {
     return res.status(400).json({ message: "Seller ID is required." });
   }
 
-  console.log("Fetching seller for ID:", id); // Debug log
   const sanitizedId = id.replace(/:/g, "");
   try {
     const seller = await Seller.findById(sanitizedId); // Use findById to find by MongoDB ID
@@ -60,15 +65,30 @@ const updateSeller = async (req, res) => {
   const { id } = req.params; // Extract ID from the URL
   const { seller_name, seller_description } = req.body; // Extract name and description from the body
 
-  console.log(`Received ID: ${id}`); // Log the received ID
+  // Use req.file since we're uploading a single file
+  const image = req.file ? path.basename(req.file.path) : null; // Get the filename if an image was uploaded
 
   // Sanitize ID if necessary (remove any unexpected characters)
   const sanitizedId = id.replace(/:/g, "");
 
   try {
+    // Create an object to hold the updates
+    const updateData = {};
+
+    // Only include the fields that are provided
+    if (seller_name) {
+      updateData.seller_name = seller_name;
+    }
+    if (seller_description) {
+      updateData.seller_description = seller_description;
+    }
+    if (image) {
+      updateData.images = image; // Update images only if there are any new uploads
+    }
+
     const profile = await Seller.findByIdAndUpdate(
       sanitizedId, // Use the sanitized ID
-      { seller_name, seller_description },
+      updateData, // Only update provided fields
       { new: true } // Return the updated profile
     );
 
@@ -78,7 +98,6 @@ const updateSeller = async (req, res) => {
 
     res.status(200).json(profile); // Respond with the updated profile
   } catch (err) {
-    console.error(err); // Log the error for debugging
     res.status(400).json({ error: err.message });
   }
 };
@@ -86,9 +105,7 @@ const updateSeller = async (req, res) => {
 //View a list of all available products(including picture of product, price, description, seller, ratings and reviews)
 const getProducts = async (req, res) => {
   try {
-    const products = await productModel
-      .find()
-      .populate("reviews.userId", "name");
+    const products = await Product.find().populate("reviews.userId", "name");
     res.status(200).json(products);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -144,27 +161,23 @@ const sortProductsSeller = async (req, res) => {
 
 // Add a product with its details, price, and available quantity
 const createProductSeller = async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    quantity,
-    seller_username,
-    images,
-    rating,
-    reviews,
-  } = req.body;
+  const { name, description, price, quantity, seller_id, rating, reviews } =
+    req.body;
+
   try {
-    // Create a new product
+    // Get the image filename from the uploaded file
+    const imageFilename = req.file ? path.basename(req.file.path) : ""; // Ensure we use imageFilename
+
+    // Create a new product with the image filename
     const newProduct = await Product.create({
-      name: name,
-      price: price,
-      description: description || "", // Default empty string if description is not provided
-      quantity: quantity || 0, // Default 0 if quantity is not provided
-      seller_username: seller_username,
-      images: images || [], // Default to an empty array if no images are provided
-      ratings: rating || 0, // Default rating to 0
-      reviews: reviews || [], // Default to an empty array if no reviews are provided
+      name,
+      price,
+      description: description || "",
+      quantity: quantity || 0,
+      seller_id: seller_id,
+      images: [imageFilename], // Store the filename in an array
+      ratings: rating || 0,
+      reviews: reviews || [],
     });
 
     // Return the newly created product along with a success message
@@ -172,6 +185,7 @@ const createProductSeller = async (req, res) => {
       .status(201)
       .json({ msg: "Product created successfully", product: newProduct });
   } catch (error) {
+    // Capture and return error details
     res.status(400).json({
       message: "Error creating product",
       error: error.message || error,
@@ -179,7 +193,6 @@ const createProductSeller = async (req, res) => {
   }
 };
 
-//Edit product details and price
 const updateProductSeller = async (req, res) => {
   let { id } = req.params;
   const { price, description, ratings, reviews, quantity } = req.body;
@@ -193,25 +206,32 @@ const updateProductSeller = async (req, res) => {
   }
 
   try {
-    // Prepare the fields to update only if they are provided in the request
-    const updateFields = {};
-
-    if (price !== undefined) updateFields.price = price;
-    if (description !== undefined) updateFields.description = description;
-    if (ratings !== undefined) updateFields.ratings = ratings;
-    if (reviews !== undefined) updateFields.reviews = reviews;
-    if (quantity !== undefined) updateFields.quantity = quantity;
-
-    // Update the product by ID
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      updateFields,
-      { new: true } // This option returns the updated document
-    );
-
-    if (!updatedProduct) {
+    // Fetch the current product to get existing values
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    // Prepare the fields to update, only updating the fields that are provided
+    const updateFields = {
+      price: price !== undefined ? price : existingProduct.price,
+      description:
+        description !== undefined ? description : existingProduct.description,
+      ratings: ratings !== undefined ? ratings : existingProduct.ratings,
+      reviews: reviews !== undefined ? reviews : existingProduct.reviews,
+      quantity: quantity !== undefined ? quantity : existingProduct.quantity,
+    };
+
+    // If an image is uploaded, add the image path to updateFields
+    if (req.file) {
+      updateFields.images = [path.basename(req.file.path)]; // Replaces the current image with the new one
+    }
+
+    // Update the product by ID
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, {
+      new: true, // This option returns the updated document
+      runValidators: true, // Optional: Ensures that any validation rules are applied
+    });
 
     res.status(200).json({ msg: "Product updated", product: updatedProduct });
   } catch (error) {
@@ -219,6 +239,46 @@ const updateProductSeller = async (req, res) => {
       message: "Error updating product",
       error: error.message || error,
     });
+  }
+};
+
+const deleteProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(deletedProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting product", error });
+  }
+};
+
+const archiveProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { archiveStatus } = req.body; // Expecting true for archive, false for unarchive
+
+    // Find product by ID and update the archive status
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      { archive: archiveStatus }, // Set archive field based on the passed status
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const statusMessage = archiveStatus
+      ? "Product archived"
+      : "Product unarchived";
+    res.status(200).json({ message: statusMessage, product: updatedProduct });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating archive status", error });
   }
 };
 
@@ -233,4 +293,6 @@ module.exports = {
   filterProductSeller,
   updateProductSeller,
   getSellerById,
+  deleteProduct,
+  archiveProduct,
 };

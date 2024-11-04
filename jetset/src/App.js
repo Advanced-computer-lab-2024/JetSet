@@ -9,9 +9,10 @@ import RegisterTourist from "./components/tourist/RegisterTourist";
 import CreateSeller from "./components/Seller/CreateSeller";
 import SellerFrontend from "./components/SellerFrontend";
 import ProfileForm from "./components/Advertiser/ProfileAdvertiser";
-import Place from "./components/Place";
+import Place from "./components/TourismGovernor";
 import Tourist from "./components/TouristApp"; // Ensure the correct case here
 import TourGuide from "./components/TourGuide";
+import Login from "./components/login"; // Use consistent case for component import
 
 const App = () => {
   return (
@@ -29,6 +30,8 @@ const App = () => {
         <Route path="/createadvertiser" element={<ProfileForm />} />
         <Route path="/place" element={<Place />} />
         <Route path="/tourguide" element={<TourGuide />} />
+        <Route path="/login" element={<Login />} />{" "}
+        {/* Consistent casing here */}
       </Routes>
     </Router>
   );

@@ -1,0 +1,57 @@
+.guest-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.guest-table th,
+.guest-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.guest-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.guest-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.guest-table a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.guest-table a:hover {
+  text-decoration: underline;
+}
+
+/* Styles for buttons */
+.accept-button {
+  background-color: #4caf50; /* Green background */
+  color: white; /* White text */
+  border: none; /* No border */
+  padding: 8px 12px; /* Padding */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.accept-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+
+.reject-button {
+  background-color: #f44336; /* Red background */
+  color: white; /* White text */
+  border: none; /* No border */
+  padding: 8px 12px; /* Padding */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.reject-button:hover {
+  background-color: #e53935; /* Darker red on hover */
+}

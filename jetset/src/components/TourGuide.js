@@ -27,7 +27,7 @@ function TourGuide() {
             View Itineraries
           </button>
           <button onClick={() => setView("tourGuideProfile")}>
-            Create and Update Tour Guide Profile
+            Create Tour Guide Profile
           </button>
           <button onClick={() => setView("readtourGuideProfile")}>
             My Profile

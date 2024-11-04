@@ -23,6 +23,11 @@ const tourGuideSchema = new Schema(
     },
     years_of_experience: Number, // For Tour Guides
     previous_work: String, // For Tour Guides
+    images: {
+      type: [String],
+      default: [],
+    },
+    document: { type: [String] },
   },
   { timestamps: true }
 );

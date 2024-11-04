@@ -1,42 +1,132 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
-const ReadTourGuideProfileForm = ({ tourGuideID }) => {
+const TourGuideProfile = () => {
+  const tourGuideId = "66fff1c213c1a607c2caa0c6"; // Get the tour guide ID from the URL
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    mobile_number: "",
+    years_of_experience: "",
+    previous_work: "",
+    image: null,
+  });
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch the tour guide profile
-  const fetchTourGuideProfile = async (tourGuideID) => {
+  // Define the fetchProfile function
+  const fetchProfile = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/TourGuideProfile/${tourGuideID}`
+        `http://localhost:3000/TourGuideProfile/${tourGuideId}`
       );
-      setProfile(response.data);
-      setError("");
-    } catch (err) {
-      console.error("Error fetching tour guide profile:", err); // Log the full error
-      setError(err.response?.data?.message || "Error fetching the profile");
-      setProfile(null);
-    } finally {
-      setLoading(false);
+      setProfile(response.data.myProfile);
+      setFormData({
+        mobile_number: response.data.myProfile.mobile_number,
+        years_of_experience: response.data.myProfile.years_of_experience,
+        previous_work: response.data.myProfile.previous_work,
+        image: null, // Reset image as it's not fetched
+      });
+    } catch (error) {
+      console.error("Error fetching profile:", error);
     }
   };
 
   useEffect(() => {
-    if (tourGuideID) {
-      fetchTourGuideProfile(tourGuideID);
-    }
-  }, [tourGuideID]);
+    fetchProfile(); // Call fetchProfile when the component mounts
+  }, [tourGuideId]);
 
-  // Display loading or error states
-  if (loading) return <div>Loading profile...</div>;
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      image: e.target.files[0],
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = new FormData();
+
+    // Append only fields that are changed or updated
+    for (const key in formData) {
+      if (formData[key] !== "" && formData[key] !== null) {
+        form.append(key, formData[key]);
+      }
+    }
+
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/updateTourGuide/${tourGuideId}`,
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      alert(response.data.msg);
+      setIsEditing(false); // Exit edit mode after submission
+      fetchProfile(); // Refresh the profile data after update
+    } catch (error) {
+      alert(error.response.data.message);
+    }
+  };
+
+  if (!profile) return <div>Loading...</div>; // Show loading state
 
   return (
     <div>
-      <h2>Tour Guide Profile</h2>
-      {profile ? (
+      <h1>Tour Guide Profile</h1>
+      {isEditing ? (
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>Mobile Number:</label>
+            <input
+              type="tel"
+              name="mobile_number"
+              value={formData.mobile_number}
+              onChange={handleChange}
+              placeholder={profile.mobile_number} // Show current value as placeholder
+            />
+          </div>
+          <div>
+            <label>Years of Experience:</label>
+            <input
+              type="number"
+              name="years_of_experience"
+              value={formData.years_of_experience}
+              onChange={handleChange}
+              placeholder={profile.years_of_experience} // Show current value as placeholder
+            />
+          </div>
+          <div>
+            <label>Previous Work:</label>
+            <textarea
+              name="previous_work"
+              value={formData.previous_work}
+              onChange={handleChange}
+              placeholder={profile.previous_work} // Show current value as placeholder
+            />
+          </div>
+          <div>
+            <label>Profile Image:</label>
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </div>
+          <button type="submit">Update Profile</button>
+        </form>
+      ) : (
         <div>
           <p>
             <strong>Username:</strong> {profile.username}
@@ -53,12 +143,17 @@ const ReadTourGuideProfileForm = ({ tourGuideID }) => {
           <p>
             <strong>Previous Work:</strong> {profile.previous_work}
           </p>
+          {profile.images && (
+            <img
+              src={`http://localhost:3000/uploads/${profile.images}`}
+              alt="Profile"
+            />
+          )}
+          <button onClick={() => setIsEditing(true)}>Edit Profile</button>
         </div>
-      ) : (
-        <div>No profile data found.</div>
       )}
     </div>
   );
 };
 
-export default ReadTourGuideProfileForm;
+export default TourGuideProfile;
