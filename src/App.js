@@ -38,6 +38,10 @@ const {
   getAdsById,
   changePasswordAdvertiser,
   getadvertiser,
+  createTransportation,
+  gettransportation,
+  updateActivityCreator,
+  deleteAdvertiserAccount,
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const {
@@ -67,6 +71,7 @@ const {
   deleteProduct,
   archiveProduct,
   changePasswordSeller,
+  deleteSellerAccount,
 } = require("./Routes/sellerController");
 const {
   createPrefTag,
@@ -125,6 +130,12 @@ const {
   fileComplaint,
   viewMyComplaints,
   redeemMyPoints,
+  bookActivity,
+  bookItinerary,
+  cancelActivityBooking,
+  cancelItineraryBooking,
+  bookTransportation,
+  deleteTouristAccount,
 
 } = require("../src/Routes/touristController");
 
@@ -143,6 +154,7 @@ const {
   activateItinerary,
   deactivateItinerary,
   changePasswordTourGuide,
+  deleteTourGuideAccount,
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -424,3 +436,15 @@ app.put("/cpSeller/:id", changePasswordSeller);
 app.put("/cpTourguide/:id", changePasswordTourGuide);
 app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
 
+app.post("/book/:touristId/activity/:activityId", bookActivity);
+app.post("/book/:touristId/itinerary/:itineraryId", bookItinerary);
+app.delete('/cancelActivity/:touristId/:activityId', cancelActivityBooking);
+app.delete('/cancelItinerary/:touristId/:itineraryId', cancelItineraryBooking);
+app.post("/bookTransportation/:touristId/:transportationId", bookTransportation);
+app.post("/transportation", createTransportation);
+app.get("/gettrans", gettransportation);
+app.delete("/deleteAccTourist/:id", deleteTouristAccount);
+app.delete("/deleteAccTourguide/:id", deleteTourGuideAccount);
+app.put("/cr/:id", updateActivityCreator);
+app.delete("/deleteAccAdvertiser/:id", deleteAdvertiserAccount);
+app.delete("/deleteAccSeller/:id", deleteSellerAccount);

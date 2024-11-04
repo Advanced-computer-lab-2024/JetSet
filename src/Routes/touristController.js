@@ -6,6 +6,7 @@ const Tourist = require("../Models/Tourist.js");
 const TourGuide=require("../Models/TourGuide.js");
 const Category = require("../Models/Category.js");
 const Complaint = require("../Models/Complaint.js");
+const Transportation = require("../Models/Transportation");
 const { default: mongoose } = require("mongoose");
 
 const createTourist = async (req, res) => {
@@ -833,6 +834,192 @@ const redeemMyPoints= async (req, res) =>{
     return res.status(500).json({ error: 'An error occurred', details: error.message });
   }
 }
+const bookActivity = async (req, res) => {
+  const { touristId, activityId } = req.params;
+
+  try {
+    // Find the tourist
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the activity
+    const activity = await Activity.findById(activityId);
+    if (!activity || !activity.booking_open) {
+      return res.status(404).json({ message: "Activity not found or not available for booking" });
+    }
+
+    // Check if the tourist has already booked this activity
+    if (tourist.bookedActivities.includes(activityId)) {
+      return res.status(400).json({ message: "Activity already booked" });
+    }
+
+    // Update the tourist's bookedActivities and increment bookings count
+    tourist.bookedActivities.push(activityId);
+   // activity.bookings += 1; // Increment bookings count
+    await tourist.save();
+   // await activity.save();
+
+    res.status(200).json({ message: "Activity booked successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error booking activity", error });
+  }
+};
+
+const bookItinerary = async (req, res) => {
+  const { touristId, itineraryId } = req.params;
+
+  try {
+    // Find the tourist
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the itinerary
+    const itinerary = await Itinerary.findById(itineraryId);
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
+    }
+
+    // Check if the tourist has already booked this itinerary
+    if (tourist.bookedItineraries.includes(itineraryId)) {
+      return res.status(400).json({ message: "Itinerary already booked" });
+    }
+
+    // Update the tourist's bookedItineraries and increment bookings count
+    tourist.bookedItineraries.push(itineraryId);
+   // itinerary.bookings += 1; // Increment bookings count
+    await tourist.save();
+   // await itinerary.save();
+
+    res.status(200).json({ message: "Itinerary booked successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error booking itinerary", error });
+  }
+};
+
+const cancelActivityBooking = async (req, res) => {
+  const { touristId, activityId } = req.params;
+
+  try {
+    // Find the tourist
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the activity
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    // Check if the activity is within the 48-hour cancellation period
+    const hoursUntilActivity = (new Date(activity.date) - new Date()) / (1000 * 60 * 60);
+    if (hoursUntilActivity < 48) {
+      return res.status(400).json({ message: "Cannot cancel less than 48 hours before the activity" });
+    }
+
+    // Remove the activity ID from tourist's bookedActivities
+    tourist.bookedActivities = tourist.bookedActivities.filter(
+      (id) => id.toString() !== activityId
+    );
+    await tourist.save();
+
+    res.status(200).json({ message: "Activity booking cancelled successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error cancelling activity booking", error });
+  }
+};
+
+const cancelItineraryBooking = async (req, res) => {
+  const { touristId, itineraryId } = req.params;
+
+  try {
+    // Find the tourist
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the itinerary
+    const itinerary = await Itinerary.findById(itineraryId);
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
+    }
+
+    // Check if the itinerary is within the 48-hour cancellation period
+    const hoursUntilItinerary = (new Date(itinerary.start_date) - new Date()) / (1000 * 60 * 60);
+    if (hoursUntilItinerary < 48) {
+      return res.status(400).json({ message: "Cannot cancel less than 48 hours before the itinerary start date" });
+    }
+
+    // Remove the itinerary ID from tourist's bookedItineraries
+    tourist.bookedItineraries = tourist.bookedItineraries.filter(
+      (id) => id.toString() !== itineraryId
+    );
+    await tourist.save();
+
+    res.status(200).json({ message: "Itinerary booking cancelled successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error cancelling itinerary booking", error });
+  }
+};
+
+const bookTransportation = async (req, res) => {
+  const { touristId, transportationId } = req.params;
+
+  try {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const transportation = await Transportation.findById(transportationId);
+    if (!transportation) {
+      return res.status(404).json({ message: "Transportation option not found" });
+    }
+
+    if (tourist.bookedTransportations.includes(transportationId)) {
+      return res.status(400).json({ message: "Transportation already booked" });
+    }
+
+    tourist.bookedTransportations.push(transportationId);
+    await tourist.save();
+
+    res.status(200).json({ message: "Transportation booked successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error booking transportation", error });
+  }
+};
+
+const deleteTouristAccount = async (req, res) => {
+  try {
+    const { id } = req.params; // Get tourist ID from the URL
+
+    // Find the tourist by ID
+    const tourist = await Tourist.findById(id);
+
+    if (!tourist) {
+      return res.status(404).json({ success: false, message: "Tourist account not found" });
+    }
+
+    // Check if the tourist has any booked activities or itineraries
+    if (tourist.bookedActivities.length === 0 && tourist.bookedItineraries.length === 0) {
+      // If no activities or itineraries are booked, delete the account
+      await Tourist.findByIdAndDelete(id);
+      return res.status(200).json({ success: true, message: "Tourist account deleted successfully" });
+    } else {
+      // If there are booked activities or itineraries, deny deletion
+      return res.status(403).json({ success: false, message: "Cannot delete account: you have booked activities or itineraries" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "An error occurred while trying to delete the account" });
+  }
+};
 
 
 module.exports = {
@@ -867,5 +1054,11 @@ module.exports = {
   fileComplaint,
   viewMyComplaints,
   redeemMyPoints,
+  bookActivity,
+  bookItinerary,
+  cancelActivityBooking,
+  cancelItineraryBooking,
+  bookTransportation,
+  deleteTouristAccount,
 
 };

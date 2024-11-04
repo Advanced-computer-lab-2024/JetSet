@@ -15,6 +15,10 @@ import RatingForm from "./tourist/RatingForm"; // Import the new RatingForm
 import RateandcommentActivity from "./tourist/RateandcommentActivity";
 import RateandcommentItinerary from "./tourist/RateandcommentItinerary";
 import UpdatePreferencesForm from "./tourist/Prefrences"; // Import the preferences update form
+import ChangePassword from "./tourist/ChangePasswordForm";
+import Book from "./tourist/ActivitiesAndItineraries";
+import Transportations from "./tourist/Transportations";
+import DeleteAccount from "./tourist/DeleteAccount";
 
 import "./styles.css";
 
@@ -65,6 +69,14 @@ const Tourist = () => {
         return <RateandcommentItinerary touristId={touristId} />;
       case "updatePreferences": // New case for updating preferences
         return <UpdatePreferencesForm touristId={touristId} />;
+        case "changepassword":
+        return <ChangePassword />;
+      case "booking":
+        return <Book />;
+      case "transportation":
+        return <Transportations />;
+      case "deleteAcc":
+        return <DeleteAccount />;
 
       default:
         return (
@@ -106,6 +118,18 @@ const Tourist = () => {
             </button>
             <button onClick={() => setCurrentPage("ratingForm")}>
               Rate a Tour Guide
+            </button>
+            <button onClick={() => setCurrentPage("changepassword")}>
+              Change Password
+            </button>
+            <button onClick={() => setCurrentPage("booking")}>
+              Book/Cancel Activity&Itenirary
+            </button>
+            <button onClick={() => setCurrentPage("transportation")}>
+              Book Transportation
+            </button>
+            <button onClick={() => setCurrentPage("deleteAcc")}>
+              Delete My account
             </button>
             <button onClick={() => setCurrentPage("RateandcommentActivity")}>
               Rate and comment your activities

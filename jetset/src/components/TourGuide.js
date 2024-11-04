@@ -12,6 +12,8 @@ import ViewCreatedItineraries from "./Itinerary/ViewCreatedItineraries.js";
 import ReadItineraryList from "./Itinerary/ReadItineraryList.js";
 import Activate from "./Tourguide/Activate";  
 import Deactivate from "./Tourguide/Deactivate"; 
+import ChangePasswordForm from "./Tourguide/ChangePasswordForm.js";
+import DeleteAccount from "./Tourguide/DeleteAccount.js";
 
 function TourGuide() {
   const [view, setView] = useState("itineraries");
@@ -40,6 +42,12 @@ function TourGuide() {
           <button onClick={() => setView("ReadTouristItinerary")}>Read Tourist Itinerary</button>
           <button onClick={() => setView("activate")}>Activate Itinerary</button>
           <button onClick={() => setView("deactivate")}>Deactivate Itinerary</button>
+          <button onClick={() => setView("ChangePassword")}>
+            Change Password
+          </button>
+          <button onClick={() => setView("deleteAcc")}>
+            Delete my account
+          </button>
 
         </nav>
 
@@ -69,6 +77,12 @@ function TourGuide() {
         {view === "ViewCreatedItineraries" && <ViewCreatedItineraries id={tourGuideID} />}
         {view === "activate" && <Activate itineraryId={itineraryID} />}
         {view === "deactivate" && <Deactivate itineraryId={itineraryID} />}
+        {view === "ChangePassword" && (
+          <ChangePasswordForm id={tourGuideID} />
+        )}
+        {view === "deleteAcc" && (
+          <DeleteAccount id={tourGuideID} />
+        )}
       </header>
     </div>
   );

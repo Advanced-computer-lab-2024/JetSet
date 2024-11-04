@@ -29,6 +29,7 @@ import CreateTourismGovernor from "./Admin/CreateTourismGovernor";
 import GuestList from "./Admin/viewGuest";
 
 import ComplaintList from "./Admin/viewComplaints"; // Assuming this is the correct path and filename
+import ChangePasswordForm from "./Admin/ChangePasswordForm";
 
 function AdminFrontend() {
   // State for managing tags
@@ -51,6 +52,7 @@ function AdminFrontend() {
   const [showProductActions, setShowProductActions] = useState(false);
   const [showAccountActions, setShowAccountActions] = useState(false);
   const [showGuestActions, setShowGuestActions] = useState(false);
+  const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
 
   const fetchTags = async () => {
     setTagLoading(true);
@@ -131,6 +133,13 @@ function AdminFrontend() {
             </div>
           )}
         </section>
+        {/* Button to toggle ChangePasswordForm */}
+         <button onClick={() => setShowChangePasswordForm(!showChangePasswordForm)}>
+            {showChangePasswordForm ? "Hide Change Password" : "Change Password"}
+         </button>
+
+      {/* Conditionally render ChangePasswordForm */}
+      {showChangePasswordForm && <ChangePasswordForm />}
 
         {/* Guest Management Section */}
         <section className="management-section guest-management">
@@ -144,6 +153,7 @@ function AdminFrontend() {
             </div>
           )}
         </section>
+        
 
         {/* Tag Management Section */}
         <section className="management-section tag-management">
