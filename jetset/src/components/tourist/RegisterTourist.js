@@ -22,10 +22,12 @@ const TouristForm = () => {
     e.preventDefault();
     try {
       const response = await axios.post("/addTourist", tourist);
-      alert(response.data.msg);
-      navigate("/tourist");
+      alert(response.data.msg); // Show success message
+      // Navigate to the Tourist component after registration
+      navigate("/tourist", { state: { touristId: response.data.touristId } });
+      console.log(response.data.touristId);
     } catch (error) {
-      alert(error.response.data.error);
+      alert(error.response.data.error); // Show error message
     }
   };
 
@@ -38,33 +40,50 @@ const TouristForm = () => {
         name="username"
         placeholder="Username"
         onChange={handleChange}
+        required
       />
       <input
         type="password"
         name="password"
         placeholder="Password"
         onChange={handleChange}
+        required
       />
       <input
         type="email"
         name="email"
         placeholder="Email"
         onChange={handleChange}
+        required
       />
       <input
         type="text"
         name="mobile"
         placeholder="Mobile"
         onChange={handleChange}
+        required
       />
       <input
         type="text"
         name="nationality"
         placeholder="Nationality"
         onChange={handleChange}
+        required
       />
-      <input type="date" name="dob" placeholder="DOB" onChange={handleChange} />
-      <input type="text" name="job" placeholder="Job" onChange={handleChange} />
+      <input
+        type="date"
+        name="dob"
+        placeholder="DOB"
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="job"
+        placeholder="Job"
+        onChange={handleChange}
+        required
+      />
       <button type="submit">Create Tourist</button>
     </form>
 

@@ -26,6 +26,7 @@ function TourGuide() {
       <header className="App-header">
         <h1>Itinerary App</h1>
         <nav>
+
           <button onClick={() => setView("itineraries")}>View Itineraries</button>
           <button onClick={() => setView("tourGuideProfile")}>Create and Update Tour Guide Profile</button>
           <button onClick={() => setView("readtourGuideProfile")}>My Profile</button>
@@ -39,6 +40,7 @@ function TourGuide() {
           <button onClick={() => setView("ReadTouristItinerary")}>Read Tourist Itinerary</button>
           <button onClick={() => setView("activate")}>Activate Itinerary</button>
           <button onClick={() => setView("deactivate")}>Deactivate Itinerary</button>
+
         </nav>
 
         {/* Input for itinerary ID */}

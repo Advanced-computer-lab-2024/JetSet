@@ -1,55 +1,103 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const TourGuideProfileForm = ({ tourGuideID }) => {
+const CreateTourGuideProfile = () => {
   const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    email: "",
     mobile_number: "",
     years_of_experience: "",
     previous_work: "",
+    image: null,
   });
 
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  // Handle form changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
-  // Handle form submission
+  const handleImageChange = (e) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      image: e.target.files[0],
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const form = new FormData();
+    for (const key in formData) {
+      form.append(key, formData[key]);
+    }
+
     try {
       const response = await axios.post(
-        `http://localhost:3000/TourGuideProfile`,
-        formData
+        "http://localhost:3000/TourGuideProfile",
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
-      setMessage(response.data.msg);
-      setError(""); // Clear any previous error
-    } catch (err) {
-      console.log(err); // Add this line to check the actual error
-      setError(
-        err.response?.data?.message ||
-          "An error occurred while updating the profile."
-      );
-      setMessage(""); // Clear success message
+      alert(response.data.msg);
+      // Optionally reset the form or redirect the user
+      setFormData({
+        username: "",
+        password: "",
+        email: "",
+        mobile_number: "",
+        years_of_experience: "",
+        previous_work: "",
+        image: null,
+      });
+    } catch (error) {
+      alert(error.response.data.message);
     }
   };
 
   return (
     <div>
-      <h2>Create and Update Tour Guide Profile</h2>
-      {message && <p style={{ color: "green" }}>{message}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      <h1>Create Tour Guide Profile</h1>
       <form onSubmit={handleSubmit}>
+        <div>
+          <label>Username:</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label>Password:</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label>Email:</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
         <div>
           <label>Mobile Number:</label>
           <input
-            type="text"
+            type="tel"
             name="mobile_number"
             value={formData.mobile_number}
             onChange={handleChange}
@@ -75,10 +123,20 @@ const TourGuideProfileForm = ({ tourGuideID }) => {
             required
           />
         </div>
-        <button type="submit">Submit</button>
+        <div>
+          <label>Profile Image:</label>
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            required
+          />
+        </div>
+        <button type="submit">Create Profile</button>
       </form>
     </div>
   );
 };
 
-export default TourGuideProfileForm;
+export default CreateTourGuideProfile;

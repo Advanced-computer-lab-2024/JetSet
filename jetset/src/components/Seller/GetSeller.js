@@ -14,8 +14,8 @@ const GetSeller = ({ sellerId }) => {
       setError(null);
       try {
         const response = await axios.get(
-          `http://localhost:3000/getSellerById/${sellerId}`
-        ); // Get seller by ID
+          `http://localhost:3000/getSellerById/${sellerId}` // Get seller by ID
+        );
         setSeller(response.data.seller); // Assuming response.data.seller contains seller info
       } catch (err) {
         console.error("Error retrieving seller profile:", err);
@@ -39,6 +39,19 @@ const GetSeller = ({ sellerId }) => {
           <p>Email: {seller.email}</p>
           <p>Name: {seller.seller_name}</p>
           <p>Description: {seller.seller_description}</p>
+          {seller.images && seller.images.length > 0 && (
+            <div>
+              <h3>Images:</h3>
+              {seller.images.map((image, index) => (
+                <img
+                  key={index}
+                  src={`http://localhost:3000/uploads/${image}`} // Update this path according to your setup
+                  alt={`Seller image ${index + 1}`}
+                  style={{ width: "200px", height: "auto", margin: "5px" }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -12,16 +12,36 @@ const productSchema = new Schema(
       required: true,
     },
     description: String,
-    seller_username: {
-      type: String,
+    seller_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Seller",
     }, // added
     ratings: {
       type: Number,
       min: 0,
       max: 5,
     },
-    reviews: [String],
+    reviews: [
+      {
+        touristId: {
+          type: Schema.Types.ObjectId,
+          ref: "Tourist",
+          required: true,
+        },
+        reviewText: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
     quantity: Number,
+    sales: {
+      type: Number,
+      default: 0, // Default to 0 if not specified
+    },
+    archive: {
+      type: Boolean,
+      default: false, // Default to false if not specified
+    },
+
     images: [String],
   },
   { timestamps: true }

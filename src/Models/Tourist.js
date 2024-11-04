@@ -29,6 +29,12 @@ const touristSchema = new Schema(
     nationality: String,
     DOB: Date,
     job: String,
+    products: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
     wallet:
     { type:Number,
       default:0,

@@ -9,18 +9,39 @@ const CreateSeller = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState(null);
+  const [images, setImages] = useState([]); // State to hold the selected images
   const navigate = useNavigate(); // Initialize the navigate hook
+
+  const handleImageChange = (e) => {
+    setImages(e.target.files); // Store the selected files
+  };
 
   const handleCreateSeller = async (e) => {
     e.preventDefault();
+
+    // Create a FormData object to hold the form data and images
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+    formData.append("email", email);
+    formData.append("name", name);
+    formData.append("description", description);
+
+    // Append each selected image to the FormData object
+    for (let i = 0; i < images.length; i++) {
+      formData.append("images", images[i]);
+    }
+
     try {
-      const response = await axios.post("http://localhost:3000/createSeller", {
-        username,
-        password,
-        email,
-        name,
-        description,
-      });
+      const response = await axios.post(
+        "http://localhost:3000/createSeller",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Set the correct content type for file upload
+          },
+        }
+      );
 
       setMessage(response.data.msg); // Display success message
 
@@ -65,6 +86,15 @@ const CreateSeller = () => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         ></textarea>
+
+        {/* File input for image uploads */}
+        <input
+          type="file"
+          multiple // Allow multiple files
+          onChange={handleImageChange}
+          accept="image/*" // Accept only image files
+        />
+
         <button type="submit">Create Profile</button>
         {message && (
           <p

@@ -20,6 +20,13 @@ const tourGuideSchema = new Schema(
       type: String,
       required: false,
     },
+    years_of_experience: Number, // For Tour Guides
+    previous_work: String, // For Tour Guides
+    images: {
+      type: [String],
+      default: [],
+    },
+    document: { type: [String] },
     ratings: [
       {
         touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist', required: true },

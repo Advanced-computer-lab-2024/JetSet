@@ -23,6 +23,11 @@ const sellerSchema = new Schema(
     seller_description: {
       type: String,
     }, // For Sellers
+    images: {
+      type: [String],
+      default: [],
+    },
+    document: { type: [String] },
   },
   { timestamps: true }
 );

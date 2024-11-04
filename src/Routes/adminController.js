@@ -7,6 +7,7 @@ const Admin = require("../Models/Admin");
 const Product = require("../Models/Product");
 const Category = require("../Models/Category");
 const tagModel = require("../Models/Tag");
+const Guest = require("../Models/Guest.js");
 const Complaint = require("../Models/Complaint");
 
 //added
@@ -123,7 +124,15 @@ const updateProduct = async (req, res) => {
 
 const getProductsAdmin = async (req, res) => {
   try {
-    const products = await Product.find().populate("reviews.userId", "name");
+    const products = await Product.find()
+      .populate({
+        path: "reviews.touristId",
+        select: "username", // Only get the username field
+      })
+      .populate({
+        path: "seller_id",
+        select: "username",
+      });
     res.status(200).json(products);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -312,12 +321,81 @@ const deletePrefTag = async (req, res) => {
 };
 
 
+const getguests = async (req, res) => {
+  try {
+    const users = await Guest.find();
+
+
 const getadmin = async (req, res) => {
   try {
     const users = await Admin.find();
     res.status(200).json({ users });
   } catch (error) {
     res.status(400).json({ message: "Error retrieving users", error });
+  }
+};
+
+
+const acceptguest = async (req, res) => {
+  const guestId = req.params.id;
+  try {
+    const guest = await Guest.findById(guestId);
+
+    if (!guest) {
+      return res.status(404).json({ message: "Guest not found." });
+    }
+
+    // Determine the target schema based on the role
+    let Model;
+    switch (guest.role) {
+      case "tourguide":
+        Model = TourGuide;
+        break;
+      case "advertiser":
+        Model = Advertiser;
+        break;
+      case "seller":
+        Model = Seller;
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid guest role." });
+    }
+
+    // Create the new user in the respective schema
+    const newUser = new Model({
+      username: guest.username,
+      email: guest.email,
+      password: guest.password, // Ideally, hash the password
+      document: guest.document,
+    });
+    await newUser.save();
+
+    await Guest.findByIdAndDelete(guestId);
+
+    res.status(200).json({
+      message: `${guest.role} accepted and added to their respective collection.`,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error accepting guest.", error });
+  }
+};
+
+// Reject Guest and Remove from Guest Schema
+const rejectguest = async (req, res) => {
+  const guestId = req.params.id;
+
+  try {
+    const guest = await Guest.findById(guestId);
+    if (!guest) {
+      return res.status(404).json({ message: "Guest not found." });
+    }
+
+    // Remove the guest from the Guest collection
+    await Guest.findByIdAndDelete(guestId);
+
+    res.status(200).json({ message: "Guest has been rejected and removed." });
+  } catch (error) {
+    res.status(500).json({ message: "Error rejecting guest.", error });
   }
 };
 
@@ -347,6 +425,7 @@ const changePasswordAdmin = async (req, res) => {
 };
 
 
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -365,6 +444,9 @@ module.exports = {
   getProductsAdmin,
   sortProducts,
   gettourism,
+  getguests,
+  acceptguest,
+  rejectguest,
   changePasswordAdmin,
   getadmin,
   viewAllComplaints,

@@ -20,7 +20,7 @@ const createTourist = async (req, res) => {
       DOB: dob,
       job: job,
     });
-    res.status(200).json({ msg: "Tourist created" });
+    res.status(200).json({ msg: "Tourist created", touristId: user._id });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -51,21 +51,26 @@ const getTouristProfile = async (req, res) => {
 
 const updateTouristProfile = async (req, res) => {
   const { username, wallet, ...rest } = req.body;
+
   try {
-    const updatedTourist = await Tourist.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: { ...rest },
-      },
-      { new: true }
-    );
-    if (!updatedTourist) {
+    const tourist = await Tourist.findById(req.params.id);
+    if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
-    // Prevent updating username and wallet
-    updatedTourist.username = username;
-    updatedTourist.wallet = wallet;
-    await updatedTourist.save();
+
+    // Update fields while keeping username and wallet unchanged
+    const updatedTourist = await Tourist.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $set: {
+          ...rest,
+          username: tourist.username, // Keep existing username
+          wallet: tourist.wallet, // Keep existing wallet
+        },
+      },
+      { new: true, runValidators: true } // Validate during update
+    );
+
     res.status(200).json(updatedTourist);
   } catch (error) {
     res.status(400).json({ message: "Error updating tourist profile", error });
@@ -74,7 +79,16 @@ const updateTouristProfile = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("reviews.userId", "name");
+    // Find products that are not archived
+    const products = await Product.find({ archive: false })
+      .populate({
+        path: "reviews.touristId",
+        select: "username", // Only get the username field
+      })
+      .populate({
+        path: "seller_id",
+        select: "username",
+      });
     res.status(200).json(products);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -82,23 +96,24 @@ const getProducts = async (req, res) => {
 };
 
 //Sort products by ratings
-const sortProducts = async (req, res) => {
-  const { sortBy = "ratings", sortOrder = -1 } = req.body; // Default to sort by ratings in descending order
+const sortProductsTourist = async (req, res) => {
+  const { sortBy, sortOrder } = req.query; // Use req.query for GET requests
+
+  // Convert sortOrder to a number and validate it
+  const validSortOrder = Number(sortOrder); // Convert to number
+  const isSortOrderValid = validSortOrder === 1 || validSortOrder === -1;
 
   try {
-    // Validate sortBy and ensure it's either 'ratings' or 'price'
-    if (!["ratings", "price"].includes(sortBy)) {
-      return res
-        .status(400)
-        .json({ error: 'Invalid sort parameter. Use "ratings" or "price".' });
+    let sortOption = {};
+    if (sortBy === "ratings" && isSortOrderValid) {
+      // Ensure sortBy is valid
+      sortOption[sortBy] = validSortOrder; // Set sorting option based on valid input
     }
 
-    // Sorting logic
-    const sortOption = {};
-    sortOption[sortBy] = sortOrder; // Use the dynamic field for sorting
-
-    // Find and sort the products
-    const sortedProducts = await Product.find().sort(sortOption);
+    // Find and sort the products that are not archived
+    const sortedProducts = await Product.find({ archive: false }).sort(
+      sortOption
+    );
 
     // Return the sorted products
     res.json(sortedProducts);
@@ -333,20 +348,27 @@ const searchItinerary = async (req, res) => {
 const searchProductTourist = async (req, res) => {
   const { name } = req.query;
   try {
-    const product = await Product.find({ name });
-    res.status(200).json(product);
+    // Find products by name and ensure they are not archived
+    const products = await Product.find({
+      name,
+      archive: false,
+    });
+
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Error retrieving product", error });
   }
 };
 
-const filterProducts = async (req, res) => {
+const filterProductsTourist = async (req, res) => {
   const { limit } = req.query; // Use req.query for GET requests
   try {
-    const products = await Product.find({ price: { $lte: limit } }).populate(
-      "reviews.userId",
-      "name"
-    );
+    // Find products with price less than or equal to limit and ensure they are not archived
+    const products = await Product.find({
+      price: { $lte: limit },
+      archive: false,
+    }).populate("reviews.userId", "name");
+
     res.status(200).json(products);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -431,6 +453,76 @@ const filterHistoricalByTag = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
+
+const createRating = async (req, res) => {
+  const { productId } = req.params; // Get productId from the URL parameters
+  const { rating } = req.body; // Get the rating from the request body
+
+  try {
+    // Validate the rating
+    if (rating < 0 || rating > 5) {
+      return res
+        .status(400)
+        .json({ message: "Rating must be between 0 and 5." });
+    }
+
+    const product = await Product.findById(productId); // Find the product by ID
+    if (!product) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    // Calculate new average rating
+    const currentTotalRating = product.ratings * (product.reviews.length || 1);
+    const newTotalRating = currentTotalRating + rating;
+    product.ratings = newTotalRating / (product.reviews.length + 1); // Update average rating
+
+    await product.save(); // Save the updated product
+
+    res.status(200).json({
+      message: "Rating added successfully.",
+      averageRating: product.ratings,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const createReview = async (req, res) => {
+  const { productId } = req.params; // Get productId from the URL parameters
+  const { touristId, reviewText } = req.body; // Get touristId and reviewText from the request body
+
+  try {
+    const product = await Product.findById(productId); // Find the product by ID
+    if (!product) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    // Add the review to the product
+    product.reviews.push({ touristId, reviewText });
+    await product.save(); // Save the updated product
+
+    res.status(200).json({ message: "Review added successfully.", product });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getPurchasedProducts = async (req, res) => {
+  const { touristId } = req.params; // Get touristId from the URL parameters
+
+  try {
+    const tourist = await Tourist.findById(touristId).populate("products");
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found." });
+    }
+
+    res.status(200).json({ products: tourist.products });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 
 
 const rateandcommentItinerary = async (req, res) => {
@@ -749,12 +841,12 @@ module.exports = {
   getItineraries,
   filterActivity,
   searchProductTourist,
-  filterProducts,
+  filterProductsTourist,
   touristFilterItineraries,
   createTourist,
   getTouristProfile,
   updateTouristProfile,
-  sortProducts,
+  sortProductsTourist,
   filterHistoricalByTag,
   getlistActivities,
   viewAllPlaces, // Export the new method
@@ -763,6 +855,9 @@ module.exports = {
   seacrhPlace,
   searchActivity,
   searchItinerary,
+  createRating,
+  createReview,
+  getPurchasedProducts,
   rateandcommentItinerary,
   rateandcommentactivity,
   addRatingAndComment,
@@ -772,4 +867,5 @@ module.exports = {
   fileComplaint,
   viewMyComplaints,
   redeemMyPoints,
+
 };

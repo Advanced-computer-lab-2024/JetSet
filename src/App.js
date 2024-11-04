@@ -3,6 +3,24 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+
+const multer = require("multer");
+const path = require("path");
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(
+      null,
+      "D:/GUC/Semester 7/CSEN704 Advanced Computer lab/Virtual Trip Planner/JetSet/src/uploads"
+    ); // Set the path where images will be saved
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname); // Create a unique filename
+  },
+});
+
+const upload = multer({ storage: storage });
 const TourGuide = require("./Models/TourGuide.js");
 const Itinerary = require("./Models/Itinerary"); // Adjust path as necessary
 const Activity = require('./Models/Activity'); // Adjust the path 
@@ -22,7 +40,6 @@ const {
   getadvertiser,
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
-const itinerary = require("./Models/Itinerary");
 const {
   viewAllPlaces,
   createPlaces,
@@ -47,6 +64,8 @@ const {
   updateSeller,
   filterProductSeller,
   getSellerById,
+  deleteProduct,
+  archiveProduct,
   changePasswordSeller,
 } = require("./Routes/sellerController");
 const {
@@ -56,6 +75,9 @@ const {
   deletePrefTag,
   sortProducts,
   gettourism,
+  getguests,
+  acceptguest,
+  rejectguest,
   changePasswordAdmin,
   getadmin,
 } = require("./Routes/adminController");
@@ -78,8 +100,8 @@ const {
   SortActivities,
   filterActivity,
   searchProductTourist,
+  filterProductsTourist,
   getProducts,
-  filterProducts,
   touristFilterItineraries,
   createTourist,
   getTouristProfile,
@@ -90,6 +112,10 @@ const {
   seacrhPlace,
   searchActivity,
   searchItinerary,
+  sortProductsTourist,
+  createRating,
+  createReview,
+  getPurchasedProducts,
   rateandcommentItinerary,
   rateandcommentactivity,
   addRatingAndComment,
@@ -99,6 +125,7 @@ const {
   fileComplaint,
   viewMyComplaints,
   redeemMyPoints,
+
 } = require("../src/Routes/touristController");
 
 const {
@@ -112,6 +139,7 @@ const {
   viewCreatedItineraries,
   getItinerariesByDateRange,
   gettourguide,
+  updateTourGuideProfile,
   activateItinerary,
   deactivateItinerary,
   changePasswordTourGuide,
@@ -137,6 +165,14 @@ const MongoURI= process.env.MONGO_URI;
 const port= process.env.PORT;
 app.use(cors());
 
+// app.use(
+//   "/uploads",
+//   express.static(
+//     "D:/GUC/Semester 7/CSEN704 Advanced Computer lab/Virtual Trip Planner/JetSet/src/uploads"
+//   )
+// );
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 app.get("/api/tourGuides", async (req, res) => {
   try {
@@ -187,14 +223,14 @@ app.get("/home", (req, res) => {
 app.use(express.json());
 
 app.post("/addTourist", createTourist);
-app.post("/register", register);
+app.post("/register", upload.array("documents", 5), register); // Adjust maxCount as needed
 
 app.get("/getTourist/:id", getTouristProfile);
 app.put("/updateTourist/:id", updateTouristProfile);
 
-app.post("/addprofiles", createProfile);
+app.post("/addprofiles", upload.single("image"), createProfile);
 app.get("/profiles", getProfile);
-app.put("/updateprofiles/:id", updateProfile);
+app.put("/updateprofiles/:id", upload.single("image"), updateProfile);
 app.delete("/deleteprofiles/:id", deleteProfile);
 app.post("/addactivity", createActivity);
 app.put("/updateactivity/:id", updateActivity);
@@ -207,12 +243,13 @@ app.put("/updateProduct/:id", updateProduct);
 app.get("/itineraries", getItineraries);
 
 app.get("/TourGuide", getTourGuides);
-app.post("/TourGuideProfile", createTourGuideProfile);
+app.post("/TourGuideProfile", upload.single("image"), createTourGuideProfile);
 app.get("/TourGuideProfile/:tourGuideID", readTourGuideProfile);
-app.patch("/TourGuideProfile/:tourGuideID", createTourGuideProfile);
-
-app.get("/products", getProducts);
-app.get("/productsAdmin", getProductsAdmin);
+app.put(
+  "/updateTourGuide/:tourGuideId",
+  upload.single("image"),
+  updateTourGuideProfile
+);
 
 app.post("/addCategory", createCategory);
 app.get("/viewCategory", getCategory);
@@ -220,7 +257,7 @@ app.put("/updateCategory/:categoryId", updateCategory);
 app.delete("/deleteCategory/:categoryId", deleteCategory);
 app.get("/filterActivity", filterActivity);
 app.get("/filterActivityGuest", filterActivityGuest);
-app.get("/searchProductTourist", searchProductTourist);
+
 app.get("/searchProductAdmin", searchProductAdmin);
 
 app.get("/viewAllPlaces", viewAllPlaces);
@@ -257,22 +294,33 @@ app.post("/createTouristItineraries/:id", createTouristItinerary);
 app.get("/getTouristItineraries", readTouristItinerary);
 app.put("/updateTouristItineraries/:id", updateTouristItinerary);
 app.delete("/deleteTouristItineraries/:id", deleteTouristItinerary);
-
 app.get("/tourist-itineraries", getItinerariesByDateRange);
-app.get("/filterProducts", filterProducts);
 app.get("/filterHistoricalTags", filterHistoricalByTag);
 
 //seller Controller
-app.post("/createSeller", createSeller);
+app.post("/createSeller", upload.single("image"), createSeller);
 app.get("/getSeller", getSeller);
-app.put("/updateSeller/:id", updateSeller);
+app.put("/updateSeller/:id", upload.single("image"), updateSeller);
 app.get("/searchProductSeller", searchProductSeller);
 app.get("/filterProduct", filterProductSeller);
 app.get("/sortProducts", sortProducts);
+
+
+app.post("/createproducts", upload.single("image"), createProductSeller);
+
+app.put("/editproduct/:id", upload.single("image"), updateProductSeller);
+
 app.post("/createproduct", createProductSeller);
 app.put("/editproduct/:id", updateProductSeller); //update rating for product (shahd and habiba)
+
 // Add the new route to fetch seller by username
 app.get("/getSellerById/:id", getSellerById);
+app.delete("/deleteproduct/:productId", deleteProduct);
+
+app.get("/products", getProducts);
+app.get("/productsAdmin", getProductsAdmin);
+
+app.put("/archieve/:productId", archiveProduct);
 
 //Admin Controller
 app.delete("/deleteAccount", deleteAccount);
@@ -281,7 +329,12 @@ app.post("/admin", createAdmin);
 
 app.get("/get", gettourism);
 
+app.get("/guest", getguests);
+
 app.get("/getTour", gettourguide);
+
+app.post("/acceptguest/:id", acceptguest);
+app.get("/rejectguest/:id", rejectguest);
 
 //Tourist Controller
 app.get("/sortactivities", SortActivities);
@@ -289,6 +342,60 @@ app.get("/SortItineraries", SortItineraries);
 app.get("/searchplace", seacrhPlace);
 app.get("/searchactivity", searchActivity);
 app.get("/searchitinerary", searchItinerary);
+
+app.get("/gettourist", getTourist);
+app.get("/sortproductTourist", sortProductsTourist);
+app.get("/searchProductTourist", searchProductTourist);
+app.get("/filterProductTourist", filterProductsTourist);
+app.put("/rate/:productId", createRating);
+app.put("/review/:productId", createReview);
+app.get("/purchased-products/:touristId", getPurchasedProducts);
+
+const Tourist = require("../src/Models/Tourist");
+const Product = require("../src/Models/Product");
+
+app.put("/buyProduct/:touristId", async (req, res) => {
+  const { touristId } = req.params; // Get the tourist ID from the route parameters
+  const { productId, purchaseQuantity } = req.body; // Get product ID and quantity to purchase from the request body
+
+  try {
+    // Find the tourist by ID
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the product by ID
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if there is enough stock
+    if (product.quantity < purchaseQuantity) {
+      return res.status(400).json({ message: "Insufficient product quantity" });
+    }
+
+    // Update the product's quantity and sales
+    product.quantity -= purchaseQuantity;
+    product.sales += purchaseQuantity;
+    await product.save(); // Save the updated product document
+
+    // Add the product ID to the tourist's products array
+    tourist.products.push(productId);
+    await tourist.save(); // Save the updated tourist document
+
+    res.status(200).json({
+      message: "Product purchased successfully",
+      tourist,
+      product,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error purchasing product" });
+  }
+});
+
 app.get("/gets", getTourist);
 app.post("/rateandcommentItinerary/:id",rateandcommentItinerary);
 app.post("/rateandcommentactivity/:id",rateandcommentactivity);

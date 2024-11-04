@@ -1,6 +1,8 @@
 const advertiserModel = require("../Models/Advertiser.js");
 const Activity = require("../Models/Activity.js");
 
+const path = require("path");
+
 const createProfile = async (req, res) => {
   const {
     email,
@@ -13,6 +15,8 @@ const createProfile = async (req, res) => {
   } = req.body;
 
   try {
+    const imageFilename = req.file ? path.basename(req.file.path) : "";
+
     const profile = await advertiserModel.create({
       email,
       username,
@@ -21,6 +25,7 @@ const createProfile = async (req, res) => {
       website,
       hotline,
       companyDescription,
+      images: imageFilename,
     });
 
     res.status(201).json(profile);
@@ -40,17 +45,21 @@ const getAdsById = async (req, res) => {
   const sanitizedId = id.replace(/:/g, "");
   try {
     const adv = await advertiserModel.findById(sanitizedId); // Use findById to find by MongoDB ID
-    //console.log("Fetched seller:", seller); // Debug log
 
     if (!adv) {
       return res.status(404).json({ message: "Advertiser not found." });
     }
-    await adv.save();
+
+    // No need to save the document if we are just retrieving it
     res.status(200).json({ adv });
   } catch (error) {
     console.error("Error retrieving Advertisor profile:", error); // Debug log
+    // Check for validation errors
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: "Validation Error", error });
+    }
     res
-      .status(400)
+      .status(500)
       .json({ message: "Error retrieving Advertisor profile.", error });
   }
 };
@@ -68,12 +77,24 @@ const updateProfile = async (req, res) => {
   const { id } = req.params;
   const { company_name, website, hotline, companyDescription } = req.body;
 
+  // Dynamically build the update object
+  const updateData = {};
+
+  if (company_name) updateData.company_name = company_name;
+  if (website) updateData.website = website;
+  if (hotline) updateData.hotline = hotline;
+  if (companyDescription) updateData.companyDescription = companyDescription;
+
+  // Conditionally add the image filename if a new file is uploaded
+  if (req.file) {
+    const imageFilename = path.basename(req.file.path);
+    updateData.images = imageFilename;
+  }
+
   try {
-    const profile = await advertiserModel.findByIdAndUpdate(
-      id,
-      { company_name, website, hotline, companyDescription },
-      { new: true }
-    );
+    const profile = await advertiserModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
     if (!profile) {
       return res.status(404).json({ error: "Profile not found" });
