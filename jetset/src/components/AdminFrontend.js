@@ -28,7 +28,6 @@ import CreateTourismGovernor from "./Admin/CreateTourismGovernor";
 
 import GuestList from "./Admin/viewGuest";
 
-
 import ComplaintList from "./Admin/viewComplaints"; // Assuming this is the correct path and filename
 
 function AdminFrontend() {
@@ -105,7 +104,6 @@ function AdminFrontend() {
   }, []);
 
   return (
-
     <div className="admin-frontend">
       <header>
         <h1>Admin Dashboard</h1>
@@ -129,9 +127,11 @@ function AdminFrontend() {
               <DeleteAccount />
               <CreateAdmin />
               <CreateTourismGovernor />
+              <ComplaintList />
             </div>
           )}
         </section>
+
         {/* Guest Management Section */}
         <section className="management-section guest-management">
           <h2>Guest Management</h2>
@@ -158,9 +158,15 @@ function AdminFrontend() {
           {showTagActions && (
             <div className="tag-actions">
               <CreateTag setTags={setTags} />
-              <TagList tags={tags} />
-              <UpdateTag tags={tags} />
-              <DeleteTag tags={tags} setTags={setTags} />
+              {tags.length > 0 ? (
+                <>
+                  <TagList tags={tags} />
+                  <UpdateTag tags={tags} />
+                  <DeleteTag tags={tags} setTags={setTags} />
+                </>
+              ) : (
+                <p>No tags available to update, delete, or display.</p>
+              )}
             </div>
           )}
         </section>
@@ -180,12 +186,18 @@ function AdminFrontend() {
           {showCategoryActions && (
             <div className="category-actions">
               <CreateCategory setCategories={setCategories} />
-              <CategoryList categories={categories} />
-              <UpdateCategory categories={categories} />
-              <DeleteCategory
-                categories={categories}
-                setCategories={setCategories}
-              />
+              {categories.length > 0 ? (
+                <>
+                  <CategoryList categories={categories} />
+                  <UpdateCategory categories={categories} />
+                  <DeleteCategory
+                    categories={categories}
+                    setCategories={setCategories}
+                  />
+                </>
+              ) : (
+                <p>No categories available to update, delete, or display.</p>
+              )}
             </div>
           )}
         </section>
@@ -217,65 +229,7 @@ function AdminFrontend() {
           )}
         </section>
       </main>
-
-    <div className="App">
-      <h1>Admin</h1>
-      {/* Tag Management Section */}
-      <h2>Tag Management</h2>
-      {tagLoading && <p>Loading tags...</p>}
-      {tagError && <p style={{ color: "red" }}>{tagError}</p>}
-      <CreateTag setTags={setTags} />
-      {tags.length > 0 ? (
-        <>
-          <TagList tags={tags} />
-          <UpdateTag tags={tags} />
-          <DeleteTag tags={tags} setTags={setTags} />
-        </>
-      ) : (
-        <p>No tags available to update, delete, or display.</p>
-      )}
-      {/* Category Management Section */}
-      <h2>Category Management</h2>
-      {categoryLoading && <p>Loading categories...</p>}
-      {categoryError && <p style={{ color: "red" }}>{categoryError}</p>}
-      <CreateCategory setCategories={setCategories} />
-      {categories.length > 0 ? (
-        <>
-          <UpdateCategory categories={categories} />
-          <DeleteCategory
-            categories={categories}
-            setCategories={setCategories}
-          />
-          <CategoryList categories={categories} />
-        </>
-      ) : (
-        <p>No categories available to update, delete, or display.</p>
-      )}
-      {/* Product Management Section */}
-      <h2>Product Management</h2>
-      <AddProduct />
-      <EditProduct />
-      <FilterProducts />
-      <SearchProduct />
-      <ProductList
-        products={products}
-        loading={productLoading}
-        error={productError}
-      />
-      <h2>Sort Products</h2>
-      <SortProducts products={products} />{" "}
-      {/* Pass products to SortProducts component */}
-      {/* Account Management Section */}
-      <h2>Account Management</h2>
-      <DeleteAccount />
-      <CreateAdmin />
-      <CreateTourismGovernor />
-      <ComplaintList />
-
-
     </div>
- 
-    
   );
 }
 

@@ -64,13 +64,13 @@ const createAdmin = async (req, res) => {
       .json({ message: "Error creating Admin", error: error.message || error });
   }
 };
-const viewAllComplaints= async (req, res) => {
+const viewAllComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find(); // Fetch all complaints from the database
     res.status(200).json(complaints); // Send complaints in the response
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to fetch complaints from database' });
+    res.status(500).json({ error: "Failed to fetch complaints from database" });
   }
 };
 //Product
@@ -320,11 +320,14 @@ const deletePrefTag = async (req, res) => {
   }
 };
 
-
 const getguests = async (req, res) => {
   try {
     const users = await Guest.find();
-
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(400).json({ message: "Error retrieving users", error });
+  }
+};
 
 const getadmin = async (req, res) => {
   try {
@@ -334,7 +337,6 @@ const getadmin = async (req, res) => {
     res.status(400).json({ message: "Error retrieving users", error });
   }
 };
-
 
 const acceptguest = async (req, res) => {
   const guestId = req.params.id;
@@ -423,8 +425,6 @@ const changePasswordAdmin = async (req, res) => {
     res.status(500).json({ message: "Error updating password", error });
   }
 };
-
-
 
 module.exports = {
   createTourismGoverner,
