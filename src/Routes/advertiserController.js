@@ -1,5 +1,7 @@
 const advertiserModel = require("../Models/Advertiser.js");
 const Activity = require("../Models/Activity.js");
+const Transportation = require("../Models/Transportation");
+const Tourist = require("../Models/Tourist.js");
 
 const createProfile = async (req, res) => {
   const {
@@ -109,7 +111,7 @@ const createActivity = async (req, res) => {
     location,
     category,
     special_discount,
-    bookingOpen,
+    booking_open,
     tags,
   } = req.body;
 
@@ -122,7 +124,7 @@ const createActivity = async (req, res) => {
       location,
       category,
       special_discount,
-      bookingOpen,
+      booking_open,
       tags,
     });
     res.status(201).json(activity);
@@ -234,6 +236,106 @@ const getadvertiser = async (req, res) => {
     res.status(400).json({ message: "Error retrieving users", error });
   }
 };
+const createTransportation = async (req, res) => {
+  const { type, company, price, availability, pickup_location, dropoff_location, creator } = req.body;
+
+  try {
+    const transportation = await Transportation.create({
+      type,
+      company,
+      price,
+      availability,
+      pickup_location,
+      dropoff_location,
+      creator,
+    });
+
+    res.status(200).json({ message: "Transportation created successfully", transportation });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const gettransportation = async (req, res) => {
+  try {
+    const transportation = await Transportation.find();
+    res.status(200).json({ transportation });
+  } catch (error) {
+    res.status(400).json({ message: "Error retrieving transpotations", error });
+  }
+};
+
+const updateActivityCreator = async (req, res) => {
+  const { id } = req.params;
+  const {
+    creator
+  } = req.body;
+  const sanitizedId = id.replace(/:/g, "");
+  try {
+    const activity = await Activity.findByIdAndUpdate(
+      sanitizedId,
+      {
+        creator
+      },
+      { new: true }
+    );
+
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    res.status(200).json(activity);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+const deleteAdvertiserAccount = async (req, res) => {
+  try {
+    const { id } = req.params; // Get advertiser ID from the URL
+    console.log(`Request to delete advertiser account with ID: ${id}`);
+
+    // Find the advertiser by ID
+    const advertiser = await advertiserModel.findById(id);
+    if (!advertiser) {
+      console.log(`Advertiser account not found for ID: ${id}`);
+      return res.status(404).json({ success: false, message: "Advertiser account not found" });
+    }
+    console.log(`Found advertiser: ${advertiser.username}`);
+
+    // Find activities created by the advertiser
+    const activities = await Activity.find({ creator: advertiser._id });
+    console.log(`Found activities created by advertiser: ${activities.length}`);
+
+    // Collect all activity IDs created by the advertiser
+    const activityIds = activities.map(activity => activity._id);
+    console.log(`Activity IDs: ${activityIds}`);
+
+    // Check if any tourists have booked these activities
+    const touristsWithBookings = await Tourist.find({
+      bookedActivities: { $in: activityIds },
+    });
+    console.log(`Tourists with bookings for these activities: ${touristsWithBookings.length}`);
+
+    if (touristsWithBookings.length > 0) {
+      // If any tourist has booked the activities, deny deletion
+      console.log("Cannot delete account: there are tourists who have booked activities.");
+      return res.status(403).json({ success: false, message: "Cannot delete account: you have booked activities" });
+    }
+
+    // If no tourists have booked the activities, delete the advertiser account and their activities
+    await Activity.deleteMany({ creator: advertiser._id }); // Delete activities
+    console.log(`Deleted activities created by advertiser: ${advertiser.username}`);
+    
+    await advertiserModel.findByIdAndDelete(id); // Delete advertiser account
+    console.log(`Deleted advertiser account: ${advertiser.username}`);
+
+    return res.status(200).json({ success: true, message: "Advertiser account deleted successfully" });
+  } catch (error) {
+    console.error("Error occurred while deleting advertiser account:", error);
+    return res.status(500).json({ success: false, message: "An error occurred while trying to delete the account" });
+  }
+};
+
 module.exports = {
   createProfile,
   getProfile,
@@ -247,4 +349,8 @@ module.exports = {
   getAdsById,
   changePasswordAdvertiser,
   getadvertiser,
+  createTransportation,
+  gettransportation,
+  updateActivityCreator,
+  deleteAdvertiserAccount,
 };

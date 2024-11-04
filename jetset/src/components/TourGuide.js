@@ -10,6 +10,8 @@ import UpdateTouristItineraryForm from "./TouristItinerary/UpdateTouristItinerar
 import DeleteTouristItineraryForm from "./TouristItinerary/DeleteTouristItineraryForm.js";
 import ViewCreatedItineraries from "./Itinerary/ViewCreatedItineraries.js";
 import ReadItineraryList from "./Itinerary/ReadItineraryList.js";
+import ChangePasswordForm from "./Tourguide/ChangePasswordForm.js";
+import DeleteAccount from "./Tourguide/DeleteAccount.js";
 
 function TourGuide() {
   const [view, setView] = useState("itineraries"); // State to toggle between views
@@ -56,6 +58,12 @@ function TourGuide() {
           <button onClick={() => setView("ReadTouristItinerary")}>
             Read Tourist Itinerary
           </button>
+          <button onClick={() => setView("ChangePassword")}>
+            Change Password
+          </button>
+          <button onClick={() => setView("deleteAcc")}>
+            Delete my account
+          </button>
         </nav>
 
         {/* Conditionally render components based on the view */}
@@ -83,6 +91,12 @@ function TourGuide() {
         )}
         {view === "ViewCreatedItineraries" && (
           <ViewCreatedItineraries id={tourGuideID} />
+        )}
+        {view === "ChangePassword" && (
+          <ChangePasswordForm id={tourGuideID} />
+        )}
+        {view === "deleteAcc" && (
+          <DeleteAccount id={tourGuideID} />
         )}
       </header>
     </div>

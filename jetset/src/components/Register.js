@@ -15,7 +15,7 @@ const Register = () => {
 
     // Navigate to the appropriate page based on role selection
     if (selectedRole === "tourist") {
-      navigate("/touristregister"); // Navigate to Tourist register page
+      navigate("/tourist"); // Navigate to Tourist register page
     } else if (selectedRole === "admin") {
       navigate("/admin"); // Navigate to Admin page
     } else if (selectedRole === "seller") {

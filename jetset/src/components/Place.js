@@ -4,6 +4,7 @@ import PlaceForm from "./Place/PlaceForm";
 import TagForm from "./Tag/TagForm";
 import ActivitiesList from "./Activity/ActivityListAdv";
 import ItineraryList from "./Itinerary/ItinerariesList";
+import ChangePasswordForm from "./Place/ChangePasswordForm";
 
 const PlaceManagement = () => {
   return (
@@ -15,6 +16,8 @@ const PlaceManagement = () => {
       <TagForm />
       <ActivitiesList />
       <ItineraryList />
+      <h1>Change Password</h1>
+      <ChangePasswordForm />
     </div>
   );
 };

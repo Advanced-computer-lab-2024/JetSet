@@ -25,6 +25,7 @@ import SortProducts from "./Products/SortProducts";
 import DeleteAccount from "./Admin/DeleteAccount";
 import CreateAdmin from "./Admin/CreateAdmin";
 import CreateTourismGovernor from "./Admin/CreateTourismGovernor";
+import ChangePasswordForm from "./Admin/ChangePasswordForm";
 
 function AdminFrontend() {
   // State for managing tags
@@ -41,6 +42,8 @@ function AdminFrontend() {
   const [products, setProducts] = useState([]);
   const [productLoading, setProductLoading] = useState(true);
   const [productError, setProductError] = useState(null);
+  // State to manage ChangePasswordForm visibility
+  const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
 
   // Fetch tags from the backend
   const fetchTags = async () => {
@@ -113,6 +116,17 @@ function AdminFrontend() {
       ) : (
         <p>No tags available to update, delete, or display.</p>
       )}
+
+
+     {/* Button to toggle ChangePasswordForm */}
+      <button onClick={() => setShowChangePasswordForm(!showChangePasswordForm)}>
+        {showChangePasswordForm ? "Hide Change Password" : "Change Password"}
+      </button>
+
+      {/* Conditionally render ChangePasswordForm */}
+      {showChangePasswordForm && <ChangePasswordForm />}
+
+
       {/* Category Management Section */}
       <h2>Category Management</h2>
       {categoryLoading && <p>Loading categories...</p>}

@@ -9,6 +9,10 @@ import SearchProduct from "./Products/SearchProduct"; // Ensure the casing match
 import ProductList from "./Products/ProductList"; // Ensure the casing matches the file
 import FilterProducts from "./Products/FilterProducts"; // Ensure the casing matches the file
 import SortProducts from "./Products/SortProducts"; // Ensure the casing matches the file
+import ChangePassword from "./tourist/ChangePasswordForm";
+import Book from "./tourist/ActivitiesAndItineraries";
+import Transportations from "./tourist/Transportations";
+import DeleteAccount from "./tourist/DeleteAccount";
 import "./styles.css";
 
 const Tourist = () => {
@@ -34,6 +38,14 @@ const Tourist = () => {
         return <FilterProducts />;
       case "SortProduct":
         return <SortProducts />;
+      case "changepassword":
+        return <ChangePassword />;
+      case "booking":
+        return <Book />;
+      case "transportation":
+        return <Transportations />;
+      case "deleteAcc":
+        return <DeleteAccount />;
       default:
         return (
           <div>
@@ -62,6 +74,18 @@ const Tourist = () => {
             </button>
             <button onClick={() => setCurrentPage("searchProduct")}>
               Search Products
+            </button>
+            <button onClick={() => setCurrentPage("changepassword")}>
+              Change Password
+            </button>
+            <button onClick={() => setCurrentPage("booking")}>
+              Book/Cancel Activity&Itenirary
+            </button>
+            <button onClick={() => setCurrentPage("transportation")}>
+              Book Transportation
+            </button>
+            <button onClick={() => setCurrentPage("deleteAcc")}>
+              Delete My account
             </button>
           </div>
         );

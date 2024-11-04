@@ -247,6 +247,40 @@ const changePasswordSeller = async (req, res) => {
   }
 };
 
+const deleteSellerAccount = async (req, res) => {
+  try {
+    const { id } = req.params; // Get seller ID from the URL
+    console.log(`Request to delete seller account with ID: ${id}`);
+
+    // Find the seller by ID
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      console.log(`Seller account not found for ID: ${id}`);
+      return res.status(404).json({ success: false, message: "Seller account not found" });
+    }
+    console.log(`Found seller: ${seller.username}`);
+
+    // Find products created by the seller
+    const products = await Product.find({ seller_id: seller._id });
+    console.log(`Found products created by seller: ${products.length}`);
+
+    // If products exist, delete them
+    if (products.length > 0) {
+      await Product.deleteMany({ seller_id: seller._id }); // Delete all products associated with the seller
+      console.log(`Deleted products created by seller: ${seller.username}`);
+    }
+
+    // Delete the seller account
+    await Seller.findByIdAndDelete(id);
+    console.log(`Deleted seller account: ${seller.username}`);
+
+    return res.status(200).json({ success: true, message: "Seller account deleted successfully" });
+  } catch (error) {
+    console.error("Error occurred while deleting seller account:", error);
+    return res.status(500).json({ success: false, message: "An error occurred while trying to delete the account" });
+  }
+};
+
 module.exports = {
   createSeller,
   getSeller,
@@ -259,4 +293,5 @@ module.exports = {
   updateProductSeller,
   getSellerById,
   changePasswordSeller,
+  deleteSellerAccount,
 };

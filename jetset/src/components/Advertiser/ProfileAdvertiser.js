@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ActivityForm from "../Activity/ActivityProfileAdv"; // Import ActivityForm
+import ChangePasswordForm from "./ChangePasswordForm";
+import DeleteAccount from "./DeleteAccount";
 
 const ProfileForm = ({ onProfileCreated }) => {
   const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
@@ -25,6 +27,7 @@ const ProfileForm = ({ onProfileCreated }) => {
   const [profiles, setProfiles] = useState([]); // State to store profiles
   const [isFetchingProfiles, setIsFetchingProfiles] = useState(false); // State to indicate fetching
   const [selectedAdvertiserId, setSelectedAdvertiserId] = useState(null); // For selected advertiser ID
+  const [showChangePassword, setShowChangePassword] = useState(false); // State to toggle ChangePasswordForm
 
   // Fetch profiles when the component mounts
   useEffect(() => {
@@ -234,6 +237,17 @@ const ProfileForm = ({ onProfileCreated }) => {
           console.log("Activity created:", activity);
         }}
       />
+
+      {/* Button to toggle ChangePasswordForm */}
+      <button onClick={() => setShowChangePassword(!showChangePassword)}>
+        {showChangePassword ? "Hide Change Password" : "Change Password"}
+      </button>
+
+      {/* Conditionally render the ChangePasswordForm */}
+      {showChangePassword && <ChangePasswordForm />}
+
+    <DeleteAccount advertiserId="6707bb596d08e5f1f78e31f1" />
+
     </div>
   );
 };

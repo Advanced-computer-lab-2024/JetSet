@@ -12,8 +12,9 @@ const productSchema = new Schema(
       required: true,
     },
     description: String,
-    seller_username: {
-      type: String,
+    seller_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Seller"
     }, // added
     ratings: {
       type: Number,

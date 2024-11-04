@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const bookingModel = require("../Models/Activity.js");
 //TOURIST ITINERARY
 const TouristItinerary = require("../Models/TouristsItinerary.js");
+const Tourist = require("../Models/Tourist.js");
 const Tag = require("../Models/Tag.js"); // Assuming tags are stored here
 
 const createTourGuideProfile = async (req, res) => {
@@ -389,6 +390,43 @@ const changePasswordTourGuide = async (req, res) => {
   }
 };
 
+const deleteTourGuideAccount = async (req, res) => {
+  try {
+    const { id } = req.params; // Get tour guide ID from the URL
+
+    // Find the tour guide by ID
+    const tourGuide = await TourGuide.findById(id);
+    if (!tourGuide) {
+      return res.status(404).json({ success: false, message: "Tour guide account not found" });
+    }
+
+    // Find itineraries created by the tour guide
+    const itineraries = await itineraryModel.find({ created_by: tourGuide._id });
+
+    // Collect all itinerary IDs created by the tour guide
+    const itineraryIds = itineraries.map(itinerary => itinerary._id);
+
+    // Check if any tourists have booked these itineraries
+    const touristsWithBookings = await Tourist.find({
+      bookedItineraries: { $in: itineraryIds },
+    });
+
+    if (touristsWithBookings.length > 0) {
+      // If any tourist has booked the itineraries, deny deletion
+      return res.status(403).json({ success: false, message: "Cannot delete account: you have booked itineraries" });
+    }
+
+    // If no tourists have booked the itineraries, delete the tour guide account and their itineraries
+    await itineraryModel.deleteMany({ created_by: tourGuide._id }); // Delete itineraries
+    
+    await TourGuide.findByIdAndDelete(id); // Delete tour guide account
+
+    return res.status(200).json({ success: true, message: "Tour guide account deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "An error occurred while trying to delete the account" });
+  }
+};
+
 module.exports = {
   createTourGuideProfile,
   getTourGuides,
@@ -405,4 +443,5 @@ module.exports = {
   getItinerariesByDateRange,
   gettourguide,
   changePasswordTourGuide,
+  deleteTourGuideAccount,
 };

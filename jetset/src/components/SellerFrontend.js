@@ -9,6 +9,8 @@ import FilterProducts from "./Products/FilterProducts"; // Import FilterProducts
 import ProductList from "./Products/ProductList"; // Import ProductList
 import SearchProduct from "./Products/SearchProduct"; // Import SearchProduct
 import SortProducts from "./Products/SortProducts"; // Import SortProducts
+import ChangePasswordForm from "./Seller/ChangePasswordForm";
+import DeleteAccount from "./Seller/DeleteAccount";
 
 const SellerFrontend = () => {
   const sellerId = "66fc4923b6a7073d648f1bc0"; // Hardcoded seller ID
@@ -19,6 +21,7 @@ const SellerFrontend = () => {
   const [showProductList, setShowProductList] = useState(false);
   const [showSearchProduct, setShowSearchProduct] = useState(false);
   const [showSortProducts, setShowSortProducts] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   return (
     <div>
@@ -65,6 +68,14 @@ const SellerFrontend = () => {
         {showSortProducts ? "Cancel Sort" : "Sort Products"}
       </button>
       {showSortProducts && <SortProducts />}
+      
+      {/* Button to toggle ChangePassword */}
+      <button onClick={() => setShowChangePassword(!showChangePassword)}>
+        {showSortProducts ? "Cancel Password" : "Change Password"}
+      </button>
+      {showChangePassword && <ChangePasswordForm />}
+
+      <DeleteAccount sellerId="670307388ee1a9de350b6b1e" />
     </div>
   );
 };

@@ -22,6 +22,24 @@ const touristSchema = new Schema(
     DOB: Date,
     job: String,
     wallet: Number,
+    bookedActivities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Activity",
+      },
+    ],
+    bookedItineraries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Itinerary",
+      },
+    ],
+    bookedTransportations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Transportation",
+      },
+    ],
   },
   { timestamps: true }
 );
