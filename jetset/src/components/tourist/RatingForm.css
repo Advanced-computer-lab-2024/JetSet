@@ -1,0 +1,30 @@
+.star-rating {
+    display: flex;
+    gap: 5px; /* Space between stars */
+}
+
+.star {
+    font-size: 24px; /* Size of stars */
+    cursor: pointer;
+    color: gray; /* Default star color */
+    transition: color 0.2s ease; /* Smooth transition for color changes */
+}
+
+.star.filled {
+    color: gold; /* Color for filled stars */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between form elements */
+}
+
+label {
+    font-weight: bold; /* Make labels bold */
+}
+
+textarea {
+    resize: vertical; /* Allow vertical resizing */
+    min-height: 50px; /* Minimum height for textarea */
+}

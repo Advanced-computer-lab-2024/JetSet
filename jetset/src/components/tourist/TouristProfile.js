@@ -43,8 +43,21 @@ const TouristProfile = ({ touristId }) => {
 
   return (
     <div>
-      <h2>Tourist Profile</h2>
-      {tourist ? (
+
+      <h2>Get Tourist Profile</h2>
+      <input
+  type="text"
+  placeholder="Enter Tourist ID"
+  value={touristId}
+  onChange={(e) => {
+    const id = e.target.value;
+    setTouristId(id);
+    localStorage.setItem('touristId', id); // Save to localStorage as the user types
+  }}
+/>
+      <button onClick={fetchTourist}>Fetch Profile</button>
+
+      {tourist && (
         <div>
           <h3>{tourist.username}</h3>
           <p>Email: {tourist.email}</p>

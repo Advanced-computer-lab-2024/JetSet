@@ -34,6 +34,20 @@ const itinerarySchema = new Schema(
       ref: "Category",
       required: false,
     },
+   
+    ratings: [
+      {
+        touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist', required: true },
+        rating: { type: Number, required: true, min: 1, max: 5 }, // Rating between 1 and 5
+        comment: { type: String, required: false },
+      },
+    ],
+
+    status: {
+      type: String,
+      enum: ['active', 'inactive'],
+      default: 'active', // Default status is active
+    },
 
     created_by: {
       type: mongoose.Schema.Types.ObjectId,

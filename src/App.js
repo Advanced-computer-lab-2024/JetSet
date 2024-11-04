@@ -1,9 +1,9 @@
 // app.js
-
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+
 const multer = require("multer");
 const path = require("path");
 
@@ -21,6 +21,9 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+const TourGuide = require("./Models/TourGuide.js");
+const Itinerary = require("./Models/Itinerary"); // Adjust path as necessary
+const Activity = require('./Models/Activity'); // Adjust the path 
 
 const {
   createProfile,
@@ -33,6 +36,8 @@ const {
   getlistActivities,
   viewCreatedActivities,
   getAdsById,
+  changePasswordAdvertiser,
+  getadvertiser,
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const {
@@ -43,6 +48,7 @@ const {
   updatePlace,
   deletePlace,
   createTag,
+  changePasswordTourismGoverner,
 } = require("./Routes/tourismgovernerController");
 const {
   filterActivityGuest,
@@ -60,6 +66,7 @@ const {
   getSellerById,
   deleteProduct,
   archiveProduct,
+  changePasswordSeller,
 } = require("./Routes/sellerController");
 const {
   createPrefTag,
@@ -71,6 +78,8 @@ const {
   getguests,
   acceptguest,
   rejectguest,
+  changePasswordAdmin,
+  getadmin,
 } = require("./Routes/adminController");
 
 const {
@@ -84,6 +93,7 @@ const {
   searchProductAdmin,
   deleteAccount,
   createTourismGoverner,
+  viewAllComplaints,
 } = require("./Routes/adminController");
 
 const {
@@ -106,6 +116,16 @@ const {
   createRating,
   createReview,
   getPurchasedProducts,
+  rateandcommentItinerary,
+  rateandcommentactivity,
+  addRatingAndComment,
+  updateTouristPreferences,
+  changePasswordTourist,
+  addLoyaltyPoints,
+  fileComplaint,
+  viewMyComplaints,
+  redeemMyPoints,
+
 } = require("../src/Routes/touristController");
 
 const {
@@ -120,6 +140,9 @@ const {
   getItinerariesByDateRange,
   gettourguide,
   updateTourGuideProfile,
+  activateItinerary,
+  deactivateItinerary,
+  changePasswordTourGuide,
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -131,18 +154,15 @@ const {
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
-dotenv.config();
+ dotenv.config();
 
 // App variables
 const app = express();
 
-const port = process.env.PORT || 3000;
-
-const MongoURI = process.env.MONGO_URI;
-
-// Middleware
 app.use(express.json());
 
+const MongoURI= process.env.MONGO_URI;
+const port= process.env.PORT;
 app.use(cors());
 
 // app.use(
@@ -153,6 +173,36 @@ app.use(cors());
 // );
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+//app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
+app.get("/api/tourGuides", async (req, res) => {
+  try {
+      const tourGuides = await TourGuide.find({}, 'username _id'); // Fetch usernames and IDs
+      res.json(tourGuides);
+  } catch (error) {
+      console.error("Error fetching tour guides:", error);
+      res.status(500).json({ message: 'Error fetching tour guides' });
+  }
+});
+
+app.get("/api/itineraryIds", async (req, res) => {
+  try {
+    const itineraryIds = await Itinerary.find({}, '_id name'); // Fetch IDs and names
+    res.json(itineraryIds);
+  } catch (error) {
+    console.error('Error fetching itinerary IDs:', error);
+    res.status(500).json({ error: 'Failed to fetch itinerary1 IDs' });
+  }
+});
+
+app.get("/api/activities", async (req, res) => {
+  try {
+    const activities = await Activity.find({}, '_id title'); // Adjust fields as necessary
+    res.json(activities);
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    res.status(500).json({ error: 'Failed to fetch activities' });
+  }
+});
 
 // MongoDB Connection
 mongoose
@@ -218,6 +268,10 @@ app.delete("/deletePlace/:id", deletePlace);
 app.post("/addTourismGoverner", createTourismGoverner);
 app.post("/addTag", createTag);
 app.get("/Tags", AllTags);
+app.post("/complaints/:touristId", fileComplaint);
+app.get("/complaints/:touristId",viewMyComplaints)
+app.get("/viewAllComplaints", viewAllComplaints);
+// const response = await axios.get('http://localhost:3000/viewAllComplaints');
 
 app.use(express.json());
 app.post("/addItinerary", createItinerary);
@@ -225,6 +279,8 @@ app.get("/Itineraries", getItineraries);
 app.put("/updateItinerary/:id", updateItinerary);
 app.delete("/deleteItinerary", deleteItinerary);
 app.get("/listofiternaries/:id", viewCreatedItineraries);
+app.post("/activateItinerary/:id",activateItinerary);
+app.post("/deactivateItinerary/:id",deactivateItinerary);
 
 app.use(express.json());
 app.post("/addPreferancetag", createPrefTag);
@@ -249,9 +305,14 @@ app.get("/searchProductSeller", searchProductSeller);
 app.get("/filterProduct", filterProductSeller);
 app.get("/sortProducts", sortProducts);
 
+
 app.post("/createproducts", upload.single("image"), createProductSeller);
 
 app.put("/editproduct/:id", upload.single("image"), updateProductSeller);
+
+app.post("/createproduct", createProductSeller);
+app.put("/editproduct/:id", updateProductSeller); //update rating for product (shahd and habiba)
+
 // Add the new route to fetch seller by username
 app.get("/getSellerById/:id", getSellerById);
 app.delete("/deleteproduct/:productId", deleteProduct);
@@ -281,6 +342,7 @@ app.get("/SortItineraries", SortItineraries);
 app.get("/searchplace", seacrhPlace);
 app.get("/searchactivity", searchActivity);
 app.get("/searchitinerary", searchItinerary);
+
 app.get("/gettourist", getTourist);
 app.get("/sortproductTourist", sortProductsTourist);
 app.get("/searchProductTourist", searchProductTourist);
@@ -334,5 +396,31 @@ app.put("/buyProduct/:touristId", async (req, res) => {
   }
 });
 
+app.get("/gets", getTourist);
+app.post("/rateandcommentItinerary/:id",rateandcommentItinerary);
+app.post("/rateandcommentactivity/:id",rateandcommentactivity);
+app.post("/comment/:id", addRatingAndComment);
+app.put("/tourist/preferences/:id", updateTouristPreferences);
+
+app.put("/redeemMyPoints/:id",redeemMyPoints);
+app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
+app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
+
+
+
+
+
+
 //Advertisor
 app.get("/getAdv/:id", getAdsById);
+
+////////////////////////////////////////////
+app.put("/cpTourist/:id", changePasswordTourist);
+app.put("/cpAdmin/:id", changePasswordAdmin);
+app.get("/getadmin", getadmin);
+app.put("/cpAdvertiser/:id", changePasswordAdvertiser);
+app.get("/getadvertiser", getadvertiser);
+app.put("/cpSeller/:id", changePasswordSeller);
+app.put("/cpTourguide/:id", changePasswordTourGuide);
+app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
+

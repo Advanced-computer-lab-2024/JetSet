@@ -32,6 +32,7 @@ const TouristForm = () => {
   };
 
   return (
+    
     <form onSubmit={handleSubmit}>
       <h2>Create Tourist</h2>
       <input
@@ -85,6 +86,7 @@ const TouristForm = () => {
       />
       <button type="submit">Create Tourist</button>
     </form>
+
   );
 };
 

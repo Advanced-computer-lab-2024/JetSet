@@ -400,6 +400,83 @@ const gettourguide = async (req, res) => {
   }
 };
 
+const changePasswordTourGuide = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const tourguideId = req.params.id;
+
+  try {
+    const tourguide = await TourGuide.findById(tourguideId);
+    if (!tourguide) {
+      return res.status(404).json({ message: "Tourguide not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (tourguide.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    tourguide.password = newPassword;
+    await tourguide.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
+
+const activateItinerary = async (req, res) => {
+  const { id } = req.params;
+
+  if (!validateObjectId(id)) {
+    return res.status(400).json({ error: "Invalid itinerary ID format" });
+  }
+
+  try {
+    const itinerary = await itineraryModel.findById(id);
+    if (!itinerary) {
+      return res.status(404).json({ error: "Itinerary not found" });
+    }
+
+    // Activate the itinerary
+    itinerary.status = 'active';
+    await itinerary.save();
+
+    res.status(200).json({ message: "Itinerary activated successfully", itinerary });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const deactivateItinerary = async (req, res) => {
+  const { id } = req.params;
+
+  if (!validateObjectId(id)) {
+    return res.status(400).json({ error: "Invalid itinerary ID format" });
+  }
+
+  try {
+    const itinerary = await itineraryModel.findById(id);
+    if (!itinerary) {
+      return res.status(404).json({ error: "Itinerary not found" });
+    }
+
+    // Check if there are any bookings
+    
+    if (itinerary.status === 'inactive') {
+      return res.status(400).json({ error: "Cannot deactivate itinerary already inactive" });
+    }
+
+    // Deactivate the itinerary
+    itinerary.status = 'inactive';
+    await itinerary.save();
+
+    res.status(200).json({ message: "Itinerary deactivated successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 module.exports = {
   createTourGuideProfile,
   getTourGuides,
@@ -416,4 +493,8 @@ module.exports = {
   getItinerariesByDateRange,
   gettourguide,
   updateTourGuideProfile,
+  activateItinerary,
+  deactivateItinerary,
+  changePasswordTourGuide,
+
 };

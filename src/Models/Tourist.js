@@ -17,17 +17,41 @@ const touristSchema = new Schema(
       type: String,
       required: true,
     },
+    preferences: {
+      historicAreas: { type: Boolean, default: false },
+      beaches: { type: Boolean, default: false },
+      familyFriendly: { type: Boolean, default: false },
+      shopping: { type: Boolean, default: false },
+      budget: { type: Number, default: 0 }, // Default budget
+    },
+    
     mobile_number: String,
     nationality: String,
     DOB: Date,
     job: String,
-    wallet: Number,
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
     ],
+    wallet:
+    { type:Number,
+      default:0,
+    },
+    loyaltyPoints: {
+      type: Number,
+      default: 0,
+    },
+    level: {
+      type: Number,
+      default: 1,
+    },
+    badge:{
+      type: String, 
+      default:"Bronze",     
+      required: true,
+    }
   },
   { timestamps: true }
 );

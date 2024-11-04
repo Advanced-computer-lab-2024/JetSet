@@ -25,9 +25,15 @@ import SortProducts from "./Products/SortProducts";
 import DeleteAccount from "./Admin/DeleteAccount";
 import CreateAdmin from "./Admin/CreateAdmin";
 import CreateTourismGovernor from "./Admin/CreateTourismGovernor";
+
 import GuestList from "./Admin/viewGuest";
 
+
+import ComplaintList from "./Admin/viewComplaints"; // Assuming this is the correct path and filename
+
 function AdminFrontend() {
+  // State for managing tags
+
   const [tags, setTags] = useState([]);
   const [tagLoading, setTagLoading] = useState(true);
   const [tagError, setTagError] = useState(null);
@@ -99,6 +105,7 @@ function AdminFrontend() {
   }, []);
 
   return (
+
     <div className="admin-frontend">
       <header>
         <h1>Admin Dashboard</h1>
@@ -210,7 +217,65 @@ function AdminFrontend() {
           )}
         </section>
       </main>
+
+    <div className="App">
+      <h1>Admin</h1>
+      {/* Tag Management Section */}
+      <h2>Tag Management</h2>
+      {tagLoading && <p>Loading tags...</p>}
+      {tagError && <p style={{ color: "red" }}>{tagError}</p>}
+      <CreateTag setTags={setTags} />
+      {tags.length > 0 ? (
+        <>
+          <TagList tags={tags} />
+          <UpdateTag tags={tags} />
+          <DeleteTag tags={tags} setTags={setTags} />
+        </>
+      ) : (
+        <p>No tags available to update, delete, or display.</p>
+      )}
+      {/* Category Management Section */}
+      <h2>Category Management</h2>
+      {categoryLoading && <p>Loading categories...</p>}
+      {categoryError && <p style={{ color: "red" }}>{categoryError}</p>}
+      <CreateCategory setCategories={setCategories} />
+      {categories.length > 0 ? (
+        <>
+          <UpdateCategory categories={categories} />
+          <DeleteCategory
+            categories={categories}
+            setCategories={setCategories}
+          />
+          <CategoryList categories={categories} />
+        </>
+      ) : (
+        <p>No categories available to update, delete, or display.</p>
+      )}
+      {/* Product Management Section */}
+      <h2>Product Management</h2>
+      <AddProduct />
+      <EditProduct />
+      <FilterProducts />
+      <SearchProduct />
+      <ProductList
+        products={products}
+        loading={productLoading}
+        error={productError}
+      />
+      <h2>Sort Products</h2>
+      <SortProducts products={products} />{" "}
+      {/* Pass products to SortProducts component */}
+      {/* Account Management Section */}
+      <h2>Account Management</h2>
+      <DeleteAccount />
+      <CreateAdmin />
+      <CreateTourismGovernor />
+      <ComplaintList />
+
+
     </div>
+ 
+    
   );
 }
 

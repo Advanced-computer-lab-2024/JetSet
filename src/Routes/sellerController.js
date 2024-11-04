@@ -282,6 +282,31 @@ const archiveProduct = async (req, res) => {
   }
 };
 
+const changePasswordSeller = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const sellerId = req.params.id;
+
+  try {
+    const seller = await Seller.findById(sellerId);
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    // Skip password hashing, compare directly
+    if (seller.password !== oldPassword) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    // Directly assign the new password (plain-text)
+    seller.password = newPassword;
+    await seller.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+};
+
 module.exports = {
   createSeller,
   getSeller,
@@ -295,4 +320,5 @@ module.exports = {
   getSellerById,
   deleteProduct,
   archiveProduct,
+  changePasswordSeller,
 };
