@@ -91,9 +91,22 @@ const TouristProducts = ({ touristId }) => {
         {products.map((product) => (
           <li key={product._id}>
             <h2>{product.name}</h2>
-            <p>{product.description}</p>
-            <p>Price: ${product.price}</p>
-            <p>Average Rating: {product.ratings?.toFixed(1) || "N/A"}</p>
+            <p>
+              <strong>Description:</strong> {product.description}
+            </p>
+            <p>
+              <strong>Price:</strong> ${product.price}
+            </p>
+            <p>
+              <strong>Quantity Purchased:</strong> {product.sales}
+            </p>
+            <p>
+              <strong>Seller:</strong> {product.seller_id?.username}
+            </p>
+            <p>
+              <strong>Average Rating:</strong>{" "}
+              {product.ratings?.toFixed(1) || "N/A"}
+            </p>
             <div>
               <label>Rate this product:</label>
               {renderStars(product._id)}
@@ -101,7 +114,7 @@ const TouristProducts = ({ touristId }) => {
 
             <form onSubmit={(e) => handleReviewSubmit(e, product._id)}>
               <label>
-                Review:
+                <strong>Review:</strong>
                 <textarea
                   value={reviews[product._id] || ""} // Get review text for this product
                   onChange={(e) =>

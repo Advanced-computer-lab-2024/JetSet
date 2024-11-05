@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const TouristProfile = () => {
-  const [touristId, setTouristId] = useState("");
+const TouristProfile = ({ touristId }) => {
   const [tourist, setTourist] = useState(null);
   const [updateFields, setUpdateFields] = useState({});
 
-  const fetchTourist = async () => {
-    if (touristId) {
-      try {
-        const response = await axios.get(`/getTourist/${touristId}`);
-        setTourist(response.data);
-      } catch (error) {
-        alert(
-          error.response?.data?.message || "Error fetching tourist profile"
-        );
+  useEffect(() => {
+    const fetchTourist = async () => {
+      if (touristId) {
+        try {
+          const response = await axios.get(`/getTourist/${touristId}`);
+          setTourist(response.data);
+        } catch (error) {
+          alert(
+            error.response?.data?.message || "Error fetching tourist profile"
+          );
+        }
       }
-    }
-  };
+    };
+    fetchTourist();
+  }, [touristId]);
 
   const handleUpdateChange = (e) => {
     setUpdateFields({ ...updateFields, [e.target.name]: e.target.value });
@@ -41,19 +43,7 @@ const TouristProfile = () => {
 
   return (
     <div>
-      <h2>Get Tourist Profile</h2>
-      <input
-        type="text"
-        placeholder="Enter Tourist ID"
-        value={touristId}
-        onChange={(e) => {
-          const id = e.target.value;
-          setTouristId(id);
-          localStorage.setItem("touristId", id); // Save to localStorage as the user types
-        }}
-      />
-      <button onClick={fetchTourist}>Fetch Profile</button>
-
+      <h2>Tourist Profile</h2>
       {tourist ? (
         <div>
           <h3>{tourist.username}</h3>
@@ -61,6 +51,7 @@ const TouristProfile = () => {
           <p>Nationality: {tourist.nationality}</p>
           <p>Job: {tourist.job}</p>
           <p>Mobile: {tourist.mobile_number}</p>
+          <p>Nationality:{tourist.nationality}</p>
 
           <h3>Update Profile</h3>
           <form onSubmit={handleUpdateSubmit}>
