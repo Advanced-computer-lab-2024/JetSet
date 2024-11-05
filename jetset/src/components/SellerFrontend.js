@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import GetSeller from "./Seller/GetSeller"; // Correct import for GetSeller
-import UpdateSeller from "./Seller/UpdateSeller"; // Correct import for UpdateSeller
+import GetSeller from "./Seller/SellerProfile";
 import AddProduct from "./Products/AddProduct"; // Import AddProduct
 import EditProduct from "./Products/EditProduct"; // Import EditProduct
 import FilterProducts from "./Products/FilterProducts"; // Import FilterProducts
@@ -25,11 +24,6 @@ const SellerFrontend = () => {
     <div>
       <h1>Seller</h1>
       <GetSeller sellerId={sellerId} />
-      <button onClick={() => setShowUpdate(!showUpdate)}>
-        {showUpdate ? "Cancel Update" : "Update Profile"}
-      </button>
-      {showUpdate && <UpdateSeller sellerId={sellerId} />}
-      <br />
       {/* Button to toggle AddProduct form */}
       <button onClick={() => setShowAddProduct(!showAddProduct)}>
         {showAddProduct ? "Cancel Add Product" : "Add Product"}
@@ -66,7 +60,6 @@ const SellerFrontend = () => {
         {showSortProducts ? "Cancel Password" : "Change Password"}
       </button>
       {showChangePassword && <ChangePasswordForm />}
-
       <DeleteAccount sellerId="670307388ee1a9de350b6b1e" />
     </div>
   );
