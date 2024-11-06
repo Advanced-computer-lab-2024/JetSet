@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 
 import TouristProfile from "./tourist/TouristProfile";
 import ActivityList from "./Activity/ActivitiesList";
-import ItineraryList from "./Itinerary/ItineraryList";
+import ItineraryList from "./Itinerary/ItineraryTourist";
 import HistoricalPlaces from "./Place/HistoricalPlacesList";
 import Search from "./tourist/SearchComponent";
 import ProductList from "./Products/productTourist";

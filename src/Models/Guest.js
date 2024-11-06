@@ -22,6 +22,10 @@ const guestSchema = new Schema(
       required: true,
     },
     document: { type: [String] },
+    flag: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

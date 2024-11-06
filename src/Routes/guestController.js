@@ -24,6 +24,61 @@ const register = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  const { user, password, role } = req.body;
+
+  try {
+    // Find the guest by username, password, and role
+    const guest = await Guest.findOne({ username: user, password, role });
+
+    // If guest not found or password does not match, return error
+    if (!guest) {
+      return res.status(404).json({ message: "You are rejected" });
+    }
+
+    if (guest.flag) {
+      res.status(200).json({
+        message: "Congratulations, you are accepted",
+        guest,
+      });
+    } else {
+      res.status(200).json({
+        message: "Waiting for the admin to accept you",
+        guest,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error during authentication.", error });
+  }
+};
+
+const deleteGuest = async (req, res) => {
+  const { user } = req.params; // Get username from request params
+
+  try {
+    // Find the guest by username
+    const guest = await Guest.findOne({ username: user });
+
+    if (!guest) {
+      return res.status(404).json({ message: "Guest not found" });
+    }
+
+    // Check the flag before deletion
+    if (guest.flag) {
+      await Guest.findOneAndDelete({ username: user }); // Delete by username
+      return res.status(200).json({ message: "Guest deleted successfully" });
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Guest cannot be deleted due to flag" });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
+};
+
 const filterActivityGuest = async (req, res) => {
   const { budget, date, category, rating } = req.body;
 
@@ -123,4 +178,6 @@ module.exports = {
   guestFilterItineraries,
   register,
   filterHistoricalByTag,
+  login,
+  deleteGuest,
 };

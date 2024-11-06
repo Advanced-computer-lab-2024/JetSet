@@ -187,7 +187,7 @@ const ActivitiesList = () => {
     setError(null); // Reset error state
 
     try {
-      const response = await axios.get("/getactivity"); // Assuming the endpoint is "/activities"
+      const response = await axios.get("/Acttour"); // Assuming the endpoint is "/activities"
       setActivities(response.data); // Store the activities in state
     } catch (err) {
       setError("Error fetching activities: " + err.message);

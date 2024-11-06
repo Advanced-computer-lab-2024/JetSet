@@ -31,6 +31,9 @@ import GuestList from "./Admin/viewGuest";
 import ComplaintList from "./Admin/viewComplaints"; // Assuming this is the correct path and filename
 import ChangePasswordForm from "./Admin/ChangePasswordForm";
 
+import Itineraries from "./Itinerary/FlagItinerary";
+import ActivityList from "./Activity/FlagActivity";
+
 function AdminFrontend() {
   // State for managing tags
 
@@ -53,6 +56,8 @@ function AdminFrontend() {
   const [showAccountActions, setShowAccountActions] = useState(false);
   const [showGuestActions, setShowGuestActions] = useState(false);
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
+  const [showItineraryActions, setShowItineraryActions] = useState(false);
+  const [showActivityActions, setShowActivityActions] = useState(false);
 
   const fetchTags = async () => {
     setTagLoading(true);
@@ -134,12 +139,14 @@ function AdminFrontend() {
           )}
         </section>
         {/* Button to toggle ChangePasswordForm */}
-         <button onClick={() => setShowChangePasswordForm(!showChangePasswordForm)}>
-            {showChangePasswordForm ? "Hide Change Password" : "Change Password"}
-         </button>
+        <button
+          onClick={() => setShowChangePasswordForm(!showChangePasswordForm)}
+        >
+          {showChangePasswordForm ? "Hide Change Password" : "Change Password"}
+        </button>
 
-      {/* Conditionally render ChangePasswordForm */}
-      {showChangePasswordForm && <ChangePasswordForm />}
+        {/* Conditionally render ChangePasswordForm */}
+        {showChangePasswordForm && <ChangePasswordForm />}
 
         {/* Guest Management Section */}
         <section className="management-section guest-management">
@@ -153,7 +160,6 @@ function AdminFrontend() {
             </div>
           )}
         </section>
-        
 
         {/* Tag Management Section */}
         <section className="management-section tag-management">
@@ -237,6 +243,30 @@ function AdminFrontend() {
               </aside>
             </div>
           )}
+        </section>
+
+        {/* Itinerary Management Section */}
+        <section className="management-section itinerary-management">
+          <h2>Itinerary Management</h2>
+          <button
+            onClick={() => setShowItineraryActions(!showItineraryActions)}
+          >
+            {showItineraryActions
+              ? "Hide Itinerary Actions"
+              : "Show Itinerary Actions"}
+          </button>
+          {showItineraryActions && <Itineraries />}
+        </section>
+
+        {/* Activity Management Section */}
+        <section className="management-section activity-management">
+          <h2>Activity Management</h2>
+          <button onClick={() => setShowActivityActions(!showActivityActions)}>
+            {showActivityActions
+              ? "Hide Activity Actions"
+              : "Show Activity Actions"}
+          </button>
+          {showActivityActions && <ActivityList />}
         </section>
       </main>
     </div>

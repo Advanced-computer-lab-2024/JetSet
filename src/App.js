@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const TourGuide = require("./Models/TourGuide.js");
 const Itinerary = require("./Models/Itinerary"); // Adjust path as necessary
-const Activity = require('./Models/Activity'); // Adjust the path 
+const Activity = require("./Models/Activity"); // Adjust the path
 
 const {
   createProfile,
@@ -58,6 +58,8 @@ const {
   filterActivityGuest,
   guestFilterItineraries,
   register,
+  login,
+  deleteGuest,
 } = require("./Routes/guestController");
 const {
   searchProductSeller,
@@ -99,6 +101,8 @@ const {
   deleteAccount,
   createTourismGoverner,
   viewAllComplaints,
+  flagItinerary,
+  flagActivity,
 } = require("./Routes/adminController");
 
 const {
@@ -136,7 +140,8 @@ const {
   cancelItineraryBooking,
   bookTransportation,
   deleteTouristAccount,
-
+  getItineraryTourist,
+  getActivityTourist,
 } = require("../src/Routes/touristController");
 
 const {
@@ -166,15 +171,15 @@ const {
 } = require("../src/Routes/tourguideController");
 
 // Load environment variables from .env file
- dotenv.config();
+dotenv.config();
 
 // App variables
 const app = express();
 
 app.use(express.json());
 
-const MongoURI= process.env.MONGO_URI;
-const port= process.env.PORT;
+const MongoURI = process.env.MONGO_URI;
+const port = process.env.PORT;
 app.use(cors());
 
 // app.use(
@@ -188,31 +193,31 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 //app.use("/api", advertiserRoutes); // Use advertiser routes under '/api'
 app.get("/api/tourGuides", async (req, res) => {
   try {
-      const tourGuides = await TourGuide.find({}, 'username _id'); // Fetch usernames and IDs
-      res.json(tourGuides);
+    const tourGuides = await TourGuide.find({}, "username _id"); // Fetch usernames and IDs
+    res.json(tourGuides);
   } catch (error) {
-      console.error("Error fetching tour guides:", error);
-      res.status(500).json({ message: 'Error fetching tour guides' });
+    console.error("Error fetching tour guides:", error);
+    res.status(500).json({ message: "Error fetching tour guides" });
   }
 });
 
 app.get("/api/itineraryIds", async (req, res) => {
   try {
-    const itineraryIds = await Itinerary.find({}, '_id name'); // Fetch IDs and names
+    const itineraryIds = await Itinerary.find({}, "_id name"); // Fetch IDs and names
     res.json(itineraryIds);
   } catch (error) {
-    console.error('Error fetching itinerary IDs:', error);
-    res.status(500).json({ error: 'Failed to fetch itinerary1 IDs' });
+    console.error("Error fetching itinerary IDs:", error);
+    res.status(500).json({ error: "Failed to fetch itinerary1 IDs" });
   }
 });
 
 app.get("/api/activities", async (req, res) => {
   try {
-    const activities = await Activity.find({}, '_id title'); // Adjust fields as necessary
+    const activities = await Activity.find({}, "_id title"); // Adjust fields as necessary
     res.json(activities);
   } catch (error) {
-    console.error('Error fetching activities:', error);
-    res.status(500).json({ error: 'Failed to fetch activities' });
+    console.error("Error fetching activities:", error);
+    res.status(500).json({ error: "Failed to fetch activities" });
   }
 });
 
@@ -236,6 +241,8 @@ app.use(express.json());
 
 app.post("/addTourist", createTourist);
 app.post("/register", upload.array("documents", 5), register); // Adjust maxCount as needed
+app.post("/login", login);
+app.delete("/deleteGuest/:user", deleteGuest);
 
 app.get("/getTourist/:id", getTouristProfile);
 app.put("/updateTourist/:id", updateTouristProfile);
@@ -281,7 +288,7 @@ app.post("/addTourismGoverner", createTourismGoverner);
 app.post("/addTag", createTag);
 app.get("/Tags", AllTags);
 app.post("/complaints/:touristId", fileComplaint);
-app.get("/complaints/:touristId",viewMyComplaints)
+app.get("/complaints/:touristId", viewMyComplaints);
 app.get("/viewAllComplaints", viewAllComplaints);
 // const response = await axios.get('http://localhost:3000/viewAllComplaints');
 
@@ -291,8 +298,8 @@ app.get("/Itineraries", getItineraries);
 app.put("/updateItinerary/:id", updateItinerary);
 app.delete("/deleteItinerary", deleteItinerary);
 app.get("/listofiternaries/:id", viewCreatedItineraries);
-app.post("/activateItinerary/:id",activateItinerary);
-app.post("/deactivateItinerary/:id",deactivateItinerary);
+app.post("/activateItinerary/:id", activateItinerary);
+app.post("/deactivateItinerary/:id", deactivateItinerary);
 
 app.use(express.json());
 app.post("/addPreferancetag", createPrefTag);
@@ -316,7 +323,6 @@ app.put("/updateSeller/:id", upload.single("image"), updateSeller);
 app.get("/searchProductSeller", searchProductSeller);
 app.get("/filterProduct", filterProductSeller);
 app.get("/sortProducts", sortProducts);
-
 
 app.post("/createproducts", upload.single("image"), createProductSeller);
 
@@ -348,6 +354,8 @@ app.get("/getTour", gettourguide);
 app.post("/acceptguest/:id", acceptguest);
 app.get("/rejectguest/:id", rejectguest);
 
+app.put("/flagItinerary/:id", flagItinerary);
+app.put("/flagActivity/:id", flagActivity);
 //Tourist Controller
 app.get("/sortactivities", SortActivities);
 app.get("/SortItineraries", SortItineraries);
@@ -362,6 +370,9 @@ app.get("/filterProductTourist", filterProductsTourist);
 app.put("/rate/:productId", createRating);
 app.put("/review/:productId", createReview);
 app.get("/purchased-products/:touristId", getPurchasedProducts);
+
+app.get("/itiTour", getItineraryTourist);
+app.get("/Acttour", getActivityTourist);
 
 const Tourist = require("../src/Models/Tourist");
 const Product = require("../src/Models/Product");
@@ -409,19 +420,14 @@ app.put("/buyProduct/:touristId", async (req, res) => {
 });
 
 app.get("/gets", getTourist);
-app.post("/rateandcommentItinerary/:id",rateandcommentItinerary);
-app.post("/rateandcommentactivity/:id",rateandcommentactivity);
+app.post("/rateandcommentItinerary/:id", rateandcommentItinerary);
+app.post("/rateandcommentactivity/:id", rateandcommentactivity);
 app.post("/comment/:id", addRatingAndComment);
 app.put("/tourist/preferences/:id", updateTouristPreferences);
 
-app.put("/redeemMyPoints/:id",redeemMyPoints);
-app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
-app.post("/addLoyaltyPoints/:id",addLoyaltyPoints);
-
-
-
-
-
+app.put("/redeemMyPoints/:id", redeemMyPoints);
+app.post("/addLoyaltyPoints/:id", addLoyaltyPoints);
+app.post("/addLoyaltyPoints/:id", addLoyaltyPoints);
 
 //Advertisor
 app.get("/getAdv/:id", getAdsById);
@@ -438,9 +444,12 @@ app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
 
 app.post("/book/:touristId/activity/:activityId", bookActivity);
 app.post("/book/:touristId/itinerary/:itineraryId", bookItinerary);
-app.delete('/cancelActivity/:touristId/:activityId', cancelActivityBooking);
-app.delete('/cancelItinerary/:touristId/:itineraryId', cancelItineraryBooking);
-app.post("/bookTransportation/:touristId/:transportationId", bookTransportation);
+app.delete("/cancelActivity/:touristId/:activityId", cancelActivityBooking);
+app.delete("/cancelItinerary/:touristId/:itineraryId", cancelItineraryBooking);
+app.post(
+  "/bookTransportation/:touristId/:transportationId",
+  bookTransportation
+);
 app.post("/transportation", createTransportation);
 app.get("/gettrans", gettransportation);
 app.delete("/deleteAccTourist/:id", deleteTouristAccount);
