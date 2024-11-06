@@ -440,10 +440,12 @@ const activateItinerary = async (req, res) => {
     }
 
     // Activate the itinerary
-    itinerary.status = 'active';
+    itinerary.status = "active";
     await itinerary.save();
 
-    res.status(200).json({ message: "Itinerary activated successfully", itinerary });
+    res
+      .status(200)
+      .json({ message: "Itinerary activated successfully", itinerary });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -463,13 +465,15 @@ const deactivateItinerary = async (req, res) => {
     }
 
     // Check if there are any bookings
-    
-    if (itinerary.status === 'inactive') {
-      return res.status(400).json({ error: "Cannot deactivate itinerary already inactive" });
+
+    if (itinerary.status === "inactive") {
+      return res
+        .status(400)
+        .json({ error: "Cannot deactivate itinerary already inactive" });
     }
 
     // Deactivate the itinerary
-    itinerary.status = 'inactive';
+    itinerary.status = "inactive";
     await itinerary.save();
 
     res.status(200).json({ message: "Itinerary deactivated successfully" });
@@ -485,14 +489,18 @@ const deleteTourGuideAccount = async (req, res) => {
     // Find the tour guide by ID
     const tourGuide = await TourGuide.findById(id);
     if (!tourGuide) {
-      return res.status(404).json({ success: false, message: "Tour guide account not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Tour guide account not found" });
     }
 
     // Find itineraries created by the tour guide
-    const itineraries = await itineraryModel.find({ created_by: tourGuide._id });
+    const itineraries = await itineraryModel.find({
+      created_by: tourGuide._id,
+    });
 
     // Collect all itinerary IDs created by the tour guide
-    const itineraryIds = itineraries.map(itinerary => itinerary._id);
+    const itineraryIds = itineraries.map((itinerary) => itinerary._id);
 
     // Check if any tourists have booked these itineraries
     const touristsWithBookings = await Tourist.find({
@@ -501,17 +509,32 @@ const deleteTourGuideAccount = async (req, res) => {
 
     if (touristsWithBookings.length > 0) {
       // If any tourist has booked the itineraries, deny deletion
-      return res.status(403).json({ success: false, message: "Cannot delete account: you have booked itineraries" });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Cannot delete account: you have booked itineraries",
+        });
     }
 
     // If no tourists have booked the itineraries, delete the tour guide account and their itineraries
     await itineraryModel.deleteMany({ created_by: tourGuide._id }); // Delete itineraries
-    
+
     await TourGuide.findByIdAndDelete(id); // Delete tour guide account
 
-    return res.status(200).json({ success: true, message: "Tour guide account deleted successfully" });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Tour guide account deleted successfully",
+      });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "An error occurred while trying to delete the account" });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "An error occurred while trying to delete the account",
+      });
   }
 };
 
@@ -535,5 +558,4 @@ module.exports = {
   deactivateItinerary,
   changePasswordTourGuide,
   deleteTourGuideAccount,
-
 };

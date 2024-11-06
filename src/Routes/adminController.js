@@ -9,6 +9,8 @@ const Category = require("../Models/Category");
 const tagModel = require("../Models/Tag");
 const Guest = require("../Models/Guest.js");
 const Complaint = require("../Models/Complaint");
+const itineraryModel = require("../Models/Itinerary.js");
+const Activity = require("../Models/Activity.js");
 
 //added
 //Tourism Governer
@@ -426,6 +428,52 @@ const changePasswordAdmin = async (req, res) => {
   }
 };
 
+const flagItinerary = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { flag } = req.body; // Expecting true for archive, false for unarchive
+
+    // Find product by ID and update the archive status
+    const updated = await itineraryModel.findByIdAndUpdate(
+      id,
+      { flag: flag }, // Set archive field based on the passed status
+      { new: true } // Return the updated document
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "itinerary not found" });
+    }
+
+    const statusMessage = flag ? "Itinerary flagged" : "Itinerary unflagged";
+    res.status(200).json({ message: statusMessage, itinerary: updated });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating archive status", error });
+  }
+};
+
+const flagActivity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { flag } = req.body; // Expecting true for archive, false for unarchive
+
+    // Find product by ID and update the archive status
+    const updated = await Activity.findByIdAndUpdate(
+      id,
+      { flag: flag }, // Set archive field based on the passed status
+      { new: true } // Return the updated document
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    const statusMessage = flag ? "Activity flagged" : "Activity unflagged";
+    res.status(200).json({ message: statusMessage, Activity: updated });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating archive status", error });
+  }
+};
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -450,4 +498,6 @@ module.exports = {
   changePasswordAdmin,
   getadmin,
   viewAllComplaints,
+  flagItinerary,
+  flagActivity,
 };

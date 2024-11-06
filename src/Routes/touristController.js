@@ -3,7 +3,7 @@ const Activity = require("../Models/Activity");
 const Itinerary = require("../Models/Itinerary");
 const Historical = require("../Models/Historical");
 const Tourist = require("../Models/Tourist.js");
-const TourGuide=require("../Models/TourGuide.js");
+const TourGuide = require("../Models/TourGuide.js");
 const Category = require("../Models/Category.js");
 const Complaint = require("../Models/Complaint.js");
 const Transportation = require("../Models/Transportation");
@@ -172,6 +172,24 @@ const SortItineraries = async (req, res) => {
   } catch (error) {
     console.error("Error fetching itineraries:", error);
     res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const getItineraryTourist = async (req, res) => {
+  try {
+    const itineraries = await Itinerary.find({ flag: false });
+    res.status(200).json(itineraries);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const getActivityTourist = async (req, res) => {
+  try {
+    const Activity = await Activity.find({ flag: false });
+    res.status(200).json(Activity);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };
 
@@ -455,7 +473,6 @@ const filterHistoricalByTag = async (req, res) => {
   }
 };
 
-
 const createRating = async (req, res) => {
   const { productId } = req.params; // Get productId from the URL parameters
   const { rating } = req.body; // Get the rating from the request body
@@ -524,17 +541,16 @@ const getPurchasedProducts = async (req, res) => {
   }
 };
 
-
-
 const rateandcommentItinerary = async (req, res) => {
-  const {itineraryId ,rating, comment } = req.body; // Expecting these fields in the request body
+  const { itineraryId, rating, comment } = req.body; // Expecting these fields in the request body
   const touristId = req.params.id; // Assuming the tourist ID is passed in the URL
-  
 
   try {
     // Validate input
     if (!itineraryId || !rating) {
-      return res.status(400).json({ error: "Itinerary ID and rating are required." });
+      return res
+        .status(400)
+        .json({ error: "Itinerary ID and rating are required." });
     }
 
     // Ensure rating is between 1 and 5
@@ -558,9 +574,13 @@ const rateandcommentItinerary = async (req, res) => {
     itinerary.ratings.push({ touristId, rating, comment });
     await itinerary.save();
 
-    return res.status(200).json({ message: "Itinerary rated successfully.", itinerary });
+    return res
+      .status(200)
+      .json({ message: "Itinerary rated successfully.", itinerary });
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error.", details: error.message });
+    return res
+      .status(500)
+      .json({ error: "Internal server error.", details: error.message });
   }
 };
 
@@ -601,28 +621,28 @@ const rateandcommentItinerary = async (req, res) => {
 // };
 
 const rateandcommentactivity = async (req, res) => {
-  const {activityId ,rating, comment } = req.body; // Expecting these fields in the request body
+  const { activityId, rating, comment } = req.body; // Expecting these fields in the request body
   const touristId = req.params.id; // Assuming the tourist ID is passed in the URL
-  
 
   try {
     // Validate input
     if (!activityId || !rating) {
-      return res.status(400).json({ error: "Activity ID and rating are required." });
+      return res
+        .status(400)
+        .json({ error: "Activity ID and rating are required." });
     }
 
     // Ensure rating is between 1 and 5
     if (rating < 1 || rating > 5) {
       return res.status(400).json({ error: "Rating must be between 1 and 5." });
     }
-    
+
     // Find the itinerary
     const activity = await Activity.findById(activityId);
     if (!activity) {
       return res.status(404).json({ message: "Activity not found." });
     }
-   
-    
+
     // Check if the tourist has already rated this itinerary
     // const existingRating = activity.ratings.find(r => r.touristId.toString() === touristId);
     // if (existingRating) {
@@ -633,56 +653,64 @@ const rateandcommentactivity = async (req, res) => {
     activity.ratings.push({ touristId, rating, comment });
     await activity.save();
 
-    return res.status(200).json({ message: "Activity rated successfully.", activity });
+    return res
+      .status(200)
+      .json({ message: "Activity rated successfully.", activity });
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error.", details: error.message });
+    return res
+      .status(500)
+      .json({ error: "Internal server error.", details: error.message });
   }
 };
 
 const addRatingAndComment = async (req, res) => {
-    console.log("Received data:", req.body); // Log the request body
-    const { tourGuideId, rating, comment } = req.body;
-    const touristId = "672635325490518dc4cd46cc"; // Hard-coded tourist ID
-    console.log("Received tourist ID:", touristId);
+  console.log("Received data:", req.body); // Log the request body
+  const { tourGuideId, rating, comment } = req.body;
+  const touristId = "672635325490518dc4cd46cc"; // Hard-coded tourist ID
+  console.log("Received tourist ID:", touristId);
 
-    // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(touristId) || !mongoose.Types.ObjectId.isValid(tourGuideId)) {
-        return res.status(400).json({ message: "Invalid IDs" });
+  // Validate IDs
+  if (
+    !mongoose.Types.ObjectId.isValid(touristId) ||
+    !mongoose.Types.ObjectId.isValid(tourGuideId)
+  ) {
+    return res.status(400).json({ message: "Invalid IDs" });
+  }
+  if (!tourGuideId || !rating || rating < 1 || rating > 5) {
+    return res.status(400).json({ message: "Invalid data" });
+  }
+
+  try {
+    const tourGuide = await TourGuide.findById(tourGuideId);
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Tour guide not found" });
     }
-    if (!tourGuideId || !rating || rating < 1 || rating > 5) {
-        return res.status(400).json({ message: "Invalid data" });
+
+    // Check for existing rating
+    const existingRatingIndex = tourGuide.ratings.findIndex((r) =>
+      r.touristId.equals(touristId)
+    );
+
+    if (existingRatingIndex !== -1) {
+      // Update existing rating
+      tourGuide.ratings[existingRatingIndex].rating = rating;
+      tourGuide.ratings[existingRatingIndex].comment = comment;
+    } else {
+      // Add new rating
+      tourGuide.ratings.push({ touristId, rating, comment });
     }
 
-    try {
-        const tourGuide = await TourGuide.findById(tourGuideId);
-        if (!tourGuide) {
-            return res.status(404).json({ message: "Tour guide not found" });
-        }
-
-        // Check for existing rating
-        const existingRatingIndex = tourGuide.ratings.findIndex(r => r.touristId.equals(touristId));
-        
-        if (existingRatingIndex !== -1) {
-            // Update existing rating
-            tourGuide.ratings[existingRatingIndex].rating = rating;
-            tourGuide.ratings[existingRatingIndex].comment = comment;
-        } else {
-            // Add new rating
-            tourGuide.ratings.push({ touristId, rating, comment });
-        }
-
-        await tourGuide.save();
-        res.status(200).json({ message: "Rating added successfully" });
-    } catch (error) {
-        console.error("Error adding rating:", error);
-        res.status(500).json({ message: "Error adding rating", error: error.message });
-    }
+    await tourGuide.save();
+    res.status(200).json({ message: "Rating added successfully" });
+  } catch (error) {
+    console.error("Error adding rating:", error);
+    res
+      .status(500)
+      .json({ message: "Error adding rating", error: error.message });
+  }
 };
 
 module.exports = addRatingAndComment;
-
-
-
 
 const updateTouristPreferences = async (req, res) => {
   const { preferences } = req.body;
@@ -741,7 +769,7 @@ function calculatePoints(paymentAmount, level) {
   }
   return 0;
 }
-function calculateBadge  (points) {
+function calculateBadge(points) {
   if (points <= 100000) {
     return "Bronze";
   } else if (points <= 500000) {
@@ -749,7 +777,7 @@ function calculateBadge  (points) {
   } else {
     return "Gold";
   }
-};
+}
 function determineLevel(loyaltyPoints) {
   if (loyaltyPoints <= 100000) {
     return 1;
@@ -761,7 +789,6 @@ function determineLevel(loyaltyPoints) {
 }
 const addLoyaltyPoints = async (req, res) => {
   try {
-
     const { paymentAmount } = req.body;
     const touristId = req.params.id;
 
@@ -778,14 +805,14 @@ const addLoyaltyPoints = async (req, res) => {
     tourist.badge = badge;
 
     // await tourist.save();
-    // const badge = Tourist.calculateBadge(tourist.loyaltyPoints); 
+    // const badge = Tourist.calculateBadge(tourist.loyaltyPoints);
 
     await tourist.save();
     res.status(200).json({
       message: "Loyalty points was added successfully",
       loyaltyPoints: tourist.loyaltyPoints,
       level: tourist.level,
-      badge: tourist.badge
+      badge: tourist.badge,
     });
   } catch (error) {
     console.error(error);
@@ -793,47 +820,53 @@ const addLoyaltyPoints = async (req, res) => {
   }
 };
 
-
-const fileComplaint= async (req, res) => {
+const fileComplaint = async (req, res) => {
   const { title, body, date } = req.body;
-  const {touristId} = req.params;
+  const { touristId } = req.params;
   try {
-    const newComplaint = new Complaint({ title, body, date, userId: touristId });
+    const newComplaint = new Complaint({
+      title,
+      body,
+      date,
+      userId: touristId,
+    });
     await newComplaint.save();
-    res.status(201).json({ message: 'Complaint filed successfully' });
+    res.status(201).json({ message: "Complaint filed successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to file the complaint' });
+    res.status(500).json({ error: "Failed to file the complaint" });
   }
 };
 
-const viewMyComplaints= async (req, res) => {
+const viewMyComplaints = async (req, res) => {
   const touristID = new mongoose.Types.ObjectId(req.params.touristId);
   try {
-    const complaints = await Complaint.find({userId: touristID}); 
-    res.status(200).json(complaints); 
+    const complaints = await Complaint.find({ userId: touristID });
+    res.status(200).json(complaints);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to fetch complaints from database' });
+    res.status(500).json({ error: "Failed to fetch complaints from database" });
   }
 };
 
-const redeemMyPoints= async (req, res) =>{
+const redeemMyPoints = async (req, res) => {
   const touristID = req.params.id;
-  try{
-    const tourist= await Tourist.findById(touristID);
-  if(tourist.loyaltyPoints>=10000){
-    tourist.loyaltyPoints-=10000;
-    tourist.wallet+=100;
-    await tourist.save();
-    return res.status(200).json({ message: 'Points redeemed successfully', tourist });
+  try {
+    const tourist = await Tourist.findById(touristID);
+    if (tourist.loyaltyPoints >= 10000) {
+      tourist.loyaltyPoints -= 10000;
+      tourist.wallet += 100;
+      await tourist.save();
+      return res
+        .status(200)
+        .json({ message: "Points redeemed successfully", tourist });
+    } else return res.status(400).json({ error: "Not Enough Points" });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred", details: error.message });
   }
-  else 
-    return res.status(400).json({error: 'Not Enough Points'});
-  }catch(error){
-    console.error(error); 
-    return res.status(500).json({ error: 'An error occurred', details: error.message });
-  }
-}
+};
 const bookActivity = async (req, res) => {
   const { touristId, activityId } = req.params;
 
@@ -847,7 +880,9 @@ const bookActivity = async (req, res) => {
     // Find the activity
     const activity = await Activity.findById(activityId);
     if (!activity || !activity.booking_open) {
-      return res.status(404).json({ message: "Activity not found or not available for booking" });
+      return res
+        .status(404)
+        .json({ message: "Activity not found or not available for booking" });
     }
 
     // Check if the tourist has already booked this activity
@@ -857,9 +892,9 @@ const bookActivity = async (req, res) => {
 
     // Update the tourist's bookedActivities and increment bookings count
     tourist.bookedActivities.push(activityId);
-   // activity.bookings += 1; // Increment bookings count
+    // activity.bookings += 1; // Increment bookings count
     await tourist.save();
-   // await activity.save();
+    // await activity.save();
 
     res.status(200).json({ message: "Activity booked successfully" });
   } catch (error) {
@@ -890,9 +925,9 @@ const bookItinerary = async (req, res) => {
 
     // Update the tourist's bookedItineraries and increment bookings count
     tourist.bookedItineraries.push(itineraryId);
-   // itinerary.bookings += 1; // Increment bookings count
+    // itinerary.bookings += 1; // Increment bookings count
     await tourist.save();
-   // await itinerary.save();
+    // await itinerary.save();
 
     res.status(200).json({ message: "Itinerary booked successfully" });
   } catch (error) {
@@ -917,9 +952,12 @@ const cancelActivityBooking = async (req, res) => {
     }
 
     // Check if the activity is within the 48-hour cancellation period
-    const hoursUntilActivity = (new Date(activity.date) - new Date()) / (1000 * 60 * 60);
+    const hoursUntilActivity =
+      (new Date(activity.date) - new Date()) / (1000 * 60 * 60);
     if (hoursUntilActivity < 48) {
-      return res.status(400).json({ message: "Cannot cancel less than 48 hours before the activity" });
+      return res.status(400).json({
+        message: "Cannot cancel less than 48 hours before the activity",
+      });
     }
 
     // Remove the activity ID from tourist's bookedActivities
@@ -928,9 +966,13 @@ const cancelActivityBooking = async (req, res) => {
     );
     await tourist.save();
 
-    res.status(200).json({ message: "Activity booking cancelled successfully" });
+    res
+      .status(200)
+      .json({ message: "Activity booking cancelled successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error cancelling activity booking", error });
+    res
+      .status(500)
+      .json({ message: "Error cancelling activity booking", error });
   }
 };
 
@@ -951,9 +993,13 @@ const cancelItineraryBooking = async (req, res) => {
     }
 
     // Check if the itinerary is within the 48-hour cancellation period
-    const hoursUntilItinerary = (new Date(itinerary.start_date) - new Date()) / (1000 * 60 * 60);
+    const hoursUntilItinerary =
+      (new Date(itinerary.start_date) - new Date()) / (1000 * 60 * 60);
     if (hoursUntilItinerary < 48) {
-      return res.status(400).json({ message: "Cannot cancel less than 48 hours before the itinerary start date" });
+      return res.status(400).json({
+        message:
+          "Cannot cancel less than 48 hours before the itinerary start date",
+      });
     }
 
     // Remove the itinerary ID from tourist's bookedItineraries
@@ -962,9 +1008,13 @@ const cancelItineraryBooking = async (req, res) => {
     );
     await tourist.save();
 
-    res.status(200).json({ message: "Itinerary booking cancelled successfully" });
+    res
+      .status(200)
+      .json({ message: "Itinerary booking cancelled successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error cancelling itinerary booking", error });
+    res
+      .status(500)
+      .json({ message: "Error cancelling itinerary booking", error });
   }
 };
 
@@ -979,7 +1029,9 @@ const bookTransportation = async (req, res) => {
 
     const transportation = await Transportation.findById(transportationId);
     if (!transportation) {
-      return res.status(404).json({ message: "Transportation option not found" });
+      return res
+        .status(404)
+        .json({ message: "Transportation option not found" });
     }
 
     if (tourist.bookedTransportations.includes(transportationId)) {
@@ -1003,24 +1055,38 @@ const deleteTouristAccount = async (req, res) => {
     const tourist = await Tourist.findById(id);
 
     if (!tourist) {
-      return res.status(404).json({ success: false, message: "Tourist account not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Tourist account not found" });
     }
 
     // Check if the tourist has any booked activities or itineraries
-    if (tourist.bookedActivities.length === 0 && tourist.bookedItineraries.length === 0) {
+    if (
+      tourist.bookedActivities.length === 0 &&
+      tourist.bookedItineraries.length === 0
+    ) {
       // If no activities or itineraries are booked, delete the account
       await Tourist.findByIdAndDelete(id);
-      return res.status(200).json({ success: true, message: "Tourist account deleted successfully" });
+      return res.status(200).json({
+        success: true,
+        message: "Tourist account deleted successfully",
+      });
     } else {
       // If there are booked activities or itineraries, deny deletion
-      return res.status(403).json({ success: false, message: "Cannot delete account: you have booked activities or itineraries" });
+      return res.status(403).json({
+        success: false,
+        message:
+          "Cannot delete account: you have booked activities or itineraries",
+      });
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: "An error occurred while trying to delete the account" });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while trying to delete the account",
+    });
   }
 };
-
 
 module.exports = {
   getProducts,
@@ -1060,5 +1126,6 @@ module.exports = {
   cancelItineraryBooking,
   bookTransportation,
   deleteTouristAccount,
-
+  getItineraryTourist,
+  getActivityTourist,
 };

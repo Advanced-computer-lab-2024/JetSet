@@ -65,17 +65,24 @@ const activitySchema = new Schema(
     budget: Number, // Optional field
     ratings: [
       {
-        touristId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist', required: true },
+        touristId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Tourist",
+          required: true,
+        },
         rating: { type: Number, required: true, min: 1, max: 5 }, // Rating between 1 and 5
         comment: { type: String, required: false },
       },
     ],
 
-
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Advertiser",
     }, // Optional reference to creator
+    flag: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

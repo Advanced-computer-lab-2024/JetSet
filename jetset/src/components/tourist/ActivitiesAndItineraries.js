@@ -54,7 +54,7 @@
 //       <ul>
 //         {activities.map((activity) => (
 //           <li key={activity._id} style={{ backgroundColor: selectedActivityId === activity._id ? '#e0f7fa' : 'transparent' }}>
-//             {activity.title} - ${activity.budget} 
+//             {activity.title} - ${activity.budget}
 //             <button onClick={() => handleBookActivity(activity._id)}>Book</button>
 //           </li>
 //         ))}
@@ -64,7 +64,7 @@
 //       <ul>
 //         {itineraries.map((itinerary) => (
 //           <li key={itinerary._id} style={{ backgroundColor: selectedItineraryId === itinerary._id ? '#e0f7fa' : 'transparent' }}>
-//             {itinerary.name} - Budget: ${itinerary.budget} 
+//             {itinerary.name} - Budget: ${itinerary.budget}
 //             <button onClick={() => handleBookItinerary(itinerary._id)}>Book</button>
 //           </li>
 //         ))}
@@ -89,13 +89,15 @@ const ActivitiesAndItineraries = ({ touristId }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const activitiesResponse = await axios.get("/getactivity");
-        const itinerariesResponse = await axios.get("/Itineraries");
+        const activitiesResponse = await axios.get("/Activities");
+        const itinerariesResponse = await axios.get("/itinerariesTourist");
         setActivities(activitiesResponse.data);
         setItineraries(itinerariesResponse.data);
 
         // Fetch tourist data to get booked activities and itineraries
-        const touristResponse = await axios.get(`/getTourist/672398fc87d64e4709f43cde`);
+        const touristResponse = await axios.get(
+          `/getTourist/672398fc87d64e4709f43cde`
+        );
         setBookedActivities(touristResponse.data.bookedActivities);
         setBookedItineraries(touristResponse.data.bookedItineraries);
       } catch (error) {
@@ -109,7 +111,9 @@ const ActivitiesAndItineraries = ({ touristId }) => {
   const handleBookActivity = async (activityId) => {
     setSelectedActivityId(activityId);
     try {
-      const response = await axios.post(`/book/672398fc87d64e4709f43cde/activity/${activityId}`);
+      const response = await axios.post(
+        `/book/672398fc87d64e4709f43cde/activity/${activityId}`
+      );
       alert(response.data.message);
       // Update booked activities after booking
       setBookedActivities([...bookedActivities, activityId]);
@@ -124,13 +128,17 @@ const ActivitiesAndItineraries = ({ touristId }) => {
   const handleCancelActivity = async (activityId) => {
     setSelectedActivityId(activityId);
     try {
-      const response = await axios.delete(`/cancelActivity/672398fc87d64e4709f43cde/${activityId}`);
+      const response = await axios.delete(
+        `/cancelActivity/672398fc87d64e4709f43cde/${activityId}`
+      );
       alert(response.data.message);
       // Update booked activities after cancellation
-      setBookedActivities(bookedActivities.filter(id => id !== activityId));
+      setBookedActivities(bookedActivities.filter((id) => id !== activityId));
     } catch (error) {
       console.error("Error cancelling activity", error);
-      alert(error.response ? error.response.data.message : "Cancellation failed!");
+      alert(
+        error.response ? error.response.data.message : "Cancellation failed!"
+      );
     } finally {
       setSelectedActivityId(null);
     }
@@ -139,7 +147,9 @@ const ActivitiesAndItineraries = ({ touristId }) => {
   const handleBookItinerary = async (itineraryId) => {
     setSelectedItineraryId(itineraryId);
     try {
-      const response = await axios.post(`/book/672398fc87d64e4709f43cde/itinerary/${itineraryId}`);
+      const response = await axios.post(
+        `/book/672398fc87d64e4709f43cde/itinerary/${itineraryId}`
+      );
       alert(response.data.message);
       // Update booked itineraries after booking
       setBookedItineraries([...bookedItineraries, itineraryId]);
@@ -154,13 +164,19 @@ const ActivitiesAndItineraries = ({ touristId }) => {
   const handleCancelItinerary = async (itineraryId) => {
     setSelectedItineraryId(itineraryId);
     try {
-      const response = await axios.delete(`/cancelItinerary/672398fc87d64e4709f43cde/${itineraryId}`);
+      const response = await axios.delete(
+        `/cancelItinerary/672398fc87d64e4709f43cde/${itineraryId}`
+      );
       alert(response.data.message);
       // Update booked itineraries after cancellation
-      setBookedItineraries(bookedItineraries.filter(id => id !== itineraryId));
+      setBookedItineraries(
+        bookedItineraries.filter((id) => id !== itineraryId)
+      );
     } catch (error) {
       console.error("Error cancelling itinerary", error);
-      alert(error.response ? error.response.data.message : "Cancellation failed!");
+      alert(
+        error.response ? error.response.data.message : "Cancellation failed!"
+      );
     } finally {
       setSelectedItineraryId(null);
     }
@@ -175,13 +191,22 @@ const ActivitiesAndItineraries = ({ touristId }) => {
           return (
             <li
               key={activity._id}
-              style={{ backgroundColor: selectedActivityId === activity._id ? '#e0f7fa' : 'transparent' }}
+              style={{
+                backgroundColor:
+                  selectedActivityId === activity._id
+                    ? "#e0f7fa"
+                    : "transparent",
+              }}
             >
-              {activity.title} - ${activity.budget} 
+              {activity.title} - ${activity.budget}
               {isBooked ? (
-                <button onClick={() => handleCancelActivity(activity._id)}>Cancel</button>
+                <button onClick={() => handleCancelActivity(activity._id)}>
+                  Cancel
+                </button>
               ) : (
-                <button onClick={() => handleBookActivity(activity._id)}>Book</button>
+                <button onClick={() => handleBookActivity(activity._id)}>
+                  Book
+                </button>
               )}
             </li>
           );
@@ -195,13 +220,22 @@ const ActivitiesAndItineraries = ({ touristId }) => {
           return (
             <li
               key={itinerary._id}
-              style={{ backgroundColor: selectedItineraryId === itinerary._id ? '#e0f7fa' : 'transparent' }}
+              style={{
+                backgroundColor:
+                  selectedItineraryId === itinerary._id
+                    ? "#e0f7fa"
+                    : "transparent",
+              }}
             >
-              {itinerary.name} - Budget: ${itinerary.budget} 
+              {itinerary.name} - Budget: ${itinerary.budget}
               {isBooked ? (
-                <button onClick={() => handleCancelItinerary(itinerary._id)}>Cancel</button>
+                <button onClick={() => handleCancelItinerary(itinerary._id)}>
+                  Cancel
+                </button>
               ) : (
-                <button onClick={() => handleBookItinerary(itinerary._id)}>Book</button>
+                <button onClick={() => handleBookItinerary(itinerary._id)}>
+                  Book
+                </button>
               )}
             </li>
           );
