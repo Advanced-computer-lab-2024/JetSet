@@ -58,8 +58,9 @@ const {
   filterActivityGuest,
   guestFilterItineraries,
   register,
-  login,
+  registerAST,
   deleteGuest,
+  getActivitiesByCategoryForGuest,
 } = require("./Routes/guestController");
 const {
   searchProductSeller,
@@ -142,6 +143,10 @@ const {
   deleteTouristAccount,
   getItineraryTourist,
   getActivityTourist,
+  buyProduct,
+  getActivitiesByCategory,
+  shareItem,
+  setPreferredCurrency,
 } = require("../src/Routes/touristController");
 
 const {
@@ -241,7 +246,7 @@ app.use(express.json());
 
 app.post("/addTourist", createTourist);
 app.post("/register", upload.array("documents", 5), register); // Adjust maxCount as needed
-app.post("/login", login);
+app.post("/login", registerAST);
 app.delete("/deleteGuest/:user", deleteGuest);
 
 app.get("/getTourist/:id", getTouristProfile);
@@ -377,47 +382,7 @@ app.get("/Acttour", getActivityTourist);
 const Tourist = require("../src/Models/Tourist");
 const Product = require("../src/Models/Product");
 
-app.put("/buyProduct/:touristId", async (req, res) => {
-  const { touristId } = req.params; // Get the tourist ID from the route parameters
-  const { productId, purchaseQuantity } = req.body; // Get product ID and quantity to purchase from the request body
-
-  try {
-    // Find the tourist by ID
-    const tourist = await Tourist.findById(touristId);
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    // Find the product by ID
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    // Check if there is enough stock
-    if (product.quantity < purchaseQuantity) {
-      return res.status(400).json({ message: "Insufficient product quantity" });
-    }
-
-    // Update the product's quantity and sales
-    product.quantity -= purchaseQuantity;
-    product.sales += purchaseQuantity;
-    await product.save(); // Save the updated product document
-
-    // Add the product ID to the tourist's products array
-    tourist.products.push(productId);
-    await tourist.save(); // Save the updated tourist document
-
-    res.status(200).json({
-      message: "Product purchased successfully",
-      tourist,
-      product,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error purchasing product" });
-  }
-});
+app.put("/buyProduct/:touristId", buyProduct);
 
 app.get("/gets", getTourist);
 app.post("/rateandcommentItinerary/:id", rateandcommentItinerary);
@@ -457,3 +422,32 @@ app.delete("/deleteAccTourguide/:id", deleteTourGuideAccount);
 app.put("/cr/:id", updateActivityCreator);
 app.delete("/deleteAccAdvertiser/:id", deleteAdvertiserAccount);
 app.delete("/deleteAccSeller/:id", deleteSellerAccount);
+
+app.put("/touristwallet/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { wallet } = req.body;
+
+    // Update the wallet field only
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      id,
+      { wallet },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    res.json(updatedTourist);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/activities/by-category", getActivitiesByCategoryForGuest);
+app.get("/activities/by-category", getActivitiesByCategory);
+app.post("/share", shareItem);
+
+app.put("/cpTourist/:touristId/currency", setPreferredCurrency);

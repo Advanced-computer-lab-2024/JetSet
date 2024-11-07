@@ -7,6 +7,7 @@ const TourGuide = require("../Models/TourGuide.js");
 const Category = require("../Models/Category.js");
 const Complaint = require("../Models/Complaint.js");
 const Transportation = require("../Models/Transportation");
+const nodemailer = require("nodemailer");
 const { default: mongoose } = require("mongoose");
 
 const createTourist = async (req, res) => {
@@ -66,7 +67,7 @@ const updateTouristProfile = async (req, res) => {
         $set: {
           ...rest,
           username: tourist.username, // Keep existing username
-          wallet: tourist.wallet, // Keep existing wallet
+          wallet: wallet, // Keep existing wallet
         },
       },
       { new: true, runValidators: true } // Validate during update
@@ -564,6 +565,12 @@ const rateandcommentItinerary = async (req, res) => {
         .json({ error: "Itinerary ID and rating are required." });
     }
 
+    if (itinerary.status !== "active") {
+      return res
+        .status(400)
+        .json({ error: "You can only rate an active itinerary." });
+    }
+
     // Ensure rating is between 1 and 5
     if (rating < 1 || rating > 5) {
       return res.status(400).json({ error: "Rating must be between 1 and 5." });
@@ -641,6 +648,14 @@ const rateandcommentactivity = async (req, res) => {
       return res
         .status(400)
         .json({ error: "Activity ID and rating are required." });
+    }
+
+    if (!activity.booking_open) {
+      return res
+        .status(400)
+        .json({
+          error: "Bookings are closed for this activity. You cannot rate it.",
+        });
     }
 
     // Ensure rating is between 1 and 5
@@ -798,36 +813,60 @@ function determineLevel(loyaltyPoints) {
     return 3;
   }
 }
-const addLoyaltyPoints = async (req, res) => {
-  try {
-    const { paymentAmount } = req.body;
-    const touristId = req.params.id;
+// const addLoyaltyPoints = async (req, res) => {
+//   try {
+//     const { paymentAmount, touristId } = req.body;
+//     //const touristId = req.params.id;
 
+//     const tourist = await Tourist.findById(touristId);
+//     if (!tourist) {
+//       return res.status(404).json({ message: "Tourist is not found" });
+//     }
+
+//     const pointsEarned = calculatePoints(paymentAmount, tourist.level);
+//     const badge = calculateBadge(tourist.loyaltyPoints); // Calculate badge based on updated points
+
+//     tourist.loyaltyPoints += pointsEarned;
+//     tourist.level = determineLevel(tourist.loyaltyPoints);
+//     tourist.badge = badge;
+
+//     // await tourist.save();
+//     // const badge = Tourist.calculateBadge(tourist.loyaltyPoints);
+
+//     await tourist.save();
+//     res.status(200).json({
+//       message: "Loyalty points was added successfully",
+//       loyaltyPoints: tourist.loyaltyPoints,
+//       level: tourist.level,
+//       badge: tourist.badge,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Failed to add loyalty points" });
+//   }
+// };
+
+const addLoyaltyPoints = async (paymentAmount, touristId) => {
+  try {
     const tourist = await Tourist.findById(touristId);
     if (!tourist) {
-      return res.status(404).json({ message: "Tourist is not found" });
+      throw new Error("Tourist not found");
     }
 
     const pointsEarned = calculatePoints(paymentAmount, tourist.level);
-    const badge = calculateBadge(tourist.loyaltyPoints); // Calculate badge based on updated points
-
     tourist.loyaltyPoints += pointsEarned;
     tourist.level = determineLevel(tourist.loyaltyPoints);
-    tourist.badge = badge;
-
-    // await tourist.save();
-    // const badge = Tourist.calculateBadge(tourist.loyaltyPoints);
+    tourist.badge = calculateBadge(tourist.loyaltyPoints);
 
     await tourist.save();
-    res.status(200).json({
-      message: "Loyalty points was added successfully",
+    return {
       loyaltyPoints: tourist.loyaltyPoints,
       level: tourist.level,
       badge: tourist.badge,
-    });
+    };
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to add loyalty points" });
+    throw new Error("Failed to add loyalty points");
   }
 };
 
@@ -903,11 +942,19 @@ const bookActivity = async (req, res) => {
 
     // Update the tourist's bookedActivities and increment bookings count
     tourist.bookedActivities.push(activityId);
+    tourist.wallet -= activity.budget;
     // activity.bookings += 1; // Increment bookings count
     await tourist.save();
     // await activity.save();
 
-    res.status(200).json({ message: "Activity booked successfully" });
+    const loyaltyUpdate = await addLoyaltyPoints(activity.budget, touristId);
+
+    res.status(200).json({
+      message: "Activity booked successfully",
+      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
+      level: loyaltyUpdate.level,
+      badge: loyaltyUpdate.badge,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error booking activity", error });
   }
@@ -937,10 +984,20 @@ const bookItinerary = async (req, res) => {
     // Update the tourist's bookedItineraries and increment bookings count
     tourist.bookedItineraries.push(itineraryId);
     // itinerary.bookings += 1; // Increment bookings count
+    tourist.wallet -= itinerary.budget;
     await tourist.save();
     // await itinerary.save();
 
-    res.status(200).json({ message: "Itinerary booked successfully" });
+    const loyaltyUpdate = await addLoyaltyPoints(itinerary.budget, touristId);
+
+    res.status(200).json({
+      message: "Itinerary booked successfully",
+      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
+      level: loyaltyUpdate.level,
+      badge: loyaltyUpdate.badge,
+    });
+
+    //res.status(200).json({ message: "Itinerary booked successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error booking itinerary", error });
   }
@@ -1050,9 +1107,21 @@ const bookTransportation = async (req, res) => {
     }
 
     tourist.bookedTransportations.push(transportationId);
+    tourist.wallet -= transportation.price;
+
     await tourist.save();
 
-    res.status(200).json({ message: "Transportation booked successfully" });
+    const loyaltyUpdate = await addLoyaltyPoints(
+      transportation.price,
+      touristId
+    );
+
+    res.status(200).json({
+      message: "transportation booked successfully",
+      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
+      level: loyaltyUpdate.level,
+      badge: loyaltyUpdate.badge,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error booking transportation", error });
   }
@@ -1099,6 +1168,147 @@ const deleteTouristAccount = async (req, res) => {
   }
 };
 
+const buyProduct = async (req, res) => {
+  const { touristId } = req.params; // Get the tourist ID from the route parameters
+  const { productId, purchaseQuantity } = req.body; // Get product ID and quantity to purchase from the request body
+
+  try {
+    // Find the tourist by ID
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the product by ID
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if there is enough stock
+    if (product.quantity < purchaseQuantity) {
+      return res.status(400).json({ message: "Insufficient product quantity" });
+    }
+
+    // Update the product's quantity and sales
+    product.quantity -= purchaseQuantity;
+    product.sales += purchaseQuantity;
+    await product.save(); // Save the updated product document
+
+    // Add the product ID to the tourist's products array
+    tourist.products.push(productId);
+    tourist.wallet -= product.price;
+    // activity.bookings += 1; // Increment bookings count
+    await tourist.save();
+    // await activity.save();
+
+    const loyaltyUpdate = await addLoyaltyPoints(product.price, touristId);
+
+    res.status(200).json({
+      message: "Product booked successfully",
+      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
+      level: loyaltyUpdate.level,
+      badge: loyaltyUpdate.badge,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error purchasing product" });
+  }
+};
+
+const getActivitiesByCategory = async (req, res) => {
+  const { category } = req.query; // Expecting 'category' as a query parameter
+
+  if (!category) {
+    return res
+      .status(400)
+      .json({ error: "Category is required for filtering activities." });
+  }
+
+  // Check if the category is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(category)) {
+    return res.status(400).json({ error: "Invalid category ID format." });
+  }
+
+  try {
+    // Find activities that belong to the specified category, with populated category data
+    const activities = await Activity.find({ category })
+      .populate("category", "name") // Populate category with only the name field
+      .populate("tags", "name") // Optional: Populate tags with name field
+      .populate("creator", "name"); // Optional: Populate creator with name field
+
+    if (activities.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No activities found for this category." });
+    }
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error("Error fetching activities by category:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const generateShareableLink = (itemType, itemId) => {
+  return `${process.env.BASE_URL}/${itemType}/${itemId}`;
+};
+
+// Method to share via copy link or email
+const shareItem = async (req, res) => {
+  const { itemId, itemType } = req.body;
+
+  let item;
+  try {
+    // Fetch the item based on type and id
+    if (itemType === "activity") item = await Activity.findById(itemId);
+    else if (itemType === "itinerary") item = await Itinerary.findById(itemId);
+    else if (itemType === "historical")
+      item = await Historical.findById(itemId);
+    else return res.status(400).json({ message: "Invalid item type." });
+
+    if (!item) return res.status(404).json({ message: "Item not found." });
+
+    // Generate the link
+    const shareableLink = generateShareableLink(itemType, itemId);
+
+    // Return the shareable link
+    res.status(200).json({ link: shareableLink });
+  } catch (error) {
+    res.status(500).json({ message: "Error generating share link", error });
+  }
+};
+
+const setPreferredCurrency = async (req, res) => {
+  const { currency } = req.body; // Expecting 'currency' in the request body
+  const touristId = req.params; // Get the tourist's ID from the request params
+
+  if (!currency) {
+    return res
+      .status(400)
+      .json({ error: "Currency is required to set preferred currency." });
+  }
+
+  try {
+    const tourist = await Tourist.findByIdAndUpdate(
+      touristId,
+      { preferredCurrency: currency }, // Set the preferred currency
+      { new: true } // Return the updated document
+    );
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Preferred currency updated successfully", tourist });
+  } catch (error) {
+    console.error("Error updating preferred currency:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 module.exports = {
   getProducts,
   SortActivities,
@@ -1139,4 +1349,8 @@ module.exports = {
   deleteTouristAccount,
   getItineraryTourist,
   getActivityTourist,
+  buyProduct,
+  getActivitiesByCategory,
+  shareItem,
+  setPreferredCurrency,
 };

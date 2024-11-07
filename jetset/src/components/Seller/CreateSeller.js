@@ -4,7 +4,7 @@ import axios from "axios";
 
 const CreateSeller = () => {
   const location = useLocation();
-  const { username = "", password = "", email = "" } = location.state || {}; // Get passed data from state or default to empty
+  const { username = "", password = "", email = "" } = location.state || {};
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -45,8 +45,8 @@ const CreateSeller = () => {
 
       setMessage(response.data.msg); // Display success message
 
-      // Navigate to SellerFrontend with the username after profile creation
-      navigate("/sellerfrontend");
+      const newSellerId = response.data.user._id;
+      navigate(`/sellerfrontend/${newSellerId}`);
     } catch (err) {
       setMessage("Error creating seller profile.");
     }

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 
 const TourGuideProfile = () => {
-  const tourGuideId = "66fff1c213c1a607c2caa0c6"; // Get the tour guide ID from the URL
+  const { tourGuideID } = useParams();
   const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
     mobile_number: "",
@@ -13,11 +13,12 @@ const TourGuideProfile = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
 
+  console.log(tourGuideID);
   // Define the fetchProfile function
   const fetchProfile = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/TourGuideProfile/${tourGuideId}`
+        `http://localhost:3000/TourGuideProfile/${tourGuideID}`
       );
       setProfile(response.data.myProfile);
       setFormData({
@@ -33,7 +34,7 @@ const TourGuideProfile = () => {
 
   useEffect(() => {
     fetchProfile(); // Call fetchProfile when the component mounts
-  }, [tourGuideId]);
+  }, [tourGuideID]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +64,7 @@ const TourGuideProfile = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:3000/updateTourGuide/${tourGuideId}`,
+        `http://localhost:3000/updateTourGuide/${tourGuideID}`,
         form,
         {
           headers: {

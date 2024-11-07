@@ -21,7 +21,7 @@ const createSeller = async (req, res) => {
       images: imageFilename,
     });
     await user.save();
-    res.status(200).json({ msg: "Seller created" });
+    res.status(200).json({ msg: "Seller created", user });
   } catch (error) {
     res.status(400).json({ message: "Error retrieving users", error });
   }
@@ -316,7 +316,9 @@ const deleteSellerAccount = async (req, res) => {
     const seller = await Seller.findById(id);
     if (!seller) {
       console.log(`Seller account not found for ID: ${id}`);
-      return res.status(404).json({ success: false, message: "Seller account not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller account not found" });
     }
     console.log(`Found seller: ${seller.username}`);
 
@@ -334,10 +336,17 @@ const deleteSellerAccount = async (req, res) => {
     await Seller.findByIdAndDelete(id);
     console.log(`Deleted seller account: ${seller.username}`);
 
-    return res.status(200).json({ success: true, message: "Seller account deleted successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Seller account deleted successfully" });
   } catch (error) {
     console.error("Error occurred while deleting seller account:", error);
-    return res.status(500).json({ success: false, message: "An error occurred while trying to delete the account" });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "An error occurred while trying to delete the account",
+      });
   }
 };
 

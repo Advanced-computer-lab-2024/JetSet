@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 import "./styles.css";
 
@@ -19,13 +20,13 @@ const Register = () => {
     } else if (selectedRole === "admin") {
       navigate("/admin"); // Navigate to Admin page
     } else if (selectedRole === "seller") {
-      navigate("/sellerfrontend"); // Stay on the seller registration page
+      navigate("/sellerfrontend/6702863c31289d63abe313af"); // Stay on the seller registration page
     } else if (selectedRole === "tourism governor") {
       navigate("/place");
     } else if (selectedRole === "tour guide") {
-      navigate("/tourguide"); // Navigate to Tour Guide registration page
+      navigate("/tourguide/66fff1c213c1a607c2caa0c6"); // Navigate to Tour Guide registration page
     } else if (selectedRole === "advertisor") {
-      navigate("/createadvertiser"); // Navigate to Advertisor registration page
+      navigate("/createadvertiser/6701a52d077eb6e57b568035"); // Navigate to Advertisor registration page
     }
   };
 

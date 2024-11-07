@@ -19,7 +19,7 @@ const createTourGuideProfile = async (req, res) => {
   } = req.body;
   try {
     const imageFilename = req.file ? path.basename(req.file.path) : "";
-    await TourGuide.create({
+    const user = await TourGuide.create({
       email: email,
       username: username,
       password: password,
@@ -28,7 +28,7 @@ const createTourGuideProfile = async (req, res) => {
       previous_work: previous_work,
       images: imageFilename,
     });
-    res.status(200).json({ msg: "profile is created" });
+    res.status(200).json({ msg: "profile is created", user });
   } catch (error) {
     res.status(400).json({
       message: "Error creating Tour Guide profile",
@@ -509,12 +509,10 @@ const deleteTourGuideAccount = async (req, res) => {
 
     if (touristsWithBookings.length > 0) {
       // If any tourist has booked the itineraries, deny deletion
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Cannot delete account: you have booked itineraries",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Cannot delete account: you have booked itineraries",
+      });
     }
 
     // If no tourists have booked the itineraries, delete the tour guide account and their itineraries
@@ -522,19 +520,15 @@ const deleteTourGuideAccount = async (req, res) => {
 
     await TourGuide.findByIdAndDelete(id); // Delete tour guide account
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Tour guide account deleted successfully",
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Tour guide account deleted successfully",
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while trying to delete the account",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while trying to delete the account",
+    });
   }
 };
 

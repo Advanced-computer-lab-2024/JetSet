@@ -4,6 +4,9 @@ import ActivityList from "./Activity/ActivitiesList.js";
 import ItineraryList from "./Itinerary/ItineraryList.js";
 import HistoricalPlaces from "./Place/HistoricalPlacesList.js";
 import Search from "./tourist/SearchComponent.js";
+import ActivityByCategory from "./Activity/ActivitiesByCategory.js";
+// Import the new ShareItem component
+
 import "./styles.css";
 
 const Guest = () => {
@@ -19,6 +22,8 @@ const Guest = () => {
         return <HistoricalPlaces />;
       case "search":
         return <Search />;
+      case "activitiesByCategory":
+        return <ActivityByCategory />;
       default:
         return (
           <div>
@@ -32,6 +37,9 @@ const Guest = () => {
               View Historical Places
             </button>
             <button onClick={() => setCurrentPage("search")}>Search</button>
+            <button onClick={() => setCurrentPage("activitiesByCategory")}>
+              Filter Activities by Category
+            </button>
           </div>
         );
     }

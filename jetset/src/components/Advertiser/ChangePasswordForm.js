@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const ChangePasswordForm = ({ touristId }) => {
+const ChangePasswordForm = ({ id }) => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -16,10 +16,13 @@ const ChangePasswordForm = ({ touristId }) => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:3000/cpAdvertiser/6701a2e8077eb6e57b56801f`, {
-        oldPassword,
-        newPassword,
-      });
+      const response = await axios.put(
+        `http://localhost:3000/cpAdvertiser/${id}`,
+        {
+          oldPassword,
+          newPassword,
+        }
+      );
       setMessage(response.data.message);
     } catch (error) {
       setMessage(error.response?.data.message || "Error updating password");

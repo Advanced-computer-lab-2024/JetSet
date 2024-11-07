@@ -3,8 +3,10 @@ import axios from "axios";
 import ActivityForm from "../Activity/ActivityProfileAdv";
 import ChangePasswordForm from "./ChangePasswordForm";
 import DeleteAccount from "./DeleteAccount";
+import { useParams } from "react-router-dom";
 
 const ProfileForm = ({ onProfileCreated }) => {
+  const { id } = useParams();
   const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
   const [formData, setFormData] = useState({
     email: "",
@@ -17,7 +19,7 @@ const ProfileForm = ({ onProfileCreated }) => {
     image: null,
   });
 
-  const id = "6701a52d077eb6e57b568035";
+  //const id = "6701a52d077eb6e57b568035";
   const [advertiser, setAdvertiser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -136,8 +138,39 @@ const ProfileForm = ({ onProfileCreated }) => {
 
   return (
     <div>
+      <div>
+        <h1>Advertiser Profile</h1>
+        {advertiser ? (
+          <div>
+            {advertiser.images && advertiser.images.length > 0 && (
+              <img
+                src={`http://localhost:3000/uploads/${advertiser.images}`}
+                alt={`${advertiser.username} Profile`}
+                style={{ width: "100px", height: "100px", objectFit: "cover" }}
+              />
+            )}
+            <h2>{advertiser.username}</h2>
+            <p>Email: {advertiser.email}</p>
+            <p>Company Name: {advertiser.company_name}</p>
+            <p>
+              Website:{" "}
+              <a
+                href={advertiser.website}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {advertiser.website}
+              </a>
+            </p>
+            <p>Hotline: {advertiser.hotline}</p>
+            <p>Company Description: {advertiser.companyDescription}</p>
+          </div>
+        ) : (
+          <div>No advertiser found.</div>
+        )}
+      </div>
       <form onSubmit={handleSubmit}>
-        <h3>Create Profile</h3>
+        <h3>update Profile</h3>
         {/* Input fields */}
         <input
           type="email"
@@ -204,44 +237,11 @@ const ProfileForm = ({ onProfileCreated }) => {
             style={{ width: "100px", height: "100px", objectFit: "cover" }}
           />
         )}
-        <button type="submit">Add Profile</button>
         <button type="button" onClick={handleUpdateProfile}>
           Update Profile
         </button>
         {statusMessage && <p>{statusMessage}</p>}
       </form>
-
-      <div>
-        <h1>Advertiser Profile</h1>
-        {advertiser ? (
-          <div>
-            {advertiser.images && advertiser.images.length > 0 && (
-              <img
-                src={`http://localhost:3000/uploads/${advertiser.images}`}
-                alt={`${advertiser.username} Profile`}
-                style={{ width: "100px", height: "100px", objectFit: "cover" }}
-              />
-            )}
-            <h2>{advertiser.username}</h2>
-            <p>Email: {advertiser.email}</p>
-            <p>Company Name: {advertiser.company_name}</p>
-            <p>
-              Website:{" "}
-              <a
-                href={advertiser.website}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {advertiser.website}
-              </a>
-            </p>
-            <p>Hotline: {advertiser.hotline}</p>
-            <p>Company Description: {advertiser.companyDescription}</p>
-          </div>
-        ) : (
-          <div>No advertiser found.</div>
-        )}
-      </div>
 
       <ActivityForm
         onActivityCreated={(activity) =>
@@ -255,9 +255,9 @@ const ProfileForm = ({ onProfileCreated }) => {
       </button>
 
       {/* Conditionally render the ChangePasswordForm */}
-      {showChangePassword && <ChangePasswordForm />}
+      {showChangePassword && <ChangePasswordForm id={id} />}
 
-    <DeleteAccount advertiserId="6707bb596d08e5f1f78e31f1" />
+      <DeleteAccount advertiserId={id} />
     </div>
   );
 };

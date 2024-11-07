@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom"; // Import useParams
 import GetSeller from "./Seller/SellerProfile";
 import AddProduct from "./Products/AddProduct"; // Import AddProduct
 import EditProduct from "./Products/EditProduct"; // Import EditProduct
@@ -10,7 +11,7 @@ import ChangePasswordForm from "./Seller/ChangePasswordForm";
 import DeleteAccount from "./Seller/DeleteAccount";
 
 const SellerFrontend = () => {
-  const sellerId = "6702863c31289d63abe313af"; // Hardcoded seller ID
+  const { sellerId } = useParams(); // Get sellerId from the route parameter
   const [showUpdate, setShowUpdate] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showEditProduct, setShowEditProduct] = useState(false);
@@ -23,44 +24,36 @@ const SellerFrontend = () => {
   return (
     <div>
       <h1>Seller</h1>
-      <GetSeller sellerId={sellerId} />
-      {/* Button to toggle AddProduct form */}
+      <GetSeller sellerId={sellerId} /> {/* Pass sellerId here */}
       <button onClick={() => setShowAddProduct(!showAddProduct)}>
         {showAddProduct ? "Cancel Add Product" : "Add Product"}
       </button>
-      {showAddProduct && <AddProduct sellerId={sellerId} />}{" "}
-      {/* Pass sellerId here */}
-      {/* Button to toggle EditProduct form */}
+      {showAddProduct && <AddProduct sellerId={sellerId} />}
       <button onClick={() => setShowEditProduct(!showEditProduct)}>
         {showEditProduct ? "Cancel Edit Product" : "Edit Product"}
       </button>
       {showEditProduct && <EditProduct />}
-      {/* Button to toggle FilterProducts */}
       <button onClick={() => setShowFilterProducts(!showFilterProducts)}>
         {showFilterProducts ? "Cancel Filter" : "Filter Products"}
       </button>
       {showFilterProducts && <FilterProducts />}
-      {/* Button to toggle ProductList */}
       <button onClick={() => setShowProductList(!showProductList)}>
         {showProductList ? "Hide Products" : "Show Products"}
       </button>
       {showProductList && <ProductList />}
-      {/* Button to toggle SearchProduct */}
       <button onClick={() => setShowSearchProduct(!showSearchProduct)}>
         {showSearchProduct ? "Cancel Search" : "Search Product"}
       </button>
       {showSearchProduct && <SearchProduct />}
-      {/* Button to toggle SortProducts */}
       <button onClick={() => setShowSortProducts(!showSortProducts)}>
         {showSortProducts ? "Cancel Sort" : "Sort Products"}
       </button>
       {showSortProducts && <SortProducts />}
-      {/* Button to toggle ChangePassword */}
       <button onClick={() => setShowChangePassword(!showChangePassword)}>
-        {showSortProducts ? "Cancel Password" : "Change Password"}
+        {showChangePassword ? "Cancel Password" : "Change Password"}
       </button>
-      {showChangePassword && <ChangePasswordForm />}
-      <DeleteAccount sellerId="670307388ee1a9de350b6b1e" />
+      {showChangePassword && <ChangePasswordForm sellerId={sellerId} />}
+      <DeleteAccount sellerId={sellerId} />
     </div>
   );
 };

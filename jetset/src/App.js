@@ -9,10 +9,12 @@ import RegisterTourist from "./components/tourist/RegisterTourist";
 import CreateSeller from "./components/Seller/CreateSeller";
 import SellerFrontend from "./components/SellerFrontend";
 import ProfileForm from "./components/Advertiser/ProfileAdvertiser";
+import CreateTourGuideProfile from "./components/Tourguide/CreateTourGuide";
 import Place from "./components/TourismGovernor";
 import Tourist from "./components/TouristApp"; // Ensure the correct case here
 import TourGuide from "./components/TourGuide";
 import Login from "./components/login"; // Use consistent case for component import
+import CreateAdv from "./components/Advertiser/CreateAdv";
 
 const App = () => {
   return (
@@ -26,10 +28,12 @@ const App = () => {
         <Route path="/admin" element={<AdminFrontend />} />
         <Route path="/registerAST" element={<RegisterASt />} />
         <Route path="/createseller" element={<CreateSeller />} />
-        <Route path="/sellerfrontend" element={<SellerFrontend />} />
-        <Route path="/createadvertiser" element={<ProfileForm />} />
+        <Route path="/sellerfrontend/:sellerId" element={<SellerFrontend />} />
+        <Route path="/createAdv" element={<CreateAdv />} />
+        <Route path="/createadvertiser/:id" element={<ProfileForm />} />
         <Route path="/place" element={<Place />} />
-        <Route path="/tourguide" element={<TourGuide />} />
+        <Route path="/CreateTourGuide" element={<CreateTourGuideProfile />} />
+        <Route path="/tourguide/:tourGuideID" element={<TourGuide />} />
         <Route path="/login" element={<Login />} />{" "}
         {/* Consistent casing here */}
       </Routes>

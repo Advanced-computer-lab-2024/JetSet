@@ -1,60 +1,66 @@
 import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const CreateTourGuideProfile = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-    email: "",
-    mobile_number: "",
-    years_of_experience: "",
-    previous_work: "",
-    image: null,
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { username = "", password = "", email = "" } = location.state || {};
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const [mobile_number, setMobile] = useState("");
+  const [years_of_experience, setYears] = useState("");
+  const [previous_work, setWork] = useState("");
+  const [images, setImages] = useState([]);
 
   const handleImageChange = (e) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      image: e.target.files[0],
-    }));
+    setImages(e.target.files); // Store the selected files
+  };
+
+  // Define the handleChange function to update state based on input name
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case "mobile_number":
+        setMobile(value);
+        break;
+      case "years_of_experience":
+        setYears(value);
+        break;
+      case "previous_work":
+        setWork(value);
+        break;
+      default:
+        break;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const form = new FormData();
-    for (const key in formData) {
-      form.append(key, formData[key]);
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+    formData.append("email", email);
+    formData.append("mobile_number", mobile_number);
+    formData.append("years_of_experience", years_of_experience);
+    formData.append("previous_work", previous_work);
+    for (let i = 0; i < images.length; i++) {
+      formData.append("image", images[i]);
     }
 
     try {
       const response = await axios.post(
         "http://localhost:3000/TourGuideProfile",
-        form,
+        formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         }
       );
+
       alert(response.data.msg);
-      // Optionally reset the form or redirect the user
-      setFormData({
-        username: "",
-        password: "",
-        email: "",
-        mobile_number: "",
-        years_of_experience: "",
-        previous_work: "",
-        image: null,
-      });
+      const newTourGuideId = response.data.user._id;
+      navigate(`/tourguide/${newTourGuideId}`); // Navigate to TourGuideFrontend with the new ID
     } catch (error) {
       alert(error.response.data.message);
     }
@@ -69,7 +75,7 @@ const CreateTourGuideProfile = () => {
           <input
             type="text"
             name="username"
-            value={formData.username}
+            value={username}
             onChange={handleChange}
             required
           />
@@ -79,7 +85,7 @@ const CreateTourGuideProfile = () => {
           <input
             type="password"
             name="password"
-            value={formData.password}
+            value={password}
             onChange={handleChange}
             required
           />
@@ -89,7 +95,7 @@ const CreateTourGuideProfile = () => {
           <input
             type="email"
             name="email"
-            value={formData.email}
+            value={email}
             onChange={handleChange}
             required
           />
@@ -99,7 +105,7 @@ const CreateTourGuideProfile = () => {
           <input
             type="tel"
             name="mobile_number"
-            value={formData.mobile_number}
+            value={mobile_number}
             onChange={handleChange}
             required
           />
@@ -109,18 +115,16 @@ const CreateTourGuideProfile = () => {
           <input
             type="number"
             name="years_of_experience"
-            value={formData.years_of_experience}
+            value={years_of_experience}
             onChange={handleChange}
-            required
           />
         </div>
         <div>
           <label>Previous Work:</label>
           <textarea
             name="previous_work"
-            value={formData.previous_work}
+            value={previous_work}
             onChange={handleChange}
-            required
           />
         </div>
         <div>
@@ -130,7 +134,6 @@ const CreateTourGuideProfile = () => {
             name="image"
             accept="image/*"
             onChange={handleImageChange}
-            required
           />
         </div>
         <button type="submit">Create Profile</button>

@@ -22,6 +22,9 @@ import DeleteAccount from "./tourist/DeleteAccount";
 import SearchProduct from "./Products/SearchProduct"; // Ensure this import is correct
 import FilterProducts from "./Products/FilterProducts"; // Ensure this import is correct
 import SortProducts from "./Products/SortProducts"; // Ensure this import is correct
+import SetPreferredCurrency from "./tourist/SetPreferredCurrency";
+import ShareItem from "./tourist/ShareItem"; // Import the new ShareItem component
+import ActivityByCategory from "./Activity/ActivitiesByCategory.js"; // Import the new ShareItem component
 
 import "./styles.css";
 
@@ -58,6 +61,12 @@ const Tourist = () => {
         return <FilterProducts />;
       case "SortProduct":
         return <SortProducts />;
+      case "ActivityByCategory":
+        return <ActivityByCategory />;
+      case "SetPreferredCurrency":
+        return <SetPreferredCurrency touristId={touristId} />;
+      case "ShareItem": // Add the new case for the ShareItem component
+        return <ShareItem />;
       case "loyaltyPoints":
         return <LoyaltyPointsForm />;
       case "ComplaintForm":
@@ -129,6 +138,15 @@ const Tourist = () => {
                 : "View Purchased Products"}
             </button>
             {showPurchasedProducts && <TouristProducts touristId={touristId} />}
+            <button onClick={() => setCurrentPage("ActivityByCategory")}>
+              Activity by category
+            </button>
+            <button onClick={() => setCurrentPage("SetPreferredCurrency")}>
+              Set Preferred Currency
+            </button>
+            <button onClick={() => setCurrentPage("ShareItem")}>
+              Share an Item
+            </button>
 
             <button onClick={() => setCurrentPage("loyaltyPoints")}>
               Loyalty Points
