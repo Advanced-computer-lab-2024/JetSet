@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const complaintSchema = new Schema({
@@ -16,13 +16,22 @@ const complaintSchema = new Schema({
   },
   state: {
     type: String,
-    default:"Pending",
+    default: "Pending",
   },
-  userId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Tourist', 
-    required: false },
+  reply: {
+    type: String,
+    default: "",
+  },
+  details: {
+    type: String,
+    default: "",
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Tourist",
+    required: false,
+  },
 });
 
-const Complaint = mongoose.model('Complaint', complaintSchema);
+const Complaint = mongoose.model("Complaint", complaintSchema);
 module.exports = Complaint;

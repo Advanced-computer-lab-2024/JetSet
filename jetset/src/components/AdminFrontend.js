@@ -34,6 +34,11 @@ import ChangePasswordForm from "./Admin/ChangePasswordForm";
 import Itineraries from "./Itinerary/FlagItinerary";
 import ActivityList from "./Activity/FlagActivity";
 
+import ComplaintsReply from "./Complaints/ComplaintsReply";
+import ComplaintsFilter from "./Complaints/ComplaintsFilter ";
+import ComplaintsSort from "./Complaints/ComplaintsSort";
+import ComplaintsStatus from "./Complaints/ComplaintsStatus";
+
 function AdminFrontend() {
   // State for managing tags
 
@@ -58,6 +63,8 @@ function AdminFrontend() {
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
   const [showItineraryActions, setShowItineraryActions] = useState(false);
   const [showActivityActions, setShowActivityActions] = useState(false);
+  const [showComplaintActions, setshowComplaintActions] = useState(false);
+  const [currentPage, setCurrentPage] = useState("");
 
   const fetchTags = async () => {
     setTagLoading(true);
@@ -110,6 +117,27 @@ function AdminFrontend() {
     fetchProducts();
   }, []);
 
+  const renderPage = () => {
+    return (
+      <div>
+        <nav>
+          <button onClick={() => setCurrentPage("view")}>View</button>
+          <button onClick={() => setCurrentPage("Crep")}>Reply</button>
+          <button onClick={() => setCurrentPage("Csort")}>Sort</button>
+          <button onClick={() => setCurrentPage("Cstatus")}>Status</button>
+          <button onClick={() => setCurrentPage("Cfilter")}>Filter</button>
+        </nav>
+        <div className="complaint-response">
+          {currentPage === "view" && <ComplaintList />}
+          {currentPage === "Crep" && <ComplaintsReply />}
+          {currentPage === "Csort" && <ComplaintsSort />}
+          {currentPage === "Cstatus" && <ComplaintsStatus />}
+          {currentPage === "Cfilter" && <ComplaintsFilter />}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="admin-frontend">
       <header>
@@ -134,7 +162,6 @@ function AdminFrontend() {
               <DeleteAccount />
               <CreateAdmin />
               <CreateTourismGovernor />
-              <ComplaintList />
             </div>
           )}
         </section>
@@ -267,6 +294,19 @@ function AdminFrontend() {
               : "Show Activity Actions"}
           </button>
           {showActivityActions && <ActivityList />}
+        </section>
+
+        {/* Complaints Management Section */}
+        <section className="Complaints-management">
+          <h2>Complaints Management</h2>
+          <button
+            onClick={() => setshowComplaintActions(!showComplaintActions)}
+          >
+            {showComplaintActions
+              ? "Hide Complaint Actions"
+              : "Show Complaint Actions"}
+          </button>
+          {showComplaintActions && renderPage()}
         </section>
       </main>
     </div>

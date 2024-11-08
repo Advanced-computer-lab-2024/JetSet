@@ -1,0 +1,11 @@
+.booking-message {
+  background-color: #4caf50; /* Green background */
+  color: white; /* White text */
+  padding: 10px; /* Some padding */
+  text-align: center; /* Center text */
+  position: fixed; /* Fixed position at the top */
+  top: 0; /* Align to the top */
+  left: 0; /* Align to the left */
+  right: 0; /* Stretch to the right */
+  z-index: 1000; /* High z-index to appear above other elements */
+}

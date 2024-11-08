@@ -10,6 +10,9 @@ const Transportation = require("../Models/Transportation");
 const nodemailer = require("nodemailer");
 const { default: mongoose } = require("mongoose");
 
+//const { default: mongoose } = require("mongoose");
+const FlightBooking = require("../Models/flightBookingSchema.js");
+
 const createTourist = async (req, res) => {
   const { username, password, email, mobile, nationality, dob, job } = req.body;
   try {
@@ -651,11 +654,9 @@ const rateandcommentactivity = async (req, res) => {
     }
 
     if (!activity.booking_open) {
-      return res
-        .status(400)
-        .json({
-          error: "Bookings are closed for this activity. You cannot rate it.",
-        });
+      return res.status(400).json({
+        error: "Bookings are closed for this activity. You cannot rate it.",
+      });
     }
 
     // Ensure rating is between 1 and 5
@@ -888,7 +889,7 @@ const fileComplaint = async (req, res) => {
 };
 
 const viewMyComplaints = async (req, res) => {
-  const touristID = new mongoose.Types.ObjectId(req.params.touristId);
+  const touristID = req.params.touristId;
   try {
     const complaints = await Complaint.find({ userId: touristID });
     res.status(200).json(complaints);
@@ -1309,6 +1310,308 @@ const setPreferredCurrency = async (req, res) => {
   }
 };
 
+const axios = require("axios");
+
+let accessToken = null;
+let tokenExpiryTime = null;
+
+const getAccessToken = async () => {
+  const url = "https://test.api.amadeus.com/v1/security/oauth2/token";
+  const headers = { "Content-Type": "application/x-www-form-urlencoded" };
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: process.env.AMADEUS_API_KEY,
+    client_secret: process.env.AMADEUS_API_SECRET,
+  });
+
+  try {
+    const response = await axios.post(url, body, { headers });
+    accessToken = response.data.access_token;
+    tokenExpiryTime = Date.now() + response.data.expires_in * 1000; // Set expiry time
+    console.log("Access token received");
+    return accessToken; // Return the token
+  } catch (error) {
+    console.error("Error fetching access token:", error);
+    throw new Error("Could not retrieve access token");
+  }
+};
+
+// Search for Flights
+const searchFlights = async (req, res) => {
+  const { origin, destination, departureDate, returnDate, adults } = req.body;
+
+  try {
+    // Check if token is valid
+    if (!accessToken || Date.now() >= tokenExpiryTime) {
+      await getAccessToken(); // Get a new token if needed
+    }
+
+    const response = await axios.get(
+      `https://test.api.amadeus.com/v2/shopping/flight-offers`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        params: {
+          originLocationCode: origin,
+          destinationLocationCode: destination,
+          departureDate: departureDate,
+          returnDate: returnDate,
+          adults: adults,
+          maxPrice: 500, // Optional
+        },
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error searching for flights:", error);
+    res.status(500).json({ message: "Error searching for flights." });
+  }
+};
+
+const bookFlight = async (req, res) => {
+  const {
+    flightId,
+    passengerDetails,
+    origin,
+    destination,
+    departureDate,
+    returnDate,
+    adults,
+    maxPrice,
+  } = req.body;
+  const touristId = req.params.touristId; // Assuming touristId is passed in URL params like /book-flight/:touristId
+
+  // Validate required fields
+  if (
+    !flightId ||
+    !passengerDetails ||
+    !origin ||
+    !destination ||
+    !departureDate ||
+    !returnDate ||
+    !adults
+  ) {
+    return res.status(400).json({ message: "Missing required fields." });
+  }
+
+  try {
+    // Ensure the passenger is a Tourist, and we'll reference the Tourist via the booked_by field
+    //const touristId = req.user._id;  // Assuming you're using authentication middleware to set the user's ID (Tourist)
+
+    // Create the flight booking document
+    const flightBooking = new FlightBooking({
+      booked_by: touristId, // Link the Tourist (passenger) via the touristId
+      origin,
+      destination,
+      departureDate,
+      returnDate,
+      adults,
+      maxPrice: maxPrice || 500, // Use the default maxPrice if not provided
+      status: "pending", // Initial status is 'pending' until the booking is confirmed
+      bookingReference: `BOOK-${Math.floor(Math.random() * 10000)}`,
+      passengerDetails, // Store passenger details from frontend
+    });
+
+    const tourist = await Tourist.findById(touristId);
+
+    tourist.wallet -= FlightBooking.price;
+
+    await tourist.save();
+
+    const loyaltyUpdate = await addLoyaltyPoints(
+      FlightBooking.price,
+      touristId
+    );
+
+    // Simulate the flight booking process (this would be replaced with actual logic)
+    // Here, we're just mocking a successful booking response
+    const bookingResponse = {
+      bookingId: flightBooking.bookingReference,
+      flightId,
+      passengerDetails,
+      status: "Confirmed",
+      message: "Flight booked successfully!",
+    };
+
+    // Save the booking response in the database
+    flightBooking.response = bookingResponse; // Store the external API response (mocked here)
+    flightBooking.status = "booked"; // Update the status to 'booked'
+
+    // Save the flight booking document in the database
+    await flightBooking.save();
+
+    // Respond with the booking details
+    res.json({
+      message: bookingResponse.message,
+      bookingDetails: flightBooking,
+    });
+  } catch (error) {
+    console.error("Error booking flight:", error);
+    res.status(500).json({ message: "Error booking flight." });
+  }
+};
+
+const crypto = require("crypto");
+const HOTELBEDS_BASE_URL =
+  "https://api.test.hotelbeds.com/hotel-api/1.0/hotels";
+
+function generateSignature() {
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const toHash =
+    process.env.HOTELBEDS_API_KEY + process.env.HOTELBEDS_SECRET + timestamp;
+  return crypto.createHash("sha256").update(toHash).digest("hex");
+}
+
+const searchHotels = async (req, res) => {
+  const { checkIn, checkOut, adults, children, destinationCode } = req.body;
+
+  // Validate required parameters
+  if (!checkIn || !checkOut || !adults || !destinationCode) {
+    return res.status(400).json({ error: "Missing required parameters" });
+  }
+
+  // Create the paxes array dynamically based on adults and children
+  const paxes = [];
+
+  // Add adults
+  for (let i = 0; i < adults; i++) {
+    paxes.push({ type: "AD", age: 30 }); // Assuming adult age is 30, adjust as needed
+  }
+
+  // Add children
+  for (let i = 0; i < children; i++) {
+    paxes.push({ type: "CH", age: 5 }); // Assuming child age is 5, adjust as needed
+  }
+
+  // Check that the number of paxes matches the total adults + children
+  if (paxes.length !== adults + children) {
+    return res.status(400).json({
+      error:
+        "The number of paxes does not match the number of adults and children.",
+    });
+  }
+
+  // Prepare request payload
+  const payload = {
+    stay: {
+      checkIn,
+      checkOut,
+    },
+    occupancies: [
+      {
+        rooms: 1, // You can adjust the number of rooms dynamically if needed
+        adults,
+        children,
+        paxes, // Pass the dynamically created paxes array
+      },
+    ],
+    destination: {
+      code: destinationCode,
+    },
+  };
+
+  const signature = generateSignature();
+
+  const headers = {
+    "Api-key": process.env.HOTELBEDS_API_KEY,
+    "X-Signature": signature,
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+
+  try {
+    const response = await axios.post(HOTELBEDS_BASE_URL, payload, { headers });
+    res.json(response.data); // Send the response back to the client
+  } catch (error) {
+    console.error(
+      "Error from Hotelbeds API:",
+      error.response?.data || error.message
+    );
+    res
+      .status(error.response?.status || 500)
+      .json({ error: "Error from Hotelbeds API" });
+  }
+};
+
+const HotelBooking = require("../Models/hotelBookingSchema"); // Import the HotelBooking model
+
+const bookHotel = async (req, res) => {
+  const { checkIn, checkOut, adults, children, destinationCode, paxes, rooms } =
+    req.body;
+  const touristId = req.params.touristId; // Assuming touristId is passed in URL params like /book-hotel/:touristId
+
+  // Validate required fields
+  if (!checkIn || !checkOut || !adults || !destinationCode || !paxes) {
+    return res.status(400).json({
+      message:
+        "Check-in, check-out, adults, destination code, and paxes are required.",
+    });
+  }
+
+  // Create a new booking object
+  const newBooking = new HotelBooking({
+    booked_by: touristId, // Reference to the tourist who booked
+    checkIn, // Check-in date
+    checkOut, // Check-out date
+    adults, // Number of adults
+    children, // Number of children
+    destinationCode, // Destination code
+    paxes: paxes, // Store the passenger details from the frontend
+    rooms, // Number of rooms (default is 1 if not passed)
+    status: "pending", // Set the initial status as 'pending'
+    bookingReference: `BOOK-${Math.floor(Math.random() * 10000)}`, // Generate a unique booking reference
+  });
+
+  try {
+    // Save the booking to the database
+    const savedBooking = await newBooking.save();
+
+    // If there is any external API response you need to store, do so in the response field
+    savedBooking.response = {}; // Set this to any API response if necessary, mock or real
+    await savedBooking.save(); // Save the booking again with the updated response field
+
+    const tourist = await Tourist.findById(touristId);
+
+    tourist.wallet -= HotelBooking.price;
+
+    await tourist.save();
+
+    const loyaltyUpdate = await addLoyaltyPoints(HotelBooking.price, touristId);
+
+    res.status(201).json({
+      message: "Booking successful!",
+      bookingId: savedBooking.bookingReference,
+      status: "booked",
+      bookingReference: savedBooking.bookingReference, // You might also want to return the reference
+    });
+  } catch (err) {
+    console.error("Error saving booking:", err);
+    res
+      .status(500)
+      .json({ message: "Error occurred while saving the booking." });
+  }
+};
+
+const viewFlight = async (req, res) => {
+  try {
+    const tags = await FlightBooking.find();
+    res.status(200).json(tags);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch tags" });
+  }
+};
+
+const viewHotel = async (req, res) => {
+  try {
+    const tags = await HotelBooking.find();
+    res.status(200).json(tags);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch tags" });
+  }
+};
+
 module.exports = {
   getProducts,
   SortActivities,
@@ -1353,4 +1656,10 @@ module.exports = {
   getActivitiesByCategory,
   shareItem,
   setPreferredCurrency,
+  searchFlights,
+  bookFlight,
+  searchHotels,
+  bookHotel,
+  viewFlight,
+  viewHotel,
 };

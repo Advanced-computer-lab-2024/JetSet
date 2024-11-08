@@ -88,6 +88,10 @@ const {
   rejectguest,
   changePasswordAdmin,
   getadmin,
+  updateComplaintStatus,
+  addReplyToComplaint,
+  getComplaintsSortedByDate,
+  getComplaintsByStatus,
 } = require("./Routes/adminController");
 
 const {
@@ -147,6 +151,12 @@ const {
   getActivitiesByCategory,
   shareItem,
   setPreferredCurrency,
+  searchFlights,
+  bookFlight,
+  searchHotels,
+  bookHotel,
+  viewFlight,
+  viewHotel,
 } = require("../src/Routes/touristController");
 
 const {
@@ -451,3 +461,17 @@ app.get("/activities/by-category", getActivitiesByCategory);
 app.post("/share", shareItem);
 
 app.put("/cpTourist/:touristId/currency", setPreferredCurrency);
+
+app.put("/complaints/:id/state", updateComplaintStatus);
+app.put("/complaints/:id/reply", addReplyToComplaint);
+app.get("/complaintSort", getComplaintsSortedByDate);
+app.get("/complaintfilter", getComplaintsByStatus);
+
+app.post("/search-flights", searchFlights);
+app.post("/book-flight/:touristId", bookFlight);
+
+app.post("/search-hotels", searchHotels);
+app.post("/book-hotel/:touristId", bookHotel);
+
+app.get("/flight", viewFlight);
+app.get("/hotel", viewHotel);

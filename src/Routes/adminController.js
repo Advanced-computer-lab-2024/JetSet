@@ -451,6 +451,81 @@ const flagActivity = async (req, res) => {
   }
 };
 
+const updateComplaintStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { state } = req.body;
+
+    // Validate status value
+    if (!["pending", "resolved"].includes(state)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const complaint = await Complaint.findByIdAndUpdate(
+      id,
+      { state },
+      { new: true }
+    );
+
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
+    }
+
+    res.json({ message: "Complaint status updated", complaint });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+const addReplyToComplaint = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reply } = req.body;
+
+    const complaint = await Complaint.findByIdAndUpdate(
+      id,
+      { reply },
+      { new: true }
+    );
+
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
+    }
+
+    res.json({ message: "Reply added to complaint", complaint });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// Get complaints sorted by date
+const getComplaintsSortedByDate = async (req, res) => {
+  try {
+    const { order = "desc" } = req.query; // Default to descending order
+    const complaints = await Complaint.find().sort({
+      date: order === "asc" ? 1 : -1,
+    });
+
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+const getComplaintsByStatus = async (req, res) => {
+  try {
+    const { state } = req.query; // Get status from query parameter
+    if (!state) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+
+    const complaints = await Complaint.find({ state }); // Filter complaints by status
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -477,4 +552,8 @@ module.exports = {
   viewAllComplaints,
   flagItinerary,
   flagActivity,
+  updateComplaintStatus,
+  addReplyToComplaint,
+  getComplaintsSortedByDate,
+  getComplaintsByStatus,
 };
