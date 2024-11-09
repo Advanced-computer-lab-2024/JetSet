@@ -42,6 +42,11 @@ const tourGuideSchema = new Schema(
       type: String,
       required: false,
     },
+    termsAccepted: {
+      type: Boolean,
+      required: true,
+      default: false
+    },
   },
   { timestamps: true }
 );

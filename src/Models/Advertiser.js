@@ -33,6 +33,11 @@ const advertiserSchema = new Schema(
       type: String,
       required: true,
     },
+    termsAccepted: {
+      type: Boolean,
+      required: true,
+      default: false
+    },
     images: {
       type: [String],
       default: [],

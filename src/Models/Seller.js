@@ -22,7 +22,12 @@ const sellerSchema = new Schema(
     }, // For Sellers
     seller_description: {
       type: String,
-    }, // For Sellers
+    }, 
+    termsAccepted: {
+      type: Boolean,
+      required: true,
+      default: false
+    },// For Sellers
     images: {
       type: [String],
       default: [],

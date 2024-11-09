@@ -7,17 +7,23 @@ const path = require("path");
 //added
 //Create/ Read/ Update my profile with my information as a Seller including name and description.  if accepted as a seller on the system
 const createSeller = async (req, res) => {
-  const { username, name, password, email, desciption } = req.body;
+  const { username, name, password, email, desciption, termsAccepted } = req.body;
 
   try {
     const imageFilename = req.file ? path.basename(req.file.path) : "";
-
+    if (!termsAccepted) {
+      return res.status(400).json({
+        success: false,
+        message: "You must accept the terms and conditions to register.",
+      });
+    }
     const user = await Seller.create({
       email: email,
       username: username,
       password: password,
       seller_name: name,
       seller_description: desciption,
+
       images: imageFilename,
     });
     await user.save();

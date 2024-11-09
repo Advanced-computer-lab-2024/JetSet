@@ -13,7 +13,15 @@ const createProfile = async (req, res) => {
     website,
     hotline,
     companyDescription,
+    termsAccepted,
   } = req.body;
+  if (!termsAccepted) {
+    return res.status(400).json({
+      success: false,
+      message: "You must accept the terms and conditions to register.",
+    });
+  }
+
 
   try {
     const imageFilename = req.file ? path.basename(req.file.path) : "";
@@ -26,6 +34,7 @@ const createProfile = async (req, res) => {
       website,
       hotline,
       companyDescription,
+     
       images: imageFilename,
     });
 

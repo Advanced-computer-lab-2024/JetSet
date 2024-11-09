@@ -4,7 +4,8 @@ const itinerariesModel = require("../Models/Itinerary.js");
 const Guest = require("../Models/Guest.js");
 const { default: mongoose } = require("mongoose");
 
-//added
+
+
 const register = async (req, res) => {
   const { username, password, email, role } = req.body;
   const documentNames = req.files ? req.files.map((file) => file.filename) : [];

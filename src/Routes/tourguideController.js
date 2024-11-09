@@ -16,8 +16,15 @@ const createTourGuideProfile = async (req, res) => {
     mobile_number,
     years_of_experience,
     previous_work,
+    termsAccepted,
   } = req.body;
   try {
+    if (!termsAccepted) {
+      return res.status(400).json({
+        success: false,
+        message: "You must accept the terms and conditions to register.",
+      });
+    }
     const imageFilename = req.file ? path.basename(req.file.path) : "";
     await TourGuide.create({
       email: email,

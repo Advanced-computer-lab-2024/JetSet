@@ -1,0 +1,11 @@
+const ensureTermsAccepted = (req, res, next) => {
+  // Check if terms are accepted (could be a flag in the user's profile or session)
+  const { termsAccepted } = req.body; // Assume this is sent in the request body
+  if (!termsAccepted) {
+    return res.status(403).json({
+      success: false,
+      message: "You must accept the terms and conditions to access this service.",
+    });
+  }
+  next(); // Proceed if terms are accepted
+};
