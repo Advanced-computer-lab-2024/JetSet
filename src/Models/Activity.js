@@ -62,7 +62,12 @@ const activitySchema = new Schema(
       //default: true,
     },
 
-    budget: Number, // Optional field
+    budget: Number,
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+    }, // Optional field
     ratings: [
       {
         touristId: {

@@ -1,36 +1,102 @@
-// src/Activity/ActivitiesByCategory.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const ActivitiesByCategory = () => {
-  const categoryId = "60d5ec49f47a1b001c8b4567"; // Hardcoded category ID
+const CategoryAndActivity = () => {
+  const [categories, setCategories] = useState([]);
   const [activities, setActivities] = useState([]);
-  const [error, setError] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
-  const fetchActivities = async () => {
-    try {
-      const response = await axios.get(`/activities/by-category`, {
-        params: { category: categoryId },
+  // Fetch categories from the backend
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/category")
+      .then((response) => {
+        setCategories(response.data);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the categories!", error);
       });
+  }, []);
+
+  // Fetch activities based on selected category
+  const fetchActivities = async (categoryId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/activities/by-category?category=${categoryId}`
+      );
       setActivities(response.data);
-    } catch (err) {
-      setError(err.response?.data?.error || "Error fetching activities");
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+      setActivities([]);
     }
+  };
+
+  // Handle category selection
+  const handleCategoryChange = (event) => {
+    const categoryId = event.target.value;
+    setSelectedCategory(categoryId);
+    fetchActivities(categoryId); // Fetch activities when category changes
   };
 
   return (
     <div>
-      <h2>Activities in Category</h2>
-      <button onClick={fetchActivities}>Fetch Activities</button>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <ul>
-        {activities.map((activity) => (
-          <li key={activity._id}>{activity.title}</li>
+      <h1>Select a Category</h1>
+      <select onChange={handleCategoryChange} value={selectedCategory}>
+        <option value="">Select a category</option>
+        {categories.map((category) => (
+          <option key={category._id} value={category._id}>
+            {category.name}
+          </option>
         ))}
-      </ul>
+      </select>
+
+      <h2>Activities</h2>
+      {activities.length > 0 ? (
+        <ul>
+          {activities.map((activity) => (
+            <li key={activity._id}>
+              <h3>{activity.title}</h3>
+              <p>
+                <strong>Budget:</strong> ${activity.budget}
+              </p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {new Date(activity.date).toLocaleDateString()}
+              </p>
+              <p>
+                <strong>Time:</strong> {activity.time}
+              </p>
+              <p>
+                <strong>Location:</strong> {activity.location}
+              </p>
+              <p>
+                <strong>Special Discount:</strong> {activity.special_discount}
+              </p>
+              <p>
+                <strong>Booking Open:</strong>{" "}
+                {activity.bookingOpen ? "Yes" : "No"}
+              </p>
+              {activity.ratings.length > 0 ? (
+                <div>
+                  <h4>Ratings:</h4>
+                  {activity.ratings.map((rating, index) => (
+                    <p key={index}>
+                      {rating.touristId} - {rating.rating} stars -{" "}
+                      {rating.comment}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p>No ratings yet.</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No activities found for this category.</p>
+      )}
     </div>
   );
 };
 
-export default ActivitiesByCategory;
+export default CategoryAndActivity;

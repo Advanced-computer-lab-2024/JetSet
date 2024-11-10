@@ -472,6 +472,10 @@ const deactivateItinerary = async (req, res) => {
         .json({ error: "Cannot deactivate itinerary already inactive" });
     }
 
+    if (itinerary.booked === 0) {
+      return res.status(400).json({ error: "Cannot deactivate itinerary" });
+    }
+
     // Deactivate the itinerary
     itinerary.status = "inactive";
     await itinerary.save();

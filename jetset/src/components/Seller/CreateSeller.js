@@ -87,13 +87,13 @@ const CreateSeller = () => {
           onChange={(e) => setDescription(e.target.value)}
         ></textarea>
 
-        {/* File input for image uploads */}
+        {/* File input for image uploads
         <input
           type="file"
           multiple // Allow multiple files
           onChange={handleImageChange}
           accept="image/*" // Accept only image files
-        />
+        /> */}
 
         <button type="submit">Create Profile</button>
         {message && (

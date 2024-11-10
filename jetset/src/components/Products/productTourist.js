@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const ProductList = () => {
+const ProductList = ({ touristId }) => {
   const [products, setProducts] = useState([]);
   const [sortBy, setSortBy] = useState("ratings");
   const [sortOrder, setSortOrder] = useState(-1);
@@ -71,7 +71,6 @@ const ProductList = () => {
 
   const handleBuyProduct = async () => {
     try {
-      const touristId = "6723896c185909fcd367634a"; // Replace with actual tourist ID
       const response = await axios.put(
         `http://localhost:3000/buyProduct/${touristId}`,
         {

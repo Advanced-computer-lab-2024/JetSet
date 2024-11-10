@@ -24,7 +24,7 @@ const touristSchema = new Schema(
       shopping: { type: Boolean, default: false },
       budget: { type: Number, default: 0 }, // Default budget
     },
-    
+
     mobile_number: String,
     nationality: String,
     DOB: Date,
@@ -35,10 +35,7 @@ const touristSchema = new Schema(
         ref: "Product",
       },
     ],
-    wallet:
-    { type:Number,
-      default:0,
-    },
+    wallet: { type: Number, default: 0 },
     loyaltyPoints: {
       type: Number,
       default: 0,
@@ -47,10 +44,9 @@ const touristSchema = new Schema(
       type: Number,
       default: 1,
     },
-    badge:{
-      type: String, 
-      default:"Bronze",     
-      required: true,
+    badge: {
+      type: String,
+      default: "Bronze",
     },
     bookedActivities: [
       {
@@ -70,6 +66,10 @@ const touristSchema = new Schema(
         ref: "Transportation",
       },
     ],
+    preferredCurrency: {
+      type: String,
+      default: "dollar",
+    },
   },
   { timestamps: true }
 );

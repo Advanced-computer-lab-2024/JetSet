@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
 
-const TourGuideProfile = () => {
-  const { tourGuideID } = useParams();
+const TourGuideProfile = ({ tourGuideID }) => {
   const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
     mobile_number: "",

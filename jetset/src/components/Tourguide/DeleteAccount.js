@@ -1,12 +1,13 @@
 // src/DeleteAccount.js
-import React from 'react';
-import axios from 'axios';
+import React from "react";
+import axios from "axios";
 
 const DeleteAccount = ({ tourguideId }) => {
-  
   const handleDeleteAccount = async () => {
     try {
-      const response = await axios.delete(`http://localhost:3000/deleteAccTourguide/6728fc73fe820b19a48d6fbd`);
+      const response = await axios.delete(
+        `http://localhost:3000/deleteAccTourguide/${tourguideId}`
+      );
       alert(response.data.message); // Show success message
     } catch (err) {
       alert(err.response?.data?.message || "An error occurred"); // Show error message

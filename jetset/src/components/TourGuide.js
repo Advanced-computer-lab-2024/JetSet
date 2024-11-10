@@ -14,13 +14,16 @@ import Activate from "./Tourguide/Activate";
 import Deactivate from "./Tourguide/Deactivate";
 import ChangePasswordForm from "./Tourguide/ChangePasswordForm.js";
 import DeleteAccount from "./Tourguide/DeleteAccount.js";
+import { useParams } from "react-router-dom";
 
-function TourGuide({ tourGuideID }) {
+function TourGuide() {
+  const { tourGuideID } = useParams();
   const [view, setView] = useState("itineraries");
   const [itineraryID, setItineraryID] = useState("");
 
-  const touristItineraryID = "6702626ec741235c6ae2d87c"; // Ensure consistency in naming
+  console.log(tourGuideID);
 
+  const touristItineraryID = "6702626ec741235c6ae2d87c"; // Ensure consistency in naming
   return (
     <div className="App">
       <header className="App-header">
@@ -110,8 +113,10 @@ function TourGuide({ tourGuideID }) {
         )}
         {view === "activate" && <Activate itineraryId={itineraryID} />}
         {view === "deactivate" && <Deactivate itineraryId={itineraryID} />}
-        {view === "ChangePassword" && <ChangePasswordForm id={tourGuideID} />}
-        {view === "deleteAcc" && <DeleteAccount id={tourGuideID} />}
+        {view === "ChangePassword" && (
+          <ChangePasswordForm tourGuideID={tourGuideID} />
+        )}
+        {view === "deleteAcc" && <DeleteAccount tourguideId={tourGuideID} />}
       </header>
     </div>
   );

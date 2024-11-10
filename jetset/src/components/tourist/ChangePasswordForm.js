@@ -16,10 +16,13 @@ const ChangePasswordForm = ({ touristId }) => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:3000/cpTourist/672398fc87d64e4709f43cde`, {
-        oldPassword,
-        newPassword,
-      });
+      const response = await axios.put(
+        `http://localhost:3000/cpTourist/${touristId}`,
+        {
+          oldPassword,
+          newPassword,
+        }
+      );
       setMessage(response.data.message);
     } catch (error) {
       setMessage(error.response?.data.message || "Error updating password");

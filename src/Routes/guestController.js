@@ -188,7 +188,7 @@ const getActivitiesByCategoryForGuest = async (req, res) => {
 
   try {
     // Find activities that belong to the specified category, with populated category data
-    const activities = await Activity.find({ category })
+    const activities = await Activity.find({ category, flag: false })
       .populate("category", "name") // Populate category with only the name field
       .populate("tags", "name") // Optional: Populate tags with name field
       .populate("creator", "name"); // Optional: Populate creator with name field

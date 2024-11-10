@@ -54,7 +54,7 @@ const RateandcommentItinerary = ({ touristId }) => {
 
     try {
       const response = await axios.post(
-        `http://localhost:3000/rateandcommentItinerary/${itineraryId}`,
+        `http://localhost:3000/rateandcommentItinerary/${touristId}`,
         rateandcommentItinerary
       );
       setMessage(response.data.message);

@@ -127,7 +127,7 @@ const CreateTourGuideProfile = () => {
             onChange={handleChange}
           />
         </div>
-        <div>
+        {/* <div>
           <label>Profile Image:</label>
           <input
             type="file"
@@ -135,7 +135,7 @@ const CreateTourGuideProfile = () => {
             accept="image/*"
             onChange={handleImageChange}
           />
-        </div>
+        </div> */}
         <button type="submit">Create Profile</button>
       </form>
     </div>

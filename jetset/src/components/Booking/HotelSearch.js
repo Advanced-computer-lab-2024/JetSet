@@ -274,7 +274,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const HotelSearch = () => {
+const HotelSearch = ({ touristId }) => {
   const [formData, setFormData] = useState({
     checkIn: "",
     checkOut: "",
@@ -406,7 +406,7 @@ const HotelSearch = () => {
 
     try {
       const bookingResponse = await axios.post(
-        `http://localhost:3000/book-hotel/6723896c185909fcd367634a`,
+        `http://localhost:3000/book-hotel/${touristId}`,
         payload
       );
       console.log("Booking Response:", bookingResponse.data);

@@ -30,9 +30,7 @@ const TouristProfile = ({ touristId }) => {
     try {
       const response = await axios.put(
         `http://localhost:3000/updateTourist/${touristId}`,
-        {
-          ...updateFields,
-        }
+        updateFields
       );
       setTourist(response.data);
       alert("Tourist profile updated!");
@@ -51,7 +49,11 @@ const TouristProfile = ({ touristId }) => {
           <p>Nationality: {tourist.nationality}</p>
           <p>Job: {tourist.job}</p>
           <p>Mobile: {tourist.mobile_number}</p>
-          <p>Nationality:{tourist.nationality}</p>
+          <p>DOB: {tourist.DOB}</p>
+          <p>Wallet Balance: ${tourist.wallet}</p>
+          <p>Loyalty Points: {tourist.loyaltyPoints}</p>
+          <p>Badge: {tourist.badge}</p>
+          <p>Level: {tourist.level}</p>
 
           <h3>Update Profile</h3>
           <form onSubmit={handleUpdateSubmit}>
@@ -65,6 +67,18 @@ const TouristProfile = ({ touristId }) => {
               type="text"
               name="job"
               placeholder="New Job"
+              onChange={handleUpdateChange}
+            />
+            <input
+              type="number"
+              name="wallet"
+              placeholder="Wallet Balance"
+              onChange={handleUpdateChange}
+            />
+            <input
+              type="number"
+              name="loyaltyPoints"
+              placeholder="Loyalty Points"
               onChange={handleUpdateChange}
             />
             <button type="submit">Update</button>

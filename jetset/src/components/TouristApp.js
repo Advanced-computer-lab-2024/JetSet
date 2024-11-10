@@ -228,6 +228,7 @@ import ShareItem from "./tourist/ShareItem";
 import ActivityByCategory from "./Activity/ActivitiesByCategory";
 import FlightBooking from "./Booking/FlightBooking";
 import HotelSearch from "./Booking/HotelSearch";
+import BookedItineraries from "./tourist/BookedItineraries";
 
 import "./styles.css";
 
@@ -242,7 +243,7 @@ const Tourist = () => {
       case "touristProfile":
         return <TouristProfile touristId={touristId} />;
       case "productList":
-        return <ProductList />;
+        return <ProductList touristId={touristId} />;
       case "activityList":
         return <ActivityList />;
       case "itineraryList":
@@ -258,7 +259,7 @@ const Tourist = () => {
       case "SortProduct":
         return <SortProducts />;
       case "touristProduct":
-        return <TouristProducts />;
+        return <TouristProducts touristId={touristId} />;
       case "ActivityByCategory":
         return <ActivityByCategory />;
       case "SetPreferredCurrency":
@@ -266,7 +267,7 @@ const Tourist = () => {
       case "ShareItem":
         return <ShareItem />;
       case "loyaltyPoints":
-        return <LoyaltyPointsForm />;
+        return <LoyaltyPointsForm touristId={touristId} />;
       case "ComplaintForm":
         return <ComplaintForm touristId={touristId} />;
       case "MyComplaintsList":
@@ -280,17 +281,19 @@ const Tourist = () => {
       case "updatePreferences":
         return <UpdatePreferencesForm touristId={touristId} />;
       case "changepassword":
-        return <ChangePassword />;
+        return <ChangePassword touristId={touristId} />;
       case "booking":
-        return <Book />;
+        return <Book touristId={touristId} />;
       case "transportation":
-        return <Transportations />;
+        return <Transportations touristId={touristId} />;
       case "deleteAcc":
-        return <DeleteAccount />;
+        return <DeleteAccount touristId={touristId} />;
       case "book":
-        return <FlightBooking />;
+        return <FlightBooking touristId={touristId} />;
       case "bookh":
-        return <HotelSearch />;
+        return <HotelSearch touristId={touristId} />;
+      case "bookIti":
+        return <BookedItineraries touristId={touristId} />;
       default:
         return (
           <section className="tourist-frontend">
@@ -340,6 +343,9 @@ const Tourist = () => {
                   onClick={() => setCurrentPage("RateandcommentItinerary")}
                 >
                   Rate & Comment on Itineraries
+                </button>
+                <button onClick={() => setCurrentPage("bookIti")}>
+                  Booked itineraries
                 </button>
               </section>
 

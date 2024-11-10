@@ -137,7 +137,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./FlightBooking.css"; // Optional CSS for styling
 
-const FlightBooking = () => {
+const FlightBooking = ({ touristId }) => {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -204,7 +204,7 @@ const FlightBooking = () => {
     setBookingMessage("");
     try {
       const response = await axios.post(
-        "http://localhost:3000/book-flight/6723896c185909fcd367634a",
+        `http://localhost:3000/book-flight/${touristId}`,
         {
           flightId,
           origin,

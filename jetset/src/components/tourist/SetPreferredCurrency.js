@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const SetPreferredCurrency = () => {
-  const touristId = "6723896c185909fcd367634a"; // Hardcoded tourist ID
+const SetPreferredCurrency = ({ touristId }) => {
   const [currency, setCurrency] = useState(""); // State for currency
   const [message, setMessage] = useState(""); // State for feedback message
 

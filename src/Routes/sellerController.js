@@ -7,7 +7,7 @@ const path = require("path");
 //added
 //Create/ Read/ Update my profile with my information as a Seller including name and description.  if accepted as a seller on the system
 const createSeller = async (req, res) => {
-  const { username, name, password, email, desciption } = req.body;
+  const { username, name, password, email, description } = req.body;
 
   try {
     const imageFilename = req.file ? path.basename(req.file.path) : "";
@@ -17,7 +17,7 @@ const createSeller = async (req, res) => {
       username: username,
       password: password,
       seller_name: name,
-      seller_description: desciption,
+      seller_description: description,
       images: imageFilename,
     });
     await user.save();
@@ -341,12 +341,10 @@ const deleteSellerAccount = async (req, res) => {
       .json({ success: true, message: "Seller account deleted successfully" });
   } catch (error) {
     console.error("Error occurred while deleting seller account:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while trying to delete the account",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while trying to delete the account",
+    });
   }
 };
 

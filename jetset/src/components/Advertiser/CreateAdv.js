@@ -124,10 +124,10 @@ const RegisterForm = () => {
           />
         </div>
 
-        <div>
+        {/* <div>
           <label>Profile Image</label>
           <input type="file" name="image" onChange={handleImageChange} />
-        </div>
+        </div> */}
 
         {error && <p style={{ color: "red" }}>{error}</p>}
 

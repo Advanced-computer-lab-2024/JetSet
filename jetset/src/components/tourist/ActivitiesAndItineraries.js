@@ -95,9 +95,7 @@ const ActivitiesAndItineraries = ({ touristId }) => {
         setItineraries(itinerariesResponse.data);
 
         // Fetch tourist data to get booked activities and itineraries
-        const touristResponse = await axios.get(
-          `/getTourist/672398fc87d64e4709f43cde`
-        );
+        const touristResponse = await axios.get(`/getTourist/${touristId}`);
         setBookedActivities(touristResponse.data.bookedActivities);
         setBookedItineraries(touristResponse.data.bookedItineraries);
       } catch (error) {
@@ -112,7 +110,7 @@ const ActivitiesAndItineraries = ({ touristId }) => {
     setSelectedActivityId(activityId);
     try {
       const response = await axios.post(
-        `/book/672398fc87d64e4709f43cde/activity/${activityId}`
+        `/book/${touristId}/activity/${activityId}`
       );
       alert(response.data.message);
       // Update booked activities after booking
@@ -129,7 +127,7 @@ const ActivitiesAndItineraries = ({ touristId }) => {
     setSelectedActivityId(activityId);
     try {
       const response = await axios.delete(
-        `/cancelActivity/672398fc87d64e4709f43cde/${activityId}`
+        `/cancelActivity/${touristId}/${activityId}`
       );
       alert(response.data.message);
       // Update booked activities after cancellation
@@ -148,7 +146,7 @@ const ActivitiesAndItineraries = ({ touristId }) => {
     setSelectedItineraryId(itineraryId);
     try {
       const response = await axios.post(
-        `/book/672398fc87d64e4709f43cde/itinerary/${itineraryId}`
+        `/book/${touristId}/itinerary/${itineraryId}`
       );
       alert(response.data.message);
       // Update booked itineraries after booking
@@ -165,7 +163,7 @@ const ActivitiesAndItineraries = ({ touristId }) => {
     setSelectedItineraryId(itineraryId);
     try {
       const response = await axios.delete(
-        `/cancelItinerary/672398fc87d64e4709f43cde/${itineraryId}`
+        `/cancelItinerary/${touristId}/${itineraryId}`
       );
       alert(response.data.message);
       // Update booked itineraries after cancellation

@@ -157,6 +157,7 @@ const {
   bookHotel,
   viewFlight,
   viewHotel,
+  getBookedItinerary,
 } = require("../src/Routes/touristController");
 
 const {
@@ -397,7 +398,7 @@ app.put("/buyProduct/:touristId", buyProduct);
 app.get("/gets", getTourist);
 app.post("/rateandcommentItinerary/:id", rateandcommentItinerary);
 app.post("/rateandcommentactivity/:id", rateandcommentactivity);
-app.post("/comment/:id", addRatingAndComment);
+app.put("/comment/:id", addRatingAndComment);
 app.put("/tourist/preferences/:id", updateTouristPreferences);
 
 app.put("/redeemMyPoints/:id", redeemMyPoints);
@@ -475,3 +476,16 @@ app.post("/book-hotel/:touristId", bookHotel);
 
 app.get("/flight", viewFlight);
 app.get("/hotel", viewHotel);
+
+const Category = require("./Models/Category.js");
+
+app.get("/category", async (req, res) => {
+  try {
+    const tags = await Category.find();
+    res.status(200).json(tags);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch tags" });
+  }
+});
+
+app.get("/bookedIti/:touristId", getBookedItinerary);

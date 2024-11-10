@@ -4,14 +4,15 @@ import axios from "axios";
 const Transportations = ({ touristId }) => {
   const [transportations, setTransportations] = useState([]);
   const [bookedTransportations, setBookedTransportations] = useState([]);
-  const [selectedTransportationId, setSelectedTransportationId] = useState(null);
+  const [selectedTransportationId, setSelectedTransportationId] =
+    useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch activities, itineraries, and transportations
         const transportationsResponse = await axios.get("/gettrans");
-        const touristResponse = await axios.get(`/getTourist/67276362cb7de3270b15bc0c`);
+        const touristResponse = await axios.get(`/getTourist/${touristId}`);
         setTransportations(transportationsResponse.data.transportation);
 
         // Set booked transportations from tourist data
@@ -27,7 +28,9 @@ const Transportations = ({ touristId }) => {
   const handleBookTransportation = async (transportationId) => {
     setSelectedTransportationId(transportationId);
     try {
-      const response = await axios.post(`/bookTransportation/67276362cb7de3270b15bc0c/${transportationId}`);
+      const response = await axios.post(
+        `/bookTransportation/${touristId}/${transportationId}`
+      );
       alert(response.data.message);
 
       // Update booked transportations after booking
@@ -47,14 +50,31 @@ const Transportations = ({ touristId }) => {
         {transportations.map((transportation) => {
           const isBooked = bookedTransportations.includes(transportation._id);
           return (
-            <li key={transportation._id} style={{ backgroundColor: selectedTransportationId === transportation._id ? '#e0f7fa' : 'transparent' }}>
-              {transportation.type} by {transportation.company} - ${transportation.price}
+            <li
+              key={transportation._id}
+              style={{
+                backgroundColor:
+                  selectedTransportationId === transportation._id
+                    ? "#e0f7fa"
+                    : "transparent",
+              }}
+            >
+              {transportation.type} by {transportation.company} - $
+              {transportation.price}
               <br />
-              From {transportation.pickup_location} to {transportation.dropoff_location} on {new Date(transportation.availability).toLocaleDateString()}
+              From {transportation.pickup_location} to{" "}
+              {transportation.dropoff_location} on{" "}
+              {new Date(transportation.availability).toLocaleDateString()}
               {isBooked ? (
-                <span style={{ marginLeft: '10px', color: 'green' }}>Already Booked</span>
+                <span style={{ marginLeft: "10px", color: "green" }}>
+                  Already Booked
+                </span>
               ) : (
-                <button onClick={() => handleBookTransportation(transportation._id)}>Book</button>
+                <button
+                  onClick={() => handleBookTransportation(transportation._id)}
+                >
+                  Book
+                </button>
               )}
             </li>
           );

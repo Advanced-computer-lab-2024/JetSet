@@ -355,12 +355,10 @@ const deleteAdvertiserAccount = async (req, res) => {
       console.log(
         "Cannot delete account: there are tourists who have booked activities."
       );
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Cannot delete account: you have booked activities",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Cannot delete account: you have booked activities",
+      });
     }
 
     // If no tourists have booked the activities, delete the advertiser account and their activities
@@ -372,20 +370,16 @@ const deleteAdvertiserAccount = async (req, res) => {
     await advertiserModel.findByIdAndDelete(id); // Delete advertiser account
     console.log(`Deleted advertiser account: ${advertiser.username}`);
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Advertiser account deleted successfully",
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Advertiser account deleted successfully",
+    });
   } catch (error) {
     console.error("Error occurred while deleting advertiser account:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while trying to delete the account",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while trying to delete the account",
+    });
   }
 };
 module.exports = {

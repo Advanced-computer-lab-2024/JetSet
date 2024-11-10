@@ -112,7 +112,7 @@ const AddProduct = ({ sellerId }) => {
           max="5"
         />
 
-        {/* File input for images */}
+        {/* File input for images
         <input
           type="file"
           onChange={handleImageChange}
@@ -123,7 +123,7 @@ const AddProduct = ({ sellerId }) => {
           {images.length > 0
             ? images.map((image) => image.name).join(", ")
             : "No images selected."}
-        </div>
+        </div> */}
 
         {/* Button to add reviews */}
         <button type="button" onClick={handleAddReview}>
