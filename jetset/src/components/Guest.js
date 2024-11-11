@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ActivityList from "./Activity/ActivitiesList.js";
-import ItineraryList from "./Itinerary/ItineraryList.js";
-import HistoricalPlaces from "./Place/HistoricalPlacesList.js";
+import ActivityList from "./Activity/ActivitiesList";
+import ItineraryList from "./Itinerary/ItineraryTourist";
+import HistoricalPlaces from "./Place/HistoricalPlacesList";
 import Search from "./tourist/SearchComponent.js";
 import ActivityByCategory from "./Activity/ActivitiesByCategory.js";
 // Import the new ShareItem component

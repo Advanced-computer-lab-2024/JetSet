@@ -489,3 +489,34 @@ app.get("/category", async (req, res) => {
 });
 
 app.get("/bookedIti/:touristId", getBookedItinerary);
+
+// Route to get tourist's preferred currency and conversion rate
+app.get("/tourist/:id/preferredCurrency", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const tourist = await Tourist.findById(id, "preferredCurrency");
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    const preferredCurrency = tourist.preferredCurrency;
+
+    // Hardcode conversion rates or fetch from an API
+    const conversionRates = {
+      USD: 1 / 49.2,
+      EGP: 1,
+      EUR: 1 / 52.6,
+      SAR: 1 / 13.1,
+      AED: 1 / 13.4,
+      KWD: 1 / 160.4,
+      TRY: 1 / 1.4,
+      GBP: 1 / 63.5,
+    };
+
+    res.json({
+      preferredCurrency,
+      conversionRate: conversionRates[preferredCurrency] || 1,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching currency data", error });
+  }
+});

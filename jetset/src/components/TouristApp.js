@@ -220,9 +220,6 @@ import ChangePassword from "./tourist/ChangePasswordForm";
 import Book from "./tourist/ActivitiesAndItineraries";
 import Transportations from "./tourist/Transportations";
 import DeleteAccount from "./tourist/DeleteAccount";
-import SearchProduct from "./Products/SearchProduct";
-import FilterProducts from "./Products/FilterProducts";
-import SortProducts from "./Products/SortProducts";
 import SetPreferredCurrency from "./tourist/SetPreferredCurrency";
 import ShareItem from "./tourist/ShareItem";
 import ActivityByCategory from "./Activity/ActivitiesByCategory";
@@ -245,23 +242,17 @@ const Tourist = () => {
       case "productList":
         return <ProductList touristId={touristId} />;
       case "activityList":
-        return <ActivityList />;
+        return <ActivityList touristId={touristId} />;
       case "itineraryList":
-        return <ItineraryList />;
+        return <ItineraryList touristId={touristId} />;
       case "historicalPlaces":
-        return <HistoricalPlaces />;
+        return <HistoricalPlaces touristId={touristId} />;
       case "search":
-        return <Search />;
-      case "searchProduct":
-        return <SearchProduct />;
-      case "FilterProduct":
-        return <FilterProducts />;
-      case "SortProduct":
-        return <SortProducts />;
+        return <Search touristId={touristId} />;
       case "touristProduct":
         return <TouristProducts touristId={touristId} />;
       case "ActivityByCategory":
-        return <ActivityByCategory />;
+        return <ActivityByCategory touristId={touristId} />;
       case "SetPreferredCurrency":
         return <SetPreferredCurrency touristId={touristId} />;
       case "ShareItem":
@@ -327,6 +318,9 @@ const Tourist = () => {
                 <button onClick={() => setCurrentPage("itineraryList")}>
                   View Itineraries
                 </button>
+                <button onClick={() => setCurrentPage("historicalPlaces")}>
+                  View Place
+                </button>
                 <button onClick={() => setCurrentPage("ActivityByCategory")}>
                   Activities by Category
                 </button>
@@ -353,15 +347,6 @@ const Tourist = () => {
                 <h2>Products & Purchases</h2>
                 <button onClick={() => setCurrentPage("productList")}>
                   View Products
-                </button>
-                <button onClick={() => setCurrentPage("searchProduct")}>
-                  Search Products
-                </button>
-                <button onClick={() => setCurrentPage("FilterProduct")}>
-                  Filter Products
-                </button>
-                <button onClick={() => setCurrentPage("SortProduct")}>
-                  Sort Products
                 </button>
                 <button
                   onClick={() =>

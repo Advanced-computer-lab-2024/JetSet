@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const CategoryAndActivity = () => {
+const CategoryAndActivity = ({ touristId }) => {
   const [categories, setCategories] = useState([]);
   const [activities, setActivities] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
   // Fetch categories from the backend
   useEffect(() => {
     axios
@@ -17,6 +18,23 @@ const CategoryAndActivity = () => {
         console.error("There was an error fetching the categories!", error);
       });
   }, []);
+
+  const fetchConversionRate = async (currency) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
 
   // Fetch activities based on selected category
   const fetchActivities = async (categoryId) => {
@@ -57,7 +75,9 @@ const CategoryAndActivity = () => {
             <li key={activity._id}>
               <h3>{activity.title}</h3>
               <p>
-                <strong>Budget:</strong> ${activity.budget}
+                <strong>Budget:</strong>{" "}
+                {(activity.budget * conversionRate).toFixed(2)}
+                {selectedCurrency}
               </p>
               <p>
                 <strong>Date:</strong>{" "}

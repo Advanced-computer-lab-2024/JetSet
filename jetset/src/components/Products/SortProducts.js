@@ -42,7 +42,7 @@ const SortProducts = () => {
         products.map((product) => (
           <div key={product._id} className="product-card">
             <h2>{product.name}</h2>
-            <p>Price: ${product.price}</p>
+            <p>Price: {product.price}</p>
             <p>Seller: {product.seller}</p>
             <p>Rating: {product.ratings} ⭐</p>
           </div>

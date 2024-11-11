@@ -3,9 +3,11 @@ import axios from "axios";
 
 const TouristProducts = ({ touristId }) => {
   const [products, setProducts] = useState([]);
-  const [ratings, setRatings] = useState({}); // Store ratings for each product
-  const [reviews, setReviews] = useState({}); // Store reviews for each product
+  const [ratings, setRatings] = useState({});
+  const [reviews, setReviews] = useState({});
   const [message, setMessage] = useState("");
+  const [currency, setCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
 
   // Fetch purchased products for the tourist
   useEffect(() => {
@@ -21,6 +23,23 @@ const TouristProducts = ({ touristId }) => {
     fetchPurchasedProducts();
   }, [touristId]);
 
+  // Fetch currency data
+  useEffect(() => {
+    const fetchCurrencyData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+        );
+        setCurrency(response.data.preferredCurrency);
+        setConversionRate(response.data.conversionRate);
+      } catch (error) {
+        console.error("Error fetching currency data:", error);
+      }
+    };
+
+    fetchCurrencyData();
+  }, [touristId]);
+
   // Handle rating submission
   const handleRatingSubmit = async (e, productId) => {
     e.preventDefault();
@@ -29,7 +48,7 @@ const TouristProducts = ({ touristId }) => {
         rating: ratings[productId],
       });
       setMessage(response.data.message || "Rating submitted successfully.");
-      setRatings((prevRatings) => ({ ...prevRatings, [productId]: 0 })); // Clear rating after submission
+      setRatings((prevRatings) => ({ ...prevRatings, [productId]: 0 }));
     } catch (error) {
       setMessage(
         error.response ? error.response.data.error : "An error occurred."
@@ -46,7 +65,7 @@ const TouristProducts = ({ touristId }) => {
         reviewText: reviews[productId],
       });
       setMessage(response.data.message || "Review submitted successfully.");
-      setReviews((prevReviews) => ({ ...prevReviews, [productId]: "" })); // Clear review text after submission
+      setReviews((prevReviews) => ({ ...prevReviews, [productId]: "" }));
     } catch (error) {
       setMessage(
         error.response ? error.response.data.error : "An error occurred."
@@ -56,7 +75,7 @@ const TouristProducts = ({ touristId }) => {
 
   // Render stars for rating
   const renderStars = (productId) => {
-    const productRating = ratings[productId] || 0; // Get rating for this product
+    const productRating = ratings[productId] || 0;
     return (
       <div>
         {[1, 2, 3, 4, 5].map((star) => (
@@ -65,7 +84,7 @@ const TouristProducts = ({ touristId }) => {
             onClick={() =>
               setRatings((prevRatings) => ({
                 ...prevRatings,
-                [productId]: star, // Set rating only for this product
+                [productId]: star,
               }))
             }
             style={{
@@ -87,6 +106,7 @@ const TouristProducts = ({ touristId }) => {
     <div>
       <h1>Your Purchased Products</h1>
       {message && <p>{message}</p>}
+
       <ul>
         {products.map((product) => (
           <li key={product._id}>
@@ -95,7 +115,8 @@ const TouristProducts = ({ touristId }) => {
               <strong>Description:</strong> {product.description}
             </p>
             <p>
-              <strong>Price:</strong> ${product.price}
+              <strong>Price:</strong>{" "}
+              {(product.price * conversionRate).toFixed(2)} {currency}
             </p>
             <p>
               <strong>Quantity Purchased:</strong> {product.sales}
@@ -116,11 +137,11 @@ const TouristProducts = ({ touristId }) => {
               <label>
                 <strong>Review:</strong>
                 <textarea
-                  value={reviews[product._id] || ""} // Get review text for this product
+                  value={reviews[product._id] || ""}
                   onChange={(e) =>
                     setReviews((prevReviews) => ({
                       ...prevReviews,
-                      [product._id]: e.target.value, // Set review text only for this product
+                      [product._id]: e.target.value,
                     }))
                   }
                 />

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const HistoricalPlacesList = () => {
+const HistoricalPlacesList = ({ touristId }) => {
   const [places, setPlaces] = useState([]);
   const [tag, setTag] = useState(""); // Only tracking tag for filtering
-
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
   // Fetch all historical places initially
   const fetchAllPlaces = async () => {
     try {
@@ -15,6 +16,22 @@ const HistoricalPlacesList = () => {
     }
   };
 
+  const fetchConversionRate = async (currency) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
   useEffect(() => {
     fetchAllPlaces();
   }, []); // Only fetch once on component mount
@@ -54,6 +71,15 @@ const HistoricalPlacesList = () => {
   return (
     <div>
       <h2>Historical Places</h2>
+      <h3>Filter Historical Places by Tag</h3>
+      <input
+        type="text"
+        name="tag"
+        placeholder="Enter Tag"
+        value={tag}
+        onChange={handleChange}
+      />
+      <button onClick={handleClearFilter}>Clear Filter</button>
       <ul>
         {places.map((place) => (
           <li key={place._id}>
@@ -76,11 +102,17 @@ const HistoricalPlacesList = () => {
             <strong>Pictures:</strong>{" "}
             {place.Pictures.length > 0 ? place.Pictures.join(", ") : "None"}
             <br />
-            <strong>Ticket Price (Family):</strong> ${place.TicketPricesF}
+            <strong>Ticket Price (Family):</strong>{" "}
+            {(place.TicketPricesF * conversionRate).toFixed(2)}
+            {selectedCurrency}
             <br />
-            <strong>Ticket Price (Normal):</strong> ${place.TicketPricesN}
+            <strong>Ticket Price (Normal):</strong>{" "}
+            {(place.TicketPricesN * conversionRate).toFixed(2)}
+            {selectedCurrency}
             <br />
-            <strong>Ticket Price (Student):</strong> ${place.TicketPricesS}
+            <strong>Ticket Price (Student):</strong>{" "}
+            {(place.TicketPricesS * conversionRate).toFixed(2)}
+            {selectedCurrency}
             <br />
             <strong>Managed By:</strong>{" "}
             {place.managed_by ? place.managed_by : "N/A"}
@@ -97,16 +129,6 @@ const HistoricalPlacesList = () => {
           </li>
         ))}
       </ul>
-
-      <h3>Filter Historical Places by Tag</h3>
-      <input
-        type="text"
-        name="tag"
-        placeholder="Enter Tag"
-        value={tag}
-        onChange={handleChange}
-      />
-      <button onClick={handleClearFilter}>Clear Filter</button>
     </div>
   );
 };

@@ -85,6 +85,8 @@ const ActivitiesAndItineraries = ({ touristId }) => {
   const [bookedItineraries, setBookedItineraries] = useState([]);
   const [selectedActivityId, setSelectedActivityId] = useState(null);
   const [selectedItineraryId, setSelectedItineraryId] = useState(null);
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,6 +107,23 @@ const ActivitiesAndItineraries = ({ touristId }) => {
 
     fetchData();
   }, [touristId]);
+
+  const fetchConversionRate = async (currency) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
 
   const handleBookActivity = async (activityId) => {
     setSelectedActivityId(activityId);
@@ -196,7 +215,8 @@ const ActivitiesAndItineraries = ({ touristId }) => {
                     : "transparent",
               }}
             >
-              {activity.title} - ${activity.budget}
+              {activity.title} - {(activity.budget * conversionRate).toFixed(2)}
+              {selectedCurrency}
               {isBooked ? (
                 <button onClick={() => handleCancelActivity(activity._id)}>
                   Cancel
@@ -225,7 +245,9 @@ const ActivitiesAndItineraries = ({ touristId }) => {
                     : "transparent",
               }}
             >
-              {itinerary.name} - Budget: ${itinerary.budget}
+              {itinerary.name} - Budget:{" "}
+              {(itinerary.budget * conversionRate).toFixed(2)}
+              {selectedCurrency}
               {isBooked ? (
                 <button onClick={() => handleCancelItinerary(itinerary._id)}>
                   Cancel

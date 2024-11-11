@@ -9,10 +9,16 @@ const ProductList = ({ touristId }) => {
   const [priceLimit, setPriceLimit] = useState(100);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showProducts, setShowProducts] = useState(false);
+  const [currency, setCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
 
   // Fetch products on initial render
   useEffect(() => {
     fetchProducts();
+    fetchCurrencyData();
   }, []);
 
   const fetchProducts = async () => {
@@ -21,6 +27,17 @@ const ProductList = ({ touristId }) => {
       setProducts(response.data);
     } catch (error) {
       console.error("Error fetching products:", error);
+    }
+  };
+  const fetchCurrencyData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      ); // Use actual tourist ID here
+      setCurrency(response.data.preferredCurrency);
+      setConversionRate(response.data.conversionRate);
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
     }
   };
 
@@ -60,7 +77,7 @@ const ProductList = ({ touristId }) => {
       const response = await axios.get(
         `http://localhost:3000/filterProductTourist`,
         {
-          params: { limit: priceLimit },
+          params: { limit: priceLimit / conversionRate },
         }
       );
       setProducts(response.data);
@@ -131,7 +148,7 @@ const ProductList = ({ touristId }) => {
             <th>Images</th>
             <th>Name</th>
             <th>Description</th>
-            <th>Price</th>
+            <th>Price ({currency.toUpperCase()})</th>
             <th>Seller</th>
             <th>Quantity</th>
             <th>Sales</th>
@@ -170,7 +187,10 @@ const ProductList = ({ touristId }) => {
                 </td>
                 <td>{product.name}</td>
                 <td>{product.description}</td>
-                <td>${product.price}</td>
+                <td>
+                  {(product.price * conversionRate).toFixed(2)}{" "}
+                  {currency.toUpperCase()}
+                </td>
                 <td>{product.seller_id?.username}</td>
                 <td>{product.quantity}</td>
                 <td>{product.sales}</td>

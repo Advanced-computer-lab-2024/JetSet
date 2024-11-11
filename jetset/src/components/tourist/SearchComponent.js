@@ -1,12 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const SearchComponent = () => {
+const SearchComponent = ({ touristId }) => {
   const [searchType, setSearchType] = useState("place"); // Default search type
   const [query, setQuery] = useState({ name: "", category: "", tags: "" });
   const [results, setResults] = useState([]);
   const [error, setError] = useState(null);
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
 
+  const fetchConversionRate = async (currency) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setQuery((prev) => ({ ...prev, [name]: value }));
@@ -93,16 +110,22 @@ const SearchComponent = () => {
                     {result.opening_hours || "N/A"}
                   </p>
                   <p>
-                    <strong>Ticket Prices (Family):</strong> $
-                    {result.TicketPricesF || "N/A"}
+                    <strong>Ticket Prices (Family):</strong>
+                    {(result.TicketPricesF * conversionRate).toFixed(2) ||
+                      "N/A"}
+                    {selectedCurrency}
                   </p>
                   <p>
-                    <strong>Ticket Prices (Normal):</strong> $
-                    {result.TicketPricesN || "N/A"}
+                    <strong>Ticket Prices (Normal):</strong>
+                    {(result.TicketPricesN * conversionRate).toFixed(2) ||
+                      "N/A"}
+                    {selectedCurrency}
                   </p>
                   <p>
-                    <strong>Ticket Prices (Student):</strong> $
-                    {result.TicketPricesS || "N/A"}
+                    <strong>Ticket Prices (Student):</strong>
+                    {(result.TicketPricesS * conversionRate).toFixed(2) ||
+                      "N/A"}
+                    {selectedCurrency}
                   </p>
                   <p>
                     <strong>Tags:</strong>{" "}
@@ -122,7 +145,9 @@ const SearchComponent = () => {
                 <div>
                   <h3>Activity: {result.title}</h3>
                   <p>
-                    <strong>Budget:</strong> ${result.budget || "N/A"}
+                    <strong>Budget:</strong>{" "}
+                    {(result.budget * conversionRate).toFixed(2) || "N/A"}
+                    {selectedCurrency}
                   </p>
                   <p>
                     <strong>Date:</strong>{" "}
@@ -166,7 +191,9 @@ const SearchComponent = () => {
                 <div>
                   <h3>Itinerary: {result.name}</h3>
                   <p>
-                    <strong>Budget:</strong> ${result.budget || "N/A"}
+                    <strong>Budget:</strong>{" "}
+                    {(result.budget * conversionRate).toFixed(2) || "N/A"}
+                    {selectedCurrency}
                   </p>
                   <p>
                     <strong>Locations:</strong>{" "}

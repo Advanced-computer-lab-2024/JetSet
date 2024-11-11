@@ -406,7 +406,7 @@ const filterProductsTourist = async (req, res) => {
     const products = await Product.find({
       price: { $lte: limit },
       archive: false,
-    }).populate("reviews.userId", "name");
+    }).populate("reviews.touristId", "username");
 
     res.status(200).json(products);
   } catch (err) {

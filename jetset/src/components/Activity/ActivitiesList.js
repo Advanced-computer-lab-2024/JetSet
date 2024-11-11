@@ -22,7 +22,7 @@
 //     setError(null); // Reset error state
 
 //     try {
-//       const response = await axios.get("/getactivity"); // Assuming the endpoint is "/activities"
+//       const response = await axios.get("/Acttour"); // Assuming the endpoint is "/activities"
 //       setActivities(response.data); // Store the activities in state
 //     } catch (err) {
 //       setError("Error fetching activities: " + err.message);
@@ -38,11 +38,13 @@
 
 //     try {
 //       const response = await axios.get("/filterActivity", {
-//         budget,
-//         date,
-//         category,
-//         rating,
-//       }); // Send filter params via POST
+//         params: {
+//           budget: budget || undefined, // Send filter params only if they exist
+//           date: date || undefined,
+//           category: category || undefined,
+//           rating: rating || undefined,
+//         },
+//       });
 //       console.log(response.data);
 //       setActivities(response.data); // Store the filtered activities in state
 //     } catch (err) {
@@ -58,11 +60,15 @@
 //     setError(null); // Reset error state
 
 //     try {
-//       const response = await axios.get("/activities", {
-//         sortBy,
-//         sortOrder,
-//       }); // Send sort params via POST
+//       const response = await axios.get("/sortactivities", {
+//         params: {
+//           sortBy,
+//           sortOrder,
+//         },
+//       });
+
 //       setActivities(response.data); // Store the sorted activities in state
+//       console.log(response.data);
 //     } catch (err) {
 //       setError("Error fetching sorted activities: " + err.message);
 //     } finally {
@@ -117,7 +123,7 @@
 //         <h3>Sort Activities</h3>
 //         <select onChange={(e) => setSortBy(e.target.value)} value={sortBy}>
 //           <option value="ratings">Sort by Ratings</option>
-//           <option value="budget">Sort by budget</option>
+//           <option value="budget">Sort by Budget</option>
 //         </select>
 
 //         <select
@@ -141,7 +147,7 @@
 //                 {activity.location?.address || "No Location Available"}
 //               </p>
 //               <p>Date: {new Date(activity.date).toLocaleDateString()}</p>
-//               <p>budget:{activity.budget || "No Budget"}</p>
+//               <p>Budget: {activity.budget || "No Budget"}</p>
 //               <p>Rating: {activity.rating || "No Rating"}</p>
 //               <p>Category: {activity.category || "No Category Available"}</p>
 //               <p>
@@ -166,7 +172,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const ActivitiesList = () => {
+const ActivitiesList = ({ touristId }) => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -178,51 +184,71 @@ const ActivitiesList = () => {
   const [rating, setRating] = useState("");
 
   // Sorting state variables
-  const [sortBy, setSortBy] = useState("ratings"); // Default sort option
-  const [sortOrder, setSortOrder] = useState(1); // Default to ascending order
+  const [sortBy, setSortBy] = useState("ratings");
+  const [sortOrder, setSortOrder] = useState(1);
+
+  // Currency conversion state variables
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
+
+  // Fetch conversion rate for the selected currency
+  const fetchConversionRate = async (currency) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
 
   // Fetch all activities
   const fetchActivities = async () => {
-    setLoading(true); // Show loading state
-    setError(null); // Reset error state
+    setLoading(true);
+    setError(null);
 
     try {
-      const response = await axios.get("/Acttour"); // Assuming the endpoint is "/activities"
-      setActivities(response.data); // Store the activities in state
+      const response = await axios.get("/Acttour");
+      setActivities(response.data);
     } catch (err) {
       setError("Error fetching activities: " + err.message);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
   // Filter activities based on user inputs
   const filterActivities = async () => {
-    setLoading(true); // Show loading state
-    setError(null); // Reset error state
+    setLoading(true);
+    setError(null);
 
     try {
+      const convertedBudget = Math.floor(budget / conversionRate);
+      console.log(convertedBudget);
+      console.log(conversionRate);
       const response = await axios.get("/filterActivity", {
         params: {
-          budget: budget || undefined, // Send filter params only if they exist
+          budget: convertedBudget || undefined,
           date: date || undefined,
           category: category || undefined,
           rating: rating || undefined,
         },
       });
-      console.log(response.data);
-      setActivities(response.data); // Store the filtered activities in state
+      setActivities(response.data);
     } catch (err) {
       setError("Error filtering activities: " + err.message);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
   // Sort activities based on user inputs
   const sortActivities = async () => {
-    setLoading(true); // Show loading state
-    setError(null); // Reset error state
+    setLoading(true);
+    setError(null);
 
     try {
       const response = await axios.get("/sortactivities", {
@@ -231,13 +257,11 @@ const ActivitiesList = () => {
           sortOrder,
         },
       });
-
-      setActivities(response.data); // Store the sorted activities in state
-      console.log(response.data);
+      setActivities(response.data);
     } catch (err) {
       setError("Error fetching sorted activities: " + err.message);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -246,11 +270,15 @@ const ActivitiesList = () => {
     fetchActivities();
   }, []);
 
+  // Fetch the conversion rate when the selected currency changes
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
+
   return (
     <div>
       <h2>Activities List</h2>
 
-      {/* Loading and Error States */}
       {loading && <div>Loading activities...</div>}
       {error && <div>{error}</div>}
 
@@ -290,7 +318,6 @@ const ActivitiesList = () => {
           <option value="ratings">Sort by Ratings</option>
           <option value="budget">Sort by Budget</option>
         </select>
-
         <select
           onChange={(e) => setSortOrder(Number(e.target.value))}
           value={sortOrder}
@@ -312,7 +339,13 @@ const ActivitiesList = () => {
                 {activity.location?.address || "No Location Available"}
               </p>
               <p>Date: {new Date(activity.date).toLocaleDateString()}</p>
-              <p>Budget: {activity.budget || "No Budget"}</p>
+              <p>
+                Budget:{" "}
+                {activity.budget
+                  ? (activity.budget * conversionRate).toFixed(2)
+                  : "No Budget"}{" "}
+                {selectedCurrency}
+              </p>
               <p>Rating: {activity.rating || "No Rating"}</p>
               <p>Category: {activity.category || "No Category Available"}</p>
               <p>

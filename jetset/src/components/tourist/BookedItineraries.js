@@ -4,6 +4,21 @@ import axios from "axios";
 const BookedItineraries = ({ touristId }) => {
   const [bookedItineraries, setBookedItineraries] = useState([]);
   const [error, setError] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
+
+  const fetchConversionRate = async (currency) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
 
   // Fetch booked itineraries on component mount
   useEffect(() => {
@@ -17,6 +32,10 @@ const BookedItineraries = ({ touristId }) => {
     };
     fetchBookedItineraries();
   }, [touristId]);
+
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
 
   // Cancel itinerary booking
   const cancelBooking = async (itineraryId) => {

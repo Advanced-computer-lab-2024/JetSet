@@ -68,7 +68,7 @@ const touristSchema = new Schema(
     ],
     preferredCurrency: {
       type: String,
-      default: "dollar",
+      default: "EGP",
     },
   },
   { timestamps: true }

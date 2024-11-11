@@ -104,7 +104,7 @@ const ProductList = () => {
                   </td>
                   <td>{product.name}</td>
                   <td>{product.description}</td>
-                  <td>${product.price}</td>
+                  <td>{product.price}</td>
                   <td>{product.seller_id?.username}</td>
                   <td>{product.quantity}</td>
                   <td>{product.sales}</td>

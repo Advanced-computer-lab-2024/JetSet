@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const ItineraryList = () => {
+const ItineraryList = ({ touristId }) => {
   const [itineraries, setItineraries] = useState([]);
   const [filters, setFilters] = useState({
     budget: "",
@@ -12,6 +12,21 @@ const ItineraryList = () => {
   });
   const [sortBy, setSortBy] = useState("budget");
   const [sortOrder, setSortOrder] = useState(1);
+
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
+
+  const fetchConversionRate = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
 
   // Fetch itineraries based on sorting
   useEffect(() => {
@@ -33,6 +48,10 @@ const ItineraryList = () => {
   useEffect(() => {
     const fetchFilteredItineraries = async () => {
       try {
+        if (filters.budget) {
+          filters.budget = Math.floor(filters.budget / conversionRate);
+        }
+
         const response = await axios.get("/tourist/filter-itineraries", {
           params: { ...filters }, // Send filters as query params
         });
@@ -79,6 +98,10 @@ const ItineraryList = () => {
     };
     fetchItineraries();
   };
+
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
 
   return (
     <div>
@@ -139,7 +162,9 @@ const ItineraryList = () => {
             <br />
             <strong>Language:</strong> {itinerary.language}
             <br />
-            <strong>Budget:</strong> ${itinerary.budget}
+            <strong>Budget:</strong>{" "}
+            {(itinerary.budget * conversionRate).toFixed(2)}
+            {selectedCurrency}
             <br />
             <strong>Availability Dates:</strong>{" "}
             {itinerary.availability_dates

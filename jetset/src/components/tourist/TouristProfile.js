@@ -4,6 +4,25 @@ import axios from "axios";
 const TouristProfile = ({ touristId }) => {
   const [tourist, setTourist] = useState(null);
   const [updateFields, setUpdateFields] = useState({});
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
+
+  const fetchConversionRate = async (currency) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
 
   useEffect(() => {
     const fetchTourist = async () => {
@@ -50,7 +69,10 @@ const TouristProfile = ({ touristId }) => {
           <p>Job: {tourist.job}</p>
           <p>Mobile: {tourist.mobile_number}</p>
           <p>DOB: {tourist.DOB}</p>
-          <p>Wallet Balance: ${tourist.wallet}</p>
+          <p>
+            Wallet Balance: {(tourist.wallet * conversionRate).toFixed(2)}
+            {selectedCurrency}
+          </p>
           <p>Loyalty Points: {tourist.loyaltyPoints}</p>
           <p>Badge: {tourist.badge}</p>
           <p>Level: {tourist.level}</p>

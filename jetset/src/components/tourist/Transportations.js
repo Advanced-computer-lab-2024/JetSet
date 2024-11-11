@@ -6,6 +6,25 @@ const Transportations = ({ touristId }) => {
   const [bookedTransportations, setBookedTransportations] = useState([]);
   const [selectedTransportationId, setSelectedTransportationId] =
     useState(null);
+  const [selectedCurrency, setSelectedCurrency] = useState("EGP");
+  const [conversionRate, setConversionRate] = useState(1);
+
+  const fetchConversionRate = async (currency) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+      );
+      setSelectedCurrency(response.data.preferredCurrency); // Set the currency
+
+      setConversionRate(response.data.conversionRate); // Set the conversion rate
+    } catch (error) {
+      console.error("Error fetching currency data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversionRate(selectedCurrency);
+  }, [selectedCurrency]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,8 +78,9 @@ const Transportations = ({ touristId }) => {
                     : "transparent",
               }}
             >
-              {transportation.type} by {transportation.company} - $
-              {transportation.price}
+              {transportation.type} by {transportation.company} -
+              {(transportation.price * conversionRate).toFixed(2)}
+              {selectedCurrency}
               <br />
               From {transportation.pickup_location} to{" "}
               {transportation.dropoff_location} on{" "}

@@ -128,8 +128,8 @@ const filterProductSeller = async (req, res) => {
   const { limit } = req.query; // Use req.query for GET requests
   try {
     const products = await Product.find({ price: { $lte: limit } }).populate(
-      "reviews.userId",
-      "name"
+      "reviews.touristId",
+      "username"
     );
     res.status(200).json(products);
   } catch (err) {
