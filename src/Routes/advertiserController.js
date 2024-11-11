@@ -157,6 +157,7 @@ const createActivity = async (req, res) => {
 const updateActivity = async (req, res) => {
   const { id } = req.params;
   const {
+    budget,
     date,
     time,
     location,
@@ -165,19 +166,25 @@ const updateActivity = async (req, res) => {
     booking_open,
     tags,
   } = req.body;
-  const sanitizedId = id.replace(/:/g, "");
+
+  const sanitizedId = id.replace(/:/g, ""); // This may be unnecessary depending on your route
+
+  const updatedData = {};
+
+  // Conditionally add fields to the updatedData object if they're provided in the request
+  if (budget) updatedData.budget = budget;
+  if (date) updatedData.date = date;
+  if (time) updatedData.time = time;
+  if (location) updatedData.location = location;
+  if (category) updatedData.category = category;
+  if (special_discount) updatedData.special_discount = special_discount;
+  if (booking_open !== undefined) updatedData.booking_open = booking_open;
+  if (tags) updatedData.tags = tags;
+
   try {
     const activity = await Activity.findByIdAndUpdate(
       sanitizedId,
-      {
-        date,
-        time,
-        location,
-        category,
-        special_discount,
-        booking_open,
-        tags,
-      },
+      updatedData,
       { new: true }
     );
 

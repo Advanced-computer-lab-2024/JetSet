@@ -51,7 +51,11 @@ const TouristProfile = ({ touristId }) => {
         `http://localhost:3000/updateTourist/${touristId}`,
         updateFields
       );
-      setTourist(response.data);
+      // Merge the updated fields with the existing tourist data
+      setTourist((prevTourist) => ({
+        ...prevTourist,
+        ...response.data,
+      }));
       alert("Tourist profile updated!");
     } catch (error) {
       alert(error.response?.data?.message || "Error updating tourist profile");
@@ -81,7 +85,7 @@ const TouristProfile = ({ touristId }) => {
           <form onSubmit={handleUpdateSubmit}>
             <input
               type="text"
-              name="mobile"
+              name="mobile_number"
               placeholder="New Mobile"
               onChange={handleUpdateChange}
             />
