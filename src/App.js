@@ -158,6 +158,7 @@ const {
   viewFlight,
   viewHotel,
   getBookedItinerary,
+ 
 } = require("../src/Routes/touristController");
 
 const {
@@ -196,6 +197,21 @@ app.use(express.json());
 
 const MongoURI = process.env.MONGO_URI;
 const port = process.env.PORT;
+mongoose
+  .connect(MongoURI)
+  .then(() => {
+    console.log("MongoDB connected!");
+    app.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}`);
+    });
+  })
+  .catch((err) => console.error(err));
+
+// Basic route for testing
+app.get("/home", (req, res) => {
+  res.status(200).send("You have everything installed!");
+});
+
 app.use(cors());
 
 // app.use(
@@ -237,16 +253,21 @@ app.get("/api/activities", async (req, res) => {
   }
 });
 
-// MongoDB Connection
-mongoose
-  .connect(MongoURI)
-  .then(() => {
-    console.log("MongoDB connected!");
-    app.listen(port, () => {
-      console.log(`Server running on http://localhost:${port}`);
-    });
-  })
-  .catch((err) => console.error(err));
+const { bookmarkActivity } = require("../src/Routes/touristController"); // Adjust this path
+app.post("/api/bookmarkActivity", async (req, res) => {
+  const { touristId, activityId } = req.body;
+
+  try {
+    const result = await bookmarkActivity(touristId, activityId);
+    if (result.message) {
+      return res.json({ message: result.message });
+    }
+    return res.status(400).json({ error: result.error });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to bookmark activity" });
+  }
+});
 
 // Basic route for testing
 app.get("/home", (req, res) => {

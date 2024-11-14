@@ -8,7 +8,10 @@ const Category = require("../Models/Category.js");
 const Complaint = require("../Models/Complaint.js");
 const Transportation = require("../Models/Transportation");
 const nodemailer = require("nodemailer");
+
 const { default: mongoose } = require("mongoose");
+const express = require('express'); // Importing express
+const router = express.Router(); // Creating a new router object
 
 const dotenv = require("dotenv");
 
@@ -1651,6 +1654,40 @@ const viewHotel = async (req, res) => {
   }
 };
 
+async function bookmarkActivity(touristId, activityId) {
+  try {
+    // Check for valid input
+    if (!touristId || !activityId) {
+      throw new Error("Invalid touristId or activityId");
+    }
+
+    // Find the tourist
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      throw new Error("Tourist not found");
+    }
+
+    // Check if the activity is already bookmarked
+    if (tourist.bookmarkedActivities.includes(activityId)) {
+      throw new Error("Activity already bookmarked");
+    }
+
+    // Add the activity to the bookmarkedActivities array
+    tourist.bookmarkedActivities.push(activityId);
+
+    // Save the tourist document
+    const updatedTourist = await tourist.save();
+    
+    // Return a success message with the updated tourist object (if needed)
+    return { message: "Activity bookmarked successfully!", tourist: updatedTourist };
+  } catch (error) {
+    console.error("Error in bookmarkActivity function:", error); // Log the error details
+    return { error: error.message };
+  }
+} 
+
+
+
 module.exports = {
   getProducts,
   SortActivities,
@@ -1702,4 +1739,5 @@ module.exports = {
   viewFlight,
   viewHotel,
   getBookedItinerary,
+  bookmarkActivity
 };

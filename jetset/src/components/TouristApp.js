@@ -226,6 +226,8 @@ import ActivityByCategory from "./Activity/ActivitiesByCategory";
 import FlightBooking from "./Booking/FlightBooking";
 import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
+import VacationGuide from "./tourist/VacationGuide";
+
 
 import "./styles.css";
 
@@ -285,6 +287,9 @@ const Tourist = () => {
         return <HotelSearch touristId={touristId} />;
       case "bookIti":
         return <BookedItineraries touristId={touristId} />;
+        case "vacationGuide": // New case for Vacation Guide
+        return <VacationGuide touristId={touristId} />;
+        
       default:
         return (
           <section className="tourist-frontend">
@@ -396,7 +401,14 @@ const Tourist = () => {
                 <button onClick={() => setCurrentPage("ShareItem")}>
                   Share an Item
                 </button>
+                <button onClick={() => setCurrentPage("vacationGuide")}>
+                View Vacation Guide
+                </button>
               </section>
+              
+      
+  
+
             </div>
           </section>
         );

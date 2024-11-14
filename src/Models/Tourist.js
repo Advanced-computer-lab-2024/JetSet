@@ -22,7 +22,7 @@ const touristSchema = new Schema(
       beaches: { type: Boolean, default: false },
       familyFriendly: { type: Boolean, default: false },
       shopping: { type: Boolean, default: false },
-      budget: { type: Number, default: 0 }, // Default budget
+      budget: { type: Number, default: 0 },
     },
 
     mobile_number: String,
@@ -70,6 +70,14 @@ const touristSchema = new Schema(
       type: String,
       default: "EGP",
     },
+
+    // Added a bookmarkedActivities field
+    bookmarkedActivities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Activity",
+      },
+    ],
   },
   { timestamps: true }
 );

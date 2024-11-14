@@ -1,0 +1,27 @@
+.bookmark-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    color: #007bff;
+    transition: transform 0.2s ease, color 0.3s ease;
+    margin-left: 10px;
+  }
+  
+  .bookmark-button i {
+    color: #aaa; /* Default color when not bookmarked */
+    transition: color 0.3s ease;
+  }
+  
+  .bookmark-button:hover i {
+    color: #0056b3;
+    transform: scale(1.1);
+  }
+  
+  .bookmark-button i.fa-bookmark {
+    color: #f39c12; /* Color when bookmarked */
+  }
+  
+  .bookmark-button:active i {
+    transform: scale(0.95);
+  }
