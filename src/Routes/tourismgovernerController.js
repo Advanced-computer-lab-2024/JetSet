@@ -4,6 +4,44 @@ const Historical = require("../Models/Historical.js");
 
 const { default: mongoose } = require("mongoose");
 
+const loginTourism = async (req, res) => {
+  const { user, password } = req.body;
+
+  try {
+    // Find the guest by username, password, and role
+    const Tourism = await TourismGoverner.findOne({ username: user, password });
+
+    // If guest not found or password does not match, return error
+    if (!Tourism) {
+      return res.status(404).json({ message: "Regiesterd First" });
+    }
+
+    res.status(200).json({
+      message: `Welcome ${user}`,
+      Tourism,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error during authentication.", error });
+  }
+};
+
+const getTourismbyid = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const tourism = await TourismGoverner.findById(id);
+
+    if (!tourism) {
+      return res.status(404).json({ message: "Tourism Governer not found." });
+    }
+    await tourism.save();
+    res.status(200).json({ username: tourism.username });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Error retrieving Tourism Governer profile.", error });
+  }
+};
+
 const viewAllPlaces = async (req, res) => {
   try {
     const places = await Historical.find();
@@ -177,4 +215,6 @@ module.exports = {
   deletePlace,
   createTag,
   changePasswordTourismGoverner,
+  loginTourism,
+  getTourismbyid,
 };

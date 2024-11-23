@@ -12,7 +12,43 @@ const Complaint = require("../Models/Complaint");
 const itineraryModel = require("../Models/Itinerary.js");
 const Activity = require("../Models/Activity.js");
 
-//added
+const getAdminbyid = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const admin = await Admin.findById(id);
+
+    if (!admin) {
+      return res.status(404).json({ message: "admin not found." });
+    }
+    await admin.save();
+    res.status(200).json({ username: admin.username });
+  } catch (error) {
+    console.error("Error retrieving admin profile:", error); // Debug log
+    res.status(400).json({ message: "Error retrieving admin profile.", error });
+  }
+};
+
+const loginAdmin = async (req, res) => {
+  const { user, password } = req.body;
+
+  try {
+    // Find the guest by username, password, and role
+    const admin = await Admin.findOne({ username: user, password });
+
+    // If guest not found or password does not match, return error
+    if (!admin) {
+      return res.status(404).json({ message: "Regiesterd First" });
+    }
+
+    res.status(200).json({
+      message: `Welcome ${user}`,
+      admin,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error during authentication.", error });
+  }
+};
+
 //Tourism Governer
 const createTourismGoverner = async (req, res) => {
   const { username, password } = req.body;
@@ -556,4 +592,6 @@ module.exports = {
   addReplyToComplaint,
   getComplaintsSortedByDate,
   getComplaintsByStatus,
+  loginAdmin,
+  getAdminbyid,
 };

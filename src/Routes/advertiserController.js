@@ -123,6 +123,27 @@ const deleteProfile = async (req, res) => {
   }
 };
 
+const loginAdv = async (req, res) => {
+  const { user, password } = req.body;
+
+  try {
+    // Find the guest by username, password, and role
+    const adv = await advertiserModel.findOne({ username: user, password });
+
+    // If guest not found or password does not match, return error
+    if (!adv) {
+      return res.status(404).json({ message: "Regiesterd First" });
+    }
+
+    res.status(200).json({
+      message: `Welcome ${user}`,
+      adv,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error during authentication.", error });
+  }
+};
+
 const createActivity = async (req, res) => {
   const {
     title,
@@ -406,4 +427,5 @@ module.exports = {
   gettransportation,
   updateActivityCreator,
   deleteAdvertiserAccount,
+  loginAdv,
 };

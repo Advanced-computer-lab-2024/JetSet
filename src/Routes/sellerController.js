@@ -102,6 +102,27 @@ const updateSeller = async (req, res) => {
   }
 };
 
+const loginSeller = async (req, res) => {
+  const { user, password } = req.body;
+
+  try {
+    // Find the guest by username, password, and role
+    const seller = await Seller.findOne({ username: user, password });
+
+    // If guest not found or password does not match, return error
+    if (!seller) {
+      return res.status(404).json({ message: "Regiesterd First" });
+    }
+
+    res.status(200).json({
+      message: `Welcome ${user}`,
+      seller,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error during authentication.", error });
+  }
+};
+
 //View a list of all available products(including picture of product, price, description, seller, ratings and reviews)
 const getProducts = async (req, res) => {
   try {
@@ -363,4 +384,5 @@ module.exports = {
   archiveProduct,
   changePasswordSeller,
   deleteSellerAccount,
+  loginSeller,
 };
