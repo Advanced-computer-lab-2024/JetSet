@@ -106,6 +106,28 @@ const getTourGuides = async (req, res) => {
 const validateObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id) && id.length === 24;
 };
+
+const loginTourGuide = async (req, res) => {
+  const { user, password } = req.body;
+
+  try {
+    // Find the guest by username, password, and role
+    const tourGuide = await TourGuide.findOne({ username: user, password });
+
+    // If guest not found or password does not match, return error
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Regiesterd First" });
+    }
+
+    res.status(200).json({
+      message: `Welcome ${user}`,
+      tourGuide,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error during authentication.", error });
+  }
+};
+
 const createItinerary = async (req, res) => {
   const {
     name,
@@ -556,4 +578,5 @@ module.exports = {
   deactivateItinerary,
   changePasswordTourGuide,
   deleteTourGuideAccount,
+  loginTourGuide,
 };

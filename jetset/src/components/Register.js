@@ -16,13 +16,9 @@ const Register = () => {
     // Navigate to the appropriate page based on role selection
     if (selectedRole === "tourist") {
       navigate("/touristregister"); // Navigate to Tourist register page
-    } else if (selectedRole === "admin") {
-      navigate("/admin"); // Navigate to Admin page
     } else if (selectedRole === "seller") {
       // Stay on the current page for the Seller role
       navigate("/registerAst"); // Stay on the seller registration page
-    } else if (selectedRole == "Tourism Governor") {
-      navigate("/place");
     }
   };
 
@@ -31,13 +27,9 @@ const Register = () => {
       {/* Role selection */}
       <div className="role-selection">
         <button onClick={() => handleRoleSelection("tourist")}>Tourist</button>
-        <button onClick={() => handleRoleSelection("admin")}>Admin</button>
         <button onClick={() => handleRoleSelection("seller")}>
           {" "}
           tour guide/ advertiser/ seller
-        </button>
-        <button onClick={() => handleRoleSelection("Tourism Governor")}>
-          Tourism Governor
         </button>
       </div>
     </div>

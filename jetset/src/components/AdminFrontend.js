@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 // Import components for Tag Management
 import CreateTag from "./Tag/CreateTag";
@@ -42,6 +43,9 @@ import ComplaintsStatus from "./Complaints/ComplaintsStatus";
 function AdminFrontend() {
   // State for managing tags
 
+  const [adminUsername, setAdminUsername] = useState(""); // State for storing the admin's username
+  const { adminId } = useParams();
+
   const [tags, setTags] = useState([]);
   const [tagLoading, setTagLoading] = useState(true);
   const [tagError, setTagError] = useState(null);
@@ -65,6 +69,21 @@ function AdminFrontend() {
   const [showActivityActions, setShowActivityActions] = useState(false);
   const [showComplaintActions, setshowComplaintActions] = useState(false);
   const [currentPage, setCurrentPage] = useState("");
+
+  const fetchAdminData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/getadminbyId/${adminId}`
+      );
+      setAdminUsername(response.data.username);
+    } catch (error) {
+      console.error("Error fetching admin data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdminData();
+  }, []);
 
   const fetchTags = async () => {
     setTagLoading(true);
@@ -141,11 +160,10 @@ function AdminFrontend() {
   return (
     <div className="admin-frontend">
       <header>
-        <h1>Admin Dashboard</h1>
-        <p>
-          Welcome to the admin dashboard. Manage tags, categories, products, and
-          accounts below.
-        </p>
+        <h1>
+          Welcome, <strong>{adminUsername || "Loading..."}</strong>
+        </h1>
+        <p>Manage tags, categories, products, and accounts below.</p>
       </header>
 
       <main>

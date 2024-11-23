@@ -42,6 +42,7 @@ const {
   gettransportation,
   updateActivityCreator,
   deleteAdvertiserAccount,
+  loginAdv,
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const {
@@ -53,6 +54,8 @@ const {
   deletePlace,
   createTag,
   changePasswordTourismGoverner,
+  loginTourism,
+  getTourismbyid,
 } = require("./Routes/tourismgovernerController");
 const {
   filterActivityGuest,
@@ -75,6 +78,7 @@ const {
   archiveProduct,
   changePasswordSeller,
   deleteSellerAccount,
+  loginSeller,
 } = require("./Routes/sellerController");
 const {
   createPrefTag,
@@ -92,6 +96,7 @@ const {
   addReplyToComplaint,
   getComplaintsSortedByDate,
   getComplaintsByStatus,
+  loginAdmin,
 } = require("./Routes/adminController");
 
 const {
@@ -108,6 +113,7 @@ const {
   viewAllComplaints,
   flagItinerary,
   flagActivity,
+  getAdminbyid,
 } = require("./Routes/adminController");
 
 const {
@@ -158,7 +164,7 @@ const {
   viewFlight,
   viewHotel,
   getBookedItinerary,
- 
+  loginTourist,
 } = require("../src/Routes/touristController");
 
 const {
@@ -177,6 +183,7 @@ const {
   deactivateItinerary,
   changePasswordTourGuide,
   deleteTourGuideAccount,
+  loginTourGuide,
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -280,6 +287,13 @@ app.post("/addTourist", createTourist);
 app.post("/register", upload.array("documents", 5), register); // Adjust maxCount as needed
 app.post("/login", registerAST);
 app.delete("/deleteGuest/:user", deleteGuest);
+
+app.post("/loginTourist", loginTourist);
+app.post("/loginAdv", loginAdv);
+app.post("/loginTourGuide", loginTourGuide);
+app.post("/loginSeller", loginSeller);
+app.post("/loginTourism", loginTourism);
+app.post("/loginAdmin", loginAdmin);
 
 app.get("/getTourist/:id", getTouristProfile);
 app.put("/updateTourist/:id", updateTouristProfile);
@@ -393,6 +407,9 @@ app.get("/rejectguest/:id", rejectguest);
 
 app.put("/flagItinerary/:id", flagItinerary);
 app.put("/flagActivity/:id", flagActivity);
+
+app.get("/getadminbyId/:id", getAdminbyid);
+app.get("/getTourismbyId/:id", getTourismbyid);
 //Tourist Controller
 app.get("/sortactivities", SortActivities);
 app.get("/SortItineraries", SortItineraries);

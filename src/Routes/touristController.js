@@ -10,7 +10,7 @@ const Transportation = require("../Models/Transportation");
 const nodemailer = require("nodemailer");
 
 const { default: mongoose } = require("mongoose");
-const express = require('express'); // Importing express
+const express = require("express"); // Importing express
 const router = express.Router(); // Creating a new router object
 
 const dotenv = require("dotenv");
@@ -89,6 +89,27 @@ const updateTouristProfile = async (req, res) => {
     res.status(200).json(updatedTourist);
   } catch (error) {
     res.status(400).json({ message: "Error updating tourist profile", error });
+  }
+};
+
+const loginTourist = async (req, res) => {
+  const { user, password } = req.body;
+
+  try {
+    // Find the guest by username, password, and role
+    const tourist = await Tourist.findOne({ username: user, password });
+
+    // If guest not found or password does not match, return error
+    if (!tourist) {
+      return res.status(404).json({ message: "Regiesterd First" });
+    }
+
+    res.status(200).json({
+      message: `Welcome ${user}`,
+      tourist,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error during authentication.", error });
   }
 };
 
@@ -1577,6 +1598,7 @@ const searchHotels = async (req, res) => {
 };
 
 const HotelBooking = require("../Models/hotelBookingSchema"); // Import the HotelBooking model
+const TouristItinerary = require("../Models/TouristsItinerary.js");
 
 const bookHotel = async (req, res) => {
   const { checkIn, checkOut, adults, children, destinationCode, paxes, rooms } =
@@ -1677,16 +1699,17 @@ async function bookmarkActivity(touristId, activityId) {
 
     // Save the tourist document
     const updatedTourist = await tourist.save();
-    
+
     // Return a success message with the updated tourist object (if needed)
-    return { message: "Activity bookmarked successfully!", tourist: updatedTourist };
+    return {
+      message: "Activity bookmarked successfully!",
+      tourist: updatedTourist,
+    };
   } catch (error) {
     console.error("Error in bookmarkActivity function:", error); // Log the error details
     return { error: error.message };
   }
-} 
-
-
+}
 
 module.exports = {
   getProducts,
@@ -1739,5 +1762,6 @@ module.exports = {
   viewFlight,
   viewHotel,
   getBookedItinerary,
-  bookmarkActivity
+  bookmarkActivity,
+  loginTourist,
 };

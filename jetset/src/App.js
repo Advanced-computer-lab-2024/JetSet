@@ -25,13 +25,13 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/touristregister" element={<RegisterTourist />} />
         <Route path="/tourist" element={<Tourist />} />
-        <Route path="/admin" element={<AdminFrontend />} />
+        <Route path="/admin/:adminId" element={<AdminFrontend />} />
         <Route path="/registerAST" element={<RegisterASt />} />
         <Route path="/createseller" element={<CreateSeller />} />
         <Route path="/sellerfrontend/:sellerId" element={<SellerFrontend />} />
         <Route path="/createAdv" element={<CreateAdv />} />
         <Route path="/createadvertiser/:id" element={<ProfileForm />} />
-        <Route path="/place" element={<Place />} />
+        <Route path="/place/:tourismGovernorId" element={<Place />} />
         <Route path="/CreateTourGuide" element={<CreateTourGuideProfile />} />
         <Route path="/tourguide/:tourGuideID" element={<TourGuide />} />
         <Route path="/login" element={<Login />} />{" "}
