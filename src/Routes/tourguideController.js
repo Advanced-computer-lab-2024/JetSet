@@ -439,6 +439,10 @@ const activateItinerary = async (req, res) => {
       return res.status(404).json({ error: "Itinerary not found" });
     }
 
+    if (itinerary.booked > 0) {
+      return res.status(400).json({ error: "Cannot activate itinerary" });
+    }
+
     // Activate the itinerary
     itinerary.status = "active";
     await itinerary.save();
@@ -470,10 +474,6 @@ const deactivateItinerary = async (req, res) => {
       return res
         .status(400)
         .json({ error: "Cannot deactivate itinerary already inactive" });
-    }
-
-    if (itinerary.booked === 0) {
-      return res.status(400).json({ error: "Cannot deactivate itinerary" });
     }
 
     // Deactivate the itinerary
