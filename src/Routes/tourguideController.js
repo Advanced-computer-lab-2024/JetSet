@@ -143,6 +143,7 @@ const createItinerary = async (req, res) => {
     accessibility,
     created_by,
     tags,
+    tourguideId,
   } = req.body;
 
   try {
@@ -160,6 +161,7 @@ const createItinerary = async (req, res) => {
       accessibility,
       created_by,
       tags,
+      created_by: tourguideId,
     });
     res.status(201).json({ msg: "Itinerary created", itinerary });
   } catch (err) {

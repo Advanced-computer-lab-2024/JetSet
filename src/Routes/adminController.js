@@ -1,3 +1,5 @@
+const nodemailer = require("nodemailer");
+require("dotenv").config();
 const TourismGoverner = require("../Models/TourismGoverner");
 const Tourist = require("../Models/Tourist");
 const TourGuide = require("../Models/TourGuide");
@@ -11,6 +13,17 @@ const Guest = require("../Models/Guest.js");
 const Complaint = require("../Models/Complaint");
 const itineraryModel = require("../Models/Itinerary.js");
 const Activity = require("../Models/Activity.js");
+
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 const getAdminbyid = async (req, res) => {
   const { id } = req.params;
@@ -88,12 +101,13 @@ const gettourism = async (req, res) => {
 
 //Admin
 const createAdmin = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email } = req.body;
 
   try {
     await Admin.create({
       username,
       password,
+      email,
     });
     res.status(200).json({ msg: "Admin created" });
   } catch (error) {
@@ -441,6 +455,14 @@ const changePasswordAdmin = async (req, res) => {
   }
 };
 
+const sendMail = async (transporter, mailOptions) => {
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const flagItinerary = async (req, res) => {
   try {
     const { id } = req.params;
@@ -457,10 +479,31 @@ const flagItinerary = async (req, res) => {
       return res.status(404).json({ message: "itinerary not found" });
     }
 
+    const tourGuide = await TourGuide.findById(updated.created_by);
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Tour guide not found" });
+    }
+
+    const mailOptions = {
+      from: {
+        name: "Admin",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
+      to: tourGuide.email,
+      subject: flag
+        ? "Your Itinerary Has Been Flagged as Inappropriate"
+        : "Your Itinerary Has Been Unflagged",
+      text: flag
+        ? `Dear ${tourGuide.username},\n\nYour itinerary "${updated.name}" has been flagged as inappropriate by the admin.\n\nBest Regards,\nAdmin Team`
+        : `Dear ${tourGuide.username},\n\nYour itinerary "${updated.name}" has been reviewed and unflagged.\n\nBest Regards,\nAdmin Team`,
+    };
+
+    sendMail(transporter, mailOptions);
+
     const statusMessage = flag ? "Itinerary flagged" : "Itinerary unflagged";
     res.status(200).json({ message: statusMessage, itinerary: updated });
   } catch (error) {
-    res.status(500).json({ message: "Error updating archive status", error });
+    res.status(500).json({ message: "Error", error });
   }
 };
 
@@ -480,8 +523,29 @@ const flagActivity = async (req, res) => {
       return res.status(404).json({ message: "Activity not found" });
     }
 
+    const adv = await Advertiser.findById(updated.creator);
+    if (!adv) {
+      return res.status(404).json({ message: "Advertiser not found" });
+    }
+
+    const mailOptions = {
+      from: {
+        name: "Admin",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
+      to: adv.email,
+      subject: flag
+        ? "Your Event Has Been Flagged as Inappropriate"
+        : "Your Event Has Been Unflagged",
+      text: flag
+        ? `Dear ${adv.username},\n\nYour Event "${updated.title}" has been flagged as inappropriate by the admin.\n\nBest Regards,\nAdmin Team`
+        : `Dear ${adv.username},\n\nYour Event "${updated.title}" has been reviewed and unflagged.\n\nBest Regards,\nAdmin Team`,
+    };
+
+    sendMail(transporter, mailOptions);
+
     const statusMessage = flag ? "Activity flagged" : "Activity unflagged";
-    res.status(200).json({ message: statusMessage, Activity: updated });
+    res.status(200).json({ message: statusMessage, itinerary: updated });
   } catch (error) {
     res.status(500).json({ message: "Error updating archive status", error });
   }

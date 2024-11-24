@@ -558,3 +558,25 @@ app.get("/tourist/:id/preferredCurrency", async (req, res) => {
     res.status(500).json({ message: "Error fetching currency data", error });
   }
 });
+
+// Import necessary modules and models
+const Admin = require("../src/Models/Admin.js"); // Replace with your Admin model's path
+
+app.delete("/deleteAdmin/:id", async (req, res) => {
+  const { id } = req.params; // Get admin ID from route parameters
+
+  try {
+    // Find and delete the admin
+    const deletedAdmin = await Admin.findByIdAndDelete(id);
+
+    // Check if the admin was found and deleted
+    if (!deletedAdmin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    res.status(200).json({ message: "Admin deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting admin" });
+  }
+});

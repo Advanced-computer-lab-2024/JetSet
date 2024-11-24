@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const CreateItineraryForm = () => {
+const CreateItineraryForm = ({ tourguideId }) => {
   const [formData, setFormData] = useState({
     name: "",
     activities: "",
@@ -14,7 +14,7 @@ const CreateItineraryForm = () => {
     pickup_location: "",
     dropoff_location: "",
     accessibility: "",
-    created_by: "",
+    created_by: tourguideId || "",
     tags: "",
   });
 
@@ -160,15 +160,6 @@ const CreateItineraryForm = () => {
           />
         </div>
 
-        <div>
-          <label>Created By:</label>
-          <input
-            type="text"
-            name="created_by"
-            value={formData.created_by}
-            onChange={handleChange}
-          />
-        </div>
         <div>
           <label>Tags:</label>
           <input

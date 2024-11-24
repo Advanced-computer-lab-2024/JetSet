@@ -32,7 +32,7 @@ import "./styles.css";
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
-  const touristId = location.state?.touristId || "6723896c185909fcd367634a";
+  const touristId = location.state?.touristId;
   const [showPurchasedProducts, setShowPurchasedProducts] = useState(false);
 
   const renderPage = () => {

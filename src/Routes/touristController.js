@@ -8,10 +8,13 @@ const Category = require("../Models/Category.js");
 const Complaint = require("../Models/Complaint.js");
 const Transportation = require("../Models/Transportation");
 const nodemailer = require("nodemailer");
+const cron = require("node-cron");
+const Seller = require("../Models/Seller.js");
+const Admin = require("../Models/Admin.js");
+const path = require("path");
+const crypto = require("crypto");
 
 const { default: mongoose } = require("mongoose");
-const express = require("express"); // Importing express
-const router = express.Router(); // Creating a new router object
 
 const dotenv = require("dotenv");
 
@@ -19,6 +22,154 @@ dotenv.config();
 
 //const { default: mongoose } = require("mongoose");
 const FlightBooking = require("../Models/flightBookingSchema.js");
+
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+cron.schedule("0 20 * * *", async () => {
+  try {
+    const now = new Date();
+    const nextDay = new Date();
+    nextDay.setDate(now.getDate() + 1);
+
+    // Fetch tourists and their upcoming bookings
+    const tourists = await Tourist.find({
+      $or: [
+        { bookedActivities: { $exists: true, $not: { $size: 0 } } },
+        { bookedItineraries: { $exists: true, $not: { $size: 0 } } },
+        { bookedTransportations: { $exists: true, $not: { $size: 0 } } },
+      ],
+    }).populate([
+      {
+        path: "bookedActivities",
+        match: { date: { $gte: now } },
+      },
+      {
+        path: "bookedItineraries",
+        match: { availability_dates: { $gte: now } },
+      },
+      {
+        path: "bookedTransportations",
+        match: { availability: { $gte: now } },
+      },
+    ]);
+
+    for (const tourist of tourists) {
+      const reminders = [];
+
+      // Add activities
+      tourist.bookedActivities?.forEach((activity) =>
+        reminders.push(`Activity: ${activity.title} on ${activity.date}`)
+      );
+
+      // Add itineraries
+      tourist.bookedItineraries?.forEach((itinerary) =>
+        reminders.push(
+          `Itinerary: ${itinerary.name} on ${itinerary.availability_dates}`
+        )
+      );
+
+      // Add transportations
+      tourist.bookedTransportations?.forEach((transport) =>
+        reminders.push(
+          `Transportation from ${transport.pickup_location} to ${transport.dropoff_location} on ${transport.availability}`
+        )
+      );
+
+      if (reminders.length > 0) {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: tourist.email,
+          subject: "Upcoming Event Reminder",
+          text: `Hello ${
+            tourist.username
+          },\n\nYou have the following events coming up:\n\n${reminders.join(
+            "\n"
+          )}\n\nThank you!`,
+        });
+        console.log(`Reminder sent to ${tourist.email}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error sending reminders:", error);
+  }
+});
+
+const sendPromoCodeToTourist = async (touristId, promoCode) => {
+  try {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return console.log("Tourist not found");
+    }
+
+    const imagePath = path.join(__dirname, "JetSet/src/uploads/birthday.jpg");
+
+    // Send the promo code via email
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: tourist.email,
+      subject: "Happy Birthday! Here's Your Promo Code",
+      html: `
+        <h1>Happy Birthday, ${tourist.username}!</h1>
+        <p>Use the promo code <strong>${promoCode}</strong> to enjoy discounts on any products on our website.</p>
+        <img src="cid:promoImage" alt="Promo Image" />
+        <p>Enjoy your special day!</p>
+      `,
+      attachments: [
+        {
+          filename: "birthday.jpg", // Optional: Name of the file
+          path: imagePath, // Path to the image
+          cid: "promoImage", // Content-ID, this will link to the <img> tag in HTML
+        },
+      ],
+    });
+
+    console.log(`Promo code sent to ${tourist.email}`);
+  } catch (error) {
+    console.error("Error sending promo code:", error);
+  }
+};
+
+// Function to check birthdays and send promo codes
+const checkBirthdaysAndSendPromoCodes = async () => {
+  const today = new Date();
+  const day = today.getDate();
+  const month = today.getMonth(); // Get current month (0-based index)
+
+  try {
+    // Find all tourists whose birthday is today
+    const tourists = await Tourist.find({
+      DOB: { $gte: new Date(today.getFullYear(), month, day) },
+    });
+
+    if (tourists.length === 0) {
+      console.log("No tourists have a birthday today");
+      return;
+    }
+
+    // Send promo code to each tourist
+    const promoCode = "20%"; // Replace with your actual promo code
+    for (const tourist of tourists) {
+      await sendPromoCodeToTourist(tourist._id, promoCode);
+    }
+
+    console.log(`Promo codes sent to ${tourists.length} tourists today.`);
+  } catch (error) {
+    console.error("Error checking birthdays:", error);
+  }
+};
+
+cron.schedule("0 0 * * *", () => {
+  checkBirthdaysAndSendPromoCodes();
+});
 
 const createTourist = async (req, res) => {
   const { username, password, email, mobile, nationality, dob, job } = req.body;
@@ -1243,44 +1394,78 @@ const deleteTouristAccount = async (req, res) => {
   }
 };
 
+const sendEmailNotification = async (name, recipientEmail, productName) => {
+  try {
+    await transporter.sendMail({
+      from: '"Inventory Alert" <your-email@example.com>',
+      to: recipientEmail,
+      subject: "Product Out of Stock Alert",
+      text: `Dear ${name} \n The product "${productName}" is now out of stock.`,
+    });
+  } catch (error) {
+    console.error("Failed to send email notification:", error);
+  }
+};
+
 const buyProduct = async (req, res) => {
-  const { touristId } = req.params; // Get the tourist ID from the route parameters
-  const { productId, purchaseQuantity } = req.body; // Get product ID and quantity to purchase from the request body
+  const { touristId } = req.params;
+  const { productId, purchaseQuantity } = req.body;
 
   try {
-    // Find the tourist by ID
     const tourist = await Tourist.findById(touristId);
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    // Find the product by ID
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Check if there is enough stock
     if (product.quantity < purchaseQuantity) {
       return res.status(400).json({ message: "Insufficient product quantity" });
     }
 
-    // Update the product's quantity and sales
     product.quantity -= purchaseQuantity;
     product.sales += purchaseQuantity;
-    await product.save(); // Save the updated product document
+    await product.save();
 
-    // Add the product ID to the tourist's products array
-    tourist.products.push(productId);
-    tourist.wallet -= product.price;
-    // activity.bookings += 1; // Increment bookings count
+    const existingProduct = tourist.products.find(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (existingProduct) {
+      existingProduct.purchaseQuantity += purchaseQuantity;
+    } else {
+      tourist.products.push({ productId, purchaseQuantity });
+    }
+
+    const totalCost = product.price * purchaseQuantity;
+    if (tourist.wallet < totalCost) {
+      return res.status(400).json({ message: "Insufficient wallet balance" });
+    }
+    tourist.wallet -= totalCost;
+
     await tourist.save();
-    // await activity.save();
+
+    // Notify admin/seller if the product is out of stock
+    if (product.quantity === 0) {
+      const seller = await Seller.findById(product.seller_id); // Assuming each product has a sellerId field
+      if (seller) {
+        await sendEmailNotification(seller.name, seller.email, product.name);
+      }
+      const admins = await Admin.find({}, "email"); // Fetch all admin emails
+      const emailPromises = admins.map((admin) =>
+        sendEmailNotification(admin.username, admin.email, product.name)
+      );
+
+      await Promise.all(emailPromises);
+    }
 
     const loyaltyUpdate = await addLoyaltyPoints(product.price, touristId);
 
     res.status(200).json({
-      message: "Product booked successfully",
+      message: "Product purchased successfully",
       loyaltyPoints: loyaltyUpdate.loyaltyPoints,
       level: loyaltyUpdate.level,
       badge: loyaltyUpdate.badge,
@@ -1515,7 +1700,6 @@ const bookFlight = async (req, res) => {
   }
 };
 
-const crypto = require("crypto");
 const HOTELBEDS_BASE_URL =
   "https://api.test.hotelbeds.com/hotel-api/1.0/hotels";
 

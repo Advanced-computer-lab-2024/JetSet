@@ -155,6 +155,7 @@ const createActivity = async (req, res) => {
     special_discount,
     bookingOpen,
     tags,
+    advertiserId,
   } = req.body;
 
   try {
@@ -168,6 +169,7 @@ const createActivity = async (req, res) => {
       special_discount,
       bookingOpen,
       tags,
+      creator: advertiserId,
     });
     res.status(201).json(activity);
   } catch (err) {
@@ -186,6 +188,7 @@ const updateActivity = async (req, res) => {
     special_discount,
     booking_open,
     tags,
+    advertiserId,
   } = req.body;
 
   const sanitizedId = id.replace(/:/g, ""); // This may be unnecessary depending on your route
@@ -201,6 +204,7 @@ const updateActivity = async (req, res) => {
   if (special_discount) updatedData.special_discount = special_discount;
   if (booking_open !== undefined) updatedData.booking_open = booking_open;
   if (tags) updatedData.tags = tags;
+  if (advertiserId) updatedData.creator = advertiserId;
 
   try {
     const activity = await Activity.findByIdAndUpdate(

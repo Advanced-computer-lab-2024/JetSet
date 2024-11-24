@@ -5,11 +5,7 @@ import ReadTourGuideProfileForm from "./Tourguide/ReadTourGuideProfileForm.js";
 import CreateItineraryForm from "./Itinerary/CreateItineraryForm.js";
 import UpdateItineraryForm from "./Itinerary/UpdateItineraryForm.js";
 import DeleteItineraryForm from "./Itinerary/DeleteItineraryForm.js";
-import CreateTouristItineraryForm from "./TouristItinerary/CreateTouristItineraryForm.js";
-import UpdateTouristItineraryForm from "./TouristItinerary/UpdateTouristItineraryForm.js";
-import DeleteTouristItineraryForm from "./TouristItinerary/DeleteTouristItineraryForm.js";
 import ViewCreatedItineraries from "./Itinerary/ViewCreatedItineraries.js";
-import ReadItineraryList from "./Itinerary/ReadItineraryList.js";
 import Activate from "./Tourguide/Activate";
 import Deactivate from "./Tourguide/Deactivate";
 import ChangePasswordForm from "./Tourguide/ChangePasswordForm.js";
@@ -21,9 +17,6 @@ function TourGuide() {
   const [view, setView] = useState("itineraries");
   const [itineraryID, setItineraryID] = useState("");
 
-  console.log(tourGuideID);
-
-  const touristItineraryID = "6702626ec741235c6ae2d87c"; // Ensure consistency in naming
   return (
     <div className="App">
       <header className="App-header">
@@ -38,27 +31,19 @@ function TourGuide() {
           <button onClick={() => setView("readtourGuideProfile")}>
             My Profile
           </button>
+          <button onClick={() => setView("createItinerary")}>
+            create Itinerary
+          </button>
           <button onClick={() => setView("updateItinerary")}>
             Update Itinerary
           </button>
           <button onClick={() => setView("deleteItinerary")}>
             Delete Itinerary
           </button>
-          <button onClick={() => setView("createTouristItinerary")}>
-            Create Tourist Itinerary
-          </button>
-          <button onClick={() => setView("updateTouristItinerary")}>
-            Update Tourist Itinerary
-          </button>
-          <button onClick={() => setView("deleteTouristItinerary")}>
-            Delete Tourist Itinerary
-          </button>
           <button onClick={() => setView("ViewCreatedItineraries")}>
             View My Created Itineraries
           </button>
-          <button onClick={() => setView("ReadTouristItinerary")}>
-            Read Tourist Itinerary
-          </button>
+
           <button onClick={() => setView("activate")}>
             Activate Itinerary
           </button>
@@ -98,16 +83,6 @@ function TourGuide() {
           <UpdateItineraryForm itineraryID={itineraryID} />
         )}
         {view === "deleteItinerary" && <DeleteItineraryForm />}
-        {view === "createTouristItinerary" && (
-          <CreateTouristItineraryForm id={tourGuideID} />
-        )}
-        {view === "ReadTouristItinerary" && <ReadItineraryList />}
-        {view === "updateTouristItinerary" && (
-          <UpdateTouristItineraryForm TouristitineraryID={touristItineraryID} />
-        )}
-        {view === "deleteTouristItinerary" && (
-          <DeleteTouristItineraryForm TouristitineraryID={touristItineraryID} />
-        )}
         {view === "ViewCreatedItineraries" && (
           <ViewCreatedItineraries id={tourGuideID} />
         )}

@@ -4,6 +4,7 @@ import axios from "axios";
 const CreateAdmin = () => {
   const [username, setUsername] = useState(""); // State for username
   const [password, setPassword] = useState(""); // State for password
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false); // State for loading status
   const [error, setError] = useState(null); // State for error messages
   const [success, setSuccess] = useState(null); // State for success messages
@@ -20,10 +21,12 @@ const CreateAdmin = () => {
       const response = await axios.post("http://localhost:3000/admin", {
         username,
         password,
+        email,
       });
       setSuccess(response.data.msg); // Set success message from the response
       setUsername(""); // Clear the username field
       setPassword(""); // Clear the password field
+      setEmail("");
     } catch (err) {
       setError(err.response?.data.message || "Error creating admin."); // Set error message
     } finally {
@@ -57,6 +60,13 @@ const CreateAdmin = () => {
             required // Make this field required
           />
         </div>
+        <label htmlFor="email">Email:</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          readOnly // Make it read-only since it's passed from the Register component
+        />
         {/* Submit button */}
         <button type="submit" disabled={loading}>
           {loading ? "Creating..." : "Create Admin"}
