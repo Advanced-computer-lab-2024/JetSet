@@ -1895,6 +1895,84 @@ async function bookmarkActivity(touristId, activityId) {
   }
 }
 
+const addToWishlist = async(req, res) => {
+  const {productID} = req.body;
+  const {touristID} = req.params;
+
+  try {
+    const tourist = await Tourist.findById(touristID);
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    const productExistsInDb = await Product.findById(productID);
+    if (!productExistsInDb) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Check if the product is already in the wishlist
+    const productExists = tourist.wishlist.some(
+      (item) => item.productId.toString() === productID
+    );
+
+    if (productExists) {
+      return res.status(400).json({ message: "Product already exists in the wishlist" });
+    }
+
+    // Add the product to the wishlist
+    tourist.wishlist.push({ productId: productID });
+    await tourist.save();
+
+    return res.status(200).json({ message: "Added Sucessfully"});
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+const viewMyWishlist= async(req, res)=>{
+  const {touristID} = req.params;
+
+  try{
+
+    const tourist = await Tourist.findById(touristID).populate('wishlist.productId');
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    res.status(200).json({ wishlist: tourist.wishlist });
+  }catch(err){
+    return res.status(400).json({ error: err.message });
+  }
+
+}
+
+const removeFromMyWishlist= async(req, res)=>{
+  const {touristID} = req.params;
+  const {productID} = req.body;
+  try{
+
+    const tourist = await Tourist.findById(touristID);
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    tourist.wishlist = tourist.wishlist.filter(
+      (item) => item.productId.toString() !== productID
+    );
+
+    await tourist.save();
+
+    return res.status(200).json({ message: "Product removed from wishlist successfully" });
+
+  }catch(err){
+    return res.status(400).json({ error: err.message });
+  }
+
+}
+
 module.exports = {
   getProducts,
   SortActivities,
@@ -1948,4 +2026,7 @@ module.exports = {
   getBookedItinerary,
   bookmarkActivity,
   loginTourist,
+  addToWishlist,
+  viewMyWishlist,
+  removeFromMyWishlist,
 };

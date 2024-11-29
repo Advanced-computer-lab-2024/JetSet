@@ -85,6 +85,18 @@ const touristSchema = new Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Activity",
       },
+    ],wishlist: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product", // Reference to the Product model
+          required: true,
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
     ],
   },
   { timestamps: true }

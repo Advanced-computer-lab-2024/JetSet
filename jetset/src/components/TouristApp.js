@@ -26,6 +26,7 @@ import FlightBooking from "./Booking/FlightBooking";
 import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
+import Wishlist from "./tourist/Wishlist";
 
 import "./styles.css";
 
@@ -51,6 +52,8 @@ const Tourist = () => {
         return <Search touristId={touristId} />;
       case "touristProduct":
         return <TouristProducts touristId={touristId} />;
+      case "Wishlist":
+        return <Wishlist touristId={touristId} />;
       case "ActivityByCategory":
         return <ActivityByCategory touristId={touristId} />;
       case "SetPreferredCurrency":
@@ -150,6 +153,9 @@ const Tourist = () => {
                 <h2>Products & Purchases</h2>
                 <button onClick={() => setCurrentPage("productList")}>
                   View Products
+                </button>
+                <button onClick={() => setCurrentPage("Wishlist")}>
+                  View My WishList
                 </button>
                 <button
                   onClick={() =>
