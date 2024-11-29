@@ -165,6 +165,9 @@ const {
   viewHotel,
   getBookedItinerary,
   loginTourist,
+  addToWishlist,
+  viewMyWishlist,
+  removeFromMyWishlist,
 } = require("../src/Routes/touristController");
 
 const {
@@ -471,6 +474,11 @@ app.delete("/deleteAccTourguide/:id", deleteTourGuideAccount);
 app.put("/cr/:id", updateActivityCreator);
 app.delete("/deleteAccAdvertiser/:id", deleteAdvertiserAccount);
 app.delete("/deleteAccSeller/:id", deleteSellerAccount);
+
+app.post("/Wishlist/:touristID",addToWishlist);
+app.get("/Wishlist/:touristID",viewMyWishlist);
+app.delete("/Wishlist/:touristID",removeFromMyWishlist);
+
 
 app.put("/touristwallet/:id", async (req, res) => {
   try {
