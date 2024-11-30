@@ -103,73 +103,7 @@ cron.schedule("0 20 * * *", async () => {
   }
 });
 
-const sendPromoCodeToTourist = async (touristId, promoCode) => {
-  try {
-    const tourist = await Tourist.findById(touristId);
-    if (!tourist) {
-      return console.log("Tourist not found");
-    }
 
-    const imagePath = path.join(__dirname, "JetSet/src/uploads/birthday.jpg");
-
-    // Send the promo code via email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: tourist.email,
-      subject: "Happy Birthday! Here's Your Promo Code",
-      html: `
-        <h1>Happy Birthday, ${tourist.username}!</h1>
-        <p>Use the promo code <strong>${promoCode}</strong> to enjoy discounts on any products on our website.</p>
-        <img src="cid:promoImage" alt="Promo Image" />
-        <p>Enjoy your special day!</p>
-      `,
-      attachments: [
-        {
-          filename: "birthday.jpg", // Optional: Name of the file
-          path: imagePath, // Path to the image
-          cid: "promoImage", // Content-ID, this will link to the <img> tag in HTML
-        },
-      ],
-    });
-
-    console.log(`Promo code sent to ${tourist.email}`);
-  } catch (error) {
-    console.error("Error sending promo code:", error);
-  }
-};
-
-// Function to check birthdays and send promo codes
-const checkBirthdaysAndSendPromoCodes = async () => {
-  const today = new Date();
-  const day = today.getDate();
-  const month = today.getMonth(); // Get current month (0-based index)
-
-  try {
-    // Find all tourists whose birthday is today
-    const tourists = await Tourist.find({
-      DOB: { $gte: new Date(today.getFullYear(), month, day) },
-    });
-
-    if (tourists.length === 0) {
-      console.log("No tourists have a birthday today");
-      return;
-    }
-
-    // Send promo code to each tourist
-    const promoCode = "20%"; // Replace with your actual promo code
-    for (const tourist of tourists) {
-      await sendPromoCodeToTourist(tourist._id, promoCode);
-    }
-
-    console.log(`Promo codes sent to ${tourists.length} tourists today.`);
-  } catch (error) {
-    console.error("Error checking birthdays:", error);
-  }
-};
-
-cron.schedule("0 0 * * *", () => {
-  checkBirthdaysAndSendPromoCodes();
-});
 
 const createTourist = async (req, res) => {
   const { username, password, email, mobile, nationality, dob, job } = req.body;
@@ -1161,22 +1095,34 @@ const bookActivity = async (req, res) => {
     if (tourist.bookedActivities.includes(activityId)) {
       return res.status(400).json({ message: "Activity already booked" });
     }
+     // Apply discount from promo code
+     const discount = req.discount || 0;
+     const finalPrice = Math.max(activity.budget - discount, 0);
+ 
+     // Check if the tourist has enough funds in their wallet
+     if (tourist.wallet < finalPrice) {
+       return res
+         .status(400)
+         .json({ message: "Insufficient wallet balance for booking" });
+     }
 
     // Update the tourist's bookedActivities and increment bookings count
     tourist.bookedActivities.push(activityId);
-    tourist.wallet -= activity.budget;
+    tourist.wallet -= finalPrice;
     // activity.bookings += 1; // Increment bookings count
     await tourist.save();
     // await activity.save();
 
-    const loyaltyUpdate = await addLoyaltyPoints(activity.budget, touristId);
-
+    const loyaltyUpdate = await addLoyaltyPoints(finalPrice, touristId);
     res.status(200).json({
       message: "Activity booked successfully",
+      finalPrice,
+      appliedPromoCode: req.promoCode || null,
       loyaltyPoints: loyaltyUpdate.loyaltyPoints,
       level: loyaltyUpdate.level,
       badge: loyaltyUpdate.badge,
     });
+    
   } catch (error) {
     res.status(500).json({ message: "Error booking activity", error });
   }
@@ -1202,19 +1148,31 @@ const bookItinerary = async (req, res) => {
     if (tourist.bookedItineraries.includes(itineraryId)) {
       return res.status(400).json({ message: "Itinerary already booked" });
     }
+    // Apply discount from promo code
+    const discount = req.discount || 0;
+    const finalPrice = Math.max(itinerary.budget - discount, 0);
+
+    // Check if the tourist has enough funds in their wallet
+    if (tourist.wallet < finalPrice) {
+      return res
+        .status(400)
+        .json({ message: "Insufficient wallet balance for booking" });
+    }
 
     // Update the tourist's bookedItineraries and increment bookings count
     tourist.bookedItineraries.push(itineraryId);
     // itinerary.bookings += 1; // Increment bookings count
-    tourist.wallet -= itinerary.budget;
+    tourist.wallet -= finalPrice;
     itinerary.booked += 1;
     await tourist.save();
     await itinerary.save();
 
-    const loyaltyUpdate = await addLoyaltyPoints(itinerary.budget, touristId);
+    const loyaltyUpdate = await addLoyaltyPoints(finalPrice, touristId);
 
     res.status(200).json({
       message: "Itinerary booked successfully",
+      finalPrice,
+      appliedPromoCode: req.promoCode || null,
       loyaltyPoints: loyaltyUpdate.loyaltyPoints,
       level: loyaltyUpdate.level,
       badge: loyaltyUpdate.badge,
@@ -1312,6 +1270,9 @@ const cancelItineraryBooking = async (req, res) => {
   }
 };
 
+
+
+
 const bookTransportation = async (req, res) => {
   const { touristId, transportationId } = req.params;
 
@@ -1331,9 +1292,15 @@ const bookTransportation = async (req, res) => {
     if (tourist.bookedTransportations.includes(transportationId)) {
       return res.status(400).json({ message: "Transportation already booked" });
     }
-
+// Calculate the final price with the discount applied
+    const discount = req.discount || 0;
+    const finalPrice = Math.max(transportation.price - discount, 0);
     tourist.bookedTransportations.push(transportationId);
-    tourist.wallet -= transportation.price;
+    tourist.wallet -= finalPrice;
+
+    if (tourist.wallet < finalPrice) {
+      return res.status(400).json({ message: "Insufficient wallet balance" });
+    }
 
     await tourist.save();
 
@@ -1407,6 +1374,13 @@ const sendEmailNotification = async (name, recipientEmail, productName) => {
   }
 };
 
+
+const express = require('express');
+
+
+
+
+
 const buyProduct = async (req, res) => {
   const { touristId } = req.params;
   const { productId, purchaseQuantity } = req.body;
@@ -1440,11 +1414,17 @@ const buyProduct = async (req, res) => {
       tourist.products.push({ productId, purchaseQuantity });
     }
 
+    
     const totalCost = product.price * purchaseQuantity;
-    if (tourist.wallet < totalCost) {
+    const discount = req.discount || 0; // Discount from promo code
+    const discountedCost = totalCost - (totalCost * discount) / 100;
+
+
+
+    if (tourist.wallet < discountedCost) {
       return res.status(400).json({ message: "Insufficient wallet balance" });
     }
-    tourist.wallet -= totalCost;
+    tourist.wallet -= discountedCost;
 
     await tourist.save();
 
@@ -1665,12 +1645,22 @@ const bookFlight = async (req, res) => {
     });
 
     const tourist = await Tourist.findById(touristId);
+    // Apply discount from promo code
+    const discount = req.discount || 0;
+    const finalPrice = Math.max((maxPrice || 500) - discount, 0);
 
-    tourist.wallet -= maxPrice;
+    // Check if the tourist has enough funds in their wallet
+    if (tourist.wallet < finalPrice) {
+      return res
+        .status(400)
+        .json({ message: "Insufficient wallet balance for booking" });
+    }
+
+    tourist.wallet -= finalPrice;
 
     await tourist.save();
 
-    const loyaltyUpdate = await addLoyaltyPoints(maxPrice, touristId);
+    const loyaltyUpdate = await addLoyaltyPoints(finalPrice, touristId);
 
     // Simulate the flight booking process (this would be replaced with actual logic)
     // Here, we're just mocking a successful booking response
@@ -1783,6 +1773,13 @@ const searchHotels = async (req, res) => {
 
 const HotelBooking = require("../Models/hotelBookingSchema"); // Import the HotelBooking model
 const TouristItinerary = require("../Models/TouristsItinerary.js");
+const express = require("express");
+const { bookHotel } = require("../Controllers/hotelController");
+const { applyPromoCode } = require("../Middleware/promoMiddleware");
+
+//const router = express.Router();
+
+
 
 const bookHotel = async (req, res) => {
   const { checkIn, checkOut, adults, children, destinationCode, paxes, rooms } =
@@ -1821,8 +1818,16 @@ const bookHotel = async (req, res) => {
 
     const tourist = await Tourist.findById(touristId);
     const flightPrice = 500;
+    const discount = req.discount || 0;
+    const finalPrice = Math.max(flightPrice - discount, 0);
 
-    tourist.wallet -= flightPrice;
+    if (tourist.wallet < finalPrice) {
+      return res
+        .status(400)
+        .json({ message: "Insufficient wallet balance for booking" });
+    }
+
+    tourist.wallet -= finalPrice;
 
     await tourist.save();
 
@@ -1894,6 +1899,58 @@ async function bookmarkActivity(touristId, activityId) {
     return { error: error.message };
   }
 }
+// Function to generate a unique promo code
+const generatePromoCode = () => {
+  return `BDAY-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+};
+
+// Cron job to send promo codes daily at midnight
+cron.schedule("0 0 * * *", async () => {
+  try {
+    const today = new Date();
+    const month = today.getMonth() + 1; // Get current month
+    const day = today.getDate(); // Get current day
+
+    // Fetch tourists whose birthdays are today
+    const birthdayTourists = await Tourist.find({
+      $expr: {
+        $and: [
+          { $eq: [{ $month: "$DOB" }, month] },
+          { $eq: [{ $dayOfMonth: "$DOB" }, day] },
+        ],
+      },
+    });
+
+    // Send emails and save promo codes
+    for (const tourist of birthdayTourists) {
+      const promoCode = generatePromoCode();
+      const validUntil = new Date(today);
+      validUntil.setDate(validUntil.getDate() + 30); // Promo code valid for 30 days
+
+      // Save the promo code in the database
+      const newPromoCode = new PromoCode({
+        code: promoCode,
+        discount: 20, // Example: 20% discount
+        validUntil,
+        createdBy: null, // If there's an admin initiating the process, reference them
+      });
+
+      await newPromoCode.save();
+
+      // Send email with the promo code
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: tourist.email,
+        subject: "Happy Birthday! 🎉 Here's a Special Promo Code Just for You!",
+        text: `Dear ${tourist.username},\n\nHappy Birthday! To celebrate your special day, we're giving you a unique promo code: ${promoCode}\n\nEnjoy 20% off on your next booking! This promo code is valid until ${validUntil.toDateString()}.\n\nWishing you a fantastic year ahead!\n\nBest wishes,\nThe Team`,
+      });
+
+      console.log(`Promo code sent and saved for ${tourist.email}`);
+    }
+  } catch (error) {
+    console.error("Error sending birthday promo codes:", error);
+  }
+});
 
 module.exports = {
   getProducts,

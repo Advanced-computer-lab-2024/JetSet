@@ -626,6 +626,31 @@ const getComplaintsByStatus = async (req, res) => {
   }
 };
 
+const PromoCode = require("../Models/PromoCode");
+
+const createPromoCode = async (req, res) => {
+  const { discount, validUntil } = req.body; // Discount percentage/fixed value & expiry date
+  const adminId = req.adminId; // Assuming admin's ID is passed via middleware
+
+  try {
+    // Generate a unique promo code
+    const code = Math.random().toString(36).substring(2, 10).toUpperCase(); // Example: 8-character alphanumeric code
+
+    // Create a new promo code in the database
+    const newPromoCode = await PromoCode.create({
+      code,
+      discount,
+      validUntil,
+      createdBy: adminId,
+    });
+
+    res.status(201).json({ message: "Promo code created", promoCode: newPromoCode });
+  } catch (error) {
+    res.status(500).json({ message: "Error creating promo code", error });
+  }
+};
+
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -658,4 +683,5 @@ module.exports = {
   getComplaintsByStatus,
   loginAdmin,
   getAdminbyid,
+  createPromoCode,
 };

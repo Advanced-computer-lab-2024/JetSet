@@ -24,6 +24,7 @@ const upload = multer({ storage: storage });
 const TourGuide = require("./Models/TourGuide.js");
 const Itinerary = require("./Models/Itinerary"); // Adjust path as necessary
 const Activity = require("./Models/Activity"); // Adjust the path
+const PromoCode = require("./Models/PromoCode.js");
 
 const {
   createProfile,
@@ -43,6 +44,7 @@ const {
   updateActivityCreator,
   deleteAdvertiserAccount,
   loginAdv,
+  createPromoCode,
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const {
@@ -194,6 +196,10 @@ const {
   deleteTouristItinerary,
 } = require("../src/Routes/tourguideController");
 
+const {
+  applyPromoCode,
+} = require("../src/Routes/applyPromoCode");
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -294,7 +300,7 @@ app.post("/loginTourGuide", loginTourGuide);
 app.post("/loginSeller", loginSeller);
 app.post("/loginTourism", loginTourism);
 app.post("/loginAdmin", loginAdmin);
-
+app.post("/applyPromoCode",applyPromoCode);
 app.get("/getTourist/:id", getTouristProfile);
 app.put("/updateTourist/:id", updateTouristProfile);
 
@@ -329,7 +335,7 @@ app.get("/filterActivity", filterActivity);
 app.get("/filterActivityGuest", filterActivityGuest);
 
 app.get("/searchProductAdmin", searchProductAdmin);
-
+app.post("/createPromoCode",createPromoCode);
 app.get("/viewAllPlaces", viewAllPlaces);
 app.post("/addPlace", createPlaces);
 app.get("/Places", getPlaces);
@@ -431,7 +437,7 @@ app.get("/Acttour", getActivityTourist);
 const Tourist = require("../src/Models/Tourist");
 const Product = require("../src/Models/Product");
 
-app.put("/buyProduct/:touristId", buyProduct);
+app.put("/buyProduct/:touristId",applyPromoCode, buyProduct);
 
 app.get("/gets", getTourist);
 app.post("/rateandcommentItinerary/:id", rateandcommentItinerary);
@@ -456,8 +462,8 @@ app.put("/cpSeller/:id", changePasswordSeller);
 app.put("/cpTourguide/:id", changePasswordTourGuide);
 app.put("/cpTourismgoverner/:id", changePasswordTourismGoverner);
 
-app.post("/book/:touristId/activity/:activityId", bookActivity);
-app.post("/book/:touristId/itinerary/:itineraryId", bookItinerary);
+app.post("/book/:touristId/activity/:activityId",applyPromoCode, bookActivity);
+app.post("/book/:touristId/itinerary/:itineraryId",applyPromoCode, bookItinerary);
 app.delete("/cancelActivity/:touristId/:activityId", cancelActivityBooking);
 app.delete("/cancelItinerary/:touristId/:itineraryId", cancelItineraryBooking);
 app.post(
@@ -507,10 +513,10 @@ app.get("/complaintSort", getComplaintsSortedByDate);
 app.get("/complaintfilter", getComplaintsByStatus);
 
 app.post("/search-flights", searchFlights);
-app.post("/book-flight/:touristId", bookFlight);
+app.post("/book-flight/:touristId",applyPromoCode, bookFlight);
 
 app.post("/search-hotels", searchHotels);
-app.post("/book-hotel/:touristId", bookHotel);
+app.post("/book-hotel/:touristId",applyPromoCode, bookHotel);
 
 app.get("/flight", viewFlight);
 app.get("/hotel", viewHotel);
