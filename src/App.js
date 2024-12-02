@@ -3,7 +3,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-
 const multer = require("multer");
 const path = require("path");
 
@@ -24,6 +23,7 @@ const upload = multer({ storage: storage });
 const TourGuide = require("./Models/TourGuide.js");
 const Itinerary = require("./Models/Itinerary"); // Adjust path as necessary
 const Activity = require("./Models/Activity"); // Adjust the path
+const Place = require("./Models/Historical.js");
 
 const {
   createProfile,
@@ -114,6 +114,8 @@ const {
   flagItinerary,
   flagActivity,
   getAdminbyid,
+  forgetPass,
+  restPass,
 } = require("./Routes/adminController");
 
 const {
@@ -200,7 +202,13 @@ dotenv.config();
 // App variables
 const app = express();
 
+app.use(cors());
+
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Server is running.");
+});
 
 const MongoURI = process.env.MONGO_URI;
 const port = process.env.PORT;
@@ -218,8 +226,6 @@ mongoose
 app.get("/home", (req, res) => {
   res.status(200).send("You have everything installed!");
 });
-
-app.use(cors());
 
 // app.use(
 //   "/uploads",
@@ -280,8 +286,6 @@ app.post("/api/bookmarkActivity", async (req, res) => {
 app.get("/home", (req, res) => {
   res.status(200).send("You have everything installed!");
 });
-
-app.use(express.json());
 
 app.post("/addTourist", createTourist);
 app.post("/register", upload.array("documents", 5), register); // Adjust maxCount as needed
@@ -578,5 +582,93 @@ app.delete("/deleteAdmin/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error deleting admin" });
+  }
+});
+
+app.post("/forgot-password", forgetPass);
+app.post("/reset-password", restPass);
+
+const Notification = require("../src/Models/Notification.js");
+app.get("/notification", async (req, res) => {
+  try {
+    const { recipient, role } = req.query; // Pass recipient's username to get notifications
+    const notifications = await Notification.find({ recipient, role });
+
+    if (!notifications.length) {
+      return res.status(404).json({ message: "No notifications found" });
+    }
+
+    res.status(200).json({ notifications });
+  } catch (error) {
+    res.status(500).json({ message: "Error", error });
+  }
+});
+
+app.get("/not", async (req, res) => {
+  try {
+    const notifications = await Notification.find();
+
+    if (!notifications.length) {
+      return res.status(404).json({ message: "No notifications found" });
+    }
+
+    res.status(200).json({ notifications });
+  } catch (error) {
+    res.status(500).json({ message: "Error", error });
+  }
+});
+
+app.get("/unread", async (req, res) => {
+  const { recipient, role } = req.query;
+  try {
+    // Get the count of unread notifications
+    const unreadCount = await Notification.countDocuments({
+      read: false,
+      recipient,
+      role,
+    });
+
+    res.status(200).json({ unreadCount });
+  } catch (error) {
+    res.status(500).json({ message: "Error", error });
+  }
+});
+
+app.get("/activity/:id", async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+    res.json(activity);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/itinerary/:id", async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
+    }
+    res.json(itinerary);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/historical/:id", async (req, res) => {
+  try {
+    const place = await Place.findById(req.params.id);
+    if (!place) {
+      return res.status(404).json({ message: "Place not found" });
+    }
+    res.json(place);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });

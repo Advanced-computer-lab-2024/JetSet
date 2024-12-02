@@ -13,6 +13,7 @@ const Guest = require("../Models/Guest.js");
 const Complaint = require("../Models/Complaint");
 const itineraryModel = require("../Models/Itinerary.js");
 const Activity = require("../Models/Activity.js");
+const Notification = require("../Models/Notification.js");
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -25,6 +26,98 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const roleModelMap = {
+  tourismgovernor: TourismGoverner,
+  admin: Admin,
+  tourist: Tourist,
+  tourguide: TourGuide,
+  seller: Seller,
+  advertisor: Advertiser,
+};
+
+const forgetPass = async (req, res) => {
+  const { username, role } = req.body;
+
+  if (!roleModelMap[role]) {
+    return res.status(400).json({ message: "Invalid role" });
+  }
+
+  try {
+    const UserModel = roleModelMap[role]; // Get the model dynamically based on role
+    const user = await UserModel.findOne({ username });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Construct the reset password link
+    const resetLink = `${
+      process.env.FRONTEND_URL
+    }/reset-password?username=${encodeURIComponent(
+      username
+    )}&role=${encodeURIComponent(role)}&otp=${otp}`;
+
+    // Send OTP and reset link via email
+    const mailOptions = {
+      from: {
+        name: "Admin",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `
+        <p>Hello ${user.username},</p>
+        <p>You have requested to reset your password. Use the button below to reset your password:</p>
+        <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Reset Password</a>
+        <p>If you did not request this, please ignore this email.</p>
+        <p>Thank you,</p>
+        <p>Admin</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    // Store OTP in the user's document
+    user.resetOtp = otp;
+    await user.save();
+
+    res.status(200).json({ message: "Reset password link sent to email" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error sending reset password link", error });
+  }
+};
+
+const restPass = async (req, res) => {
+  const { username, role, otp, newPassword } = req.body;
+
+  if (!roleModelMap[role]) {
+    return res.status(400).json({ message: "Invalid role" });
+  }
+
+  try {
+    const UserModel = roleModelMap[role]; // Get the model dynamically based on role
+    const user = await UserModel.findOne({ username });
+
+    if (!user || user.resetOtp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // Hash the new password
+    user.password = newPassword;
+    user.resetOtp = null; // Clear OTP after reset
+    await user.save();
+
+    res.status(200).json({ message: "Password successfully updated" });
+  } catch (error) {
+    res.status(500).json({ message: "Error resetting password", error });
+  }
+};
+
 const getAdminbyid = async (req, res) => {
   const { id } = req.params;
   try {
@@ -34,7 +127,7 @@ const getAdminbyid = async (req, res) => {
       return res.status(404).json({ message: "admin not found." });
     }
     await admin.save();
-    res.status(200).json({ username: admin.username });
+    res.status(200).json({ admin, username: admin.username });
   } catch (error) {
     console.error("Error retrieving admin profile:", error); // Debug log
     res.status(400).json({ message: "Error retrieving admin profile.", error });
@@ -64,7 +157,7 @@ const loginAdmin = async (req, res) => {
 
 //Tourism Governer
 const createTourismGoverner = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email } = req.body;
 
   try {
     // Check if the Username already exists
@@ -77,6 +170,7 @@ const createTourismGoverner = async (req, res) => {
     const newGovernor = await TourismGoverner.create({
       username: username,
       password: password,
+      email: email,
     });
 
     res
@@ -127,7 +221,7 @@ const viewAllComplaints = async (req, res) => {
 };
 //Product
 const createProduct = async (req, res) => {
-  const { name, desciption, price, quantity, seller_id } = req.body;
+  const { name, desciption, price, quantity, seller_id, admin_id } = req.body;
   try {
     await Product.create({
       name: name,
@@ -135,6 +229,7 @@ const createProduct = async (req, res) => {
       description: desciption,
       quantity: quantity,
       seller_id: seller_id,
+      admin_id: admin_id,
     });
     res.status(200).json({ msg: "Product created" });
   } catch (error) {
@@ -466,27 +561,29 @@ const sendMail = async (transporter, mailOptions) => {
 const flagItinerary = async (req, res) => {
   try {
     const { id } = req.params;
-    const { flag } = req.body; // Expecting true for archive, false for unarchive
+    const { flag } = req.body; // Expecting true for flag, false for unflag
 
-    // Find product by ID and update the archive status
+    // Find the itinerary by ID and update the flag status
     const updated = await itineraryModel.findByIdAndUpdate(
       id,
-      { flag: flag }, // Set archive field based on the passed status
+      { flag: flag }, // Set flag field based on the passed status
       { new: true } // Return the updated document
     );
 
     if (!updated) {
-      return res.status(404).json({ message: "itinerary not found" });
+      return res.status(404).json({ message: "Itinerary not found" });
     }
 
+    // Find the tour guide who created the itinerary
     const tourGuide = await TourGuide.findById(updated.created_by);
     if (!tourGuide) {
       return res.status(404).json({ message: "Tour guide not found" });
     }
 
+    // Send an email notification to the tour guide
     const mailOptions = {
       from: {
-        name: "Admin",
+        name: "JetSet",
         address: process.env.EMAIL_USER, // Corrected to reference the environment variable
       },
       to: tourGuide.email,
@@ -500,6 +597,19 @@ const flagItinerary = async (req, res) => {
 
     sendMail(transporter, mailOptions);
 
+    // Create a notification for the tour guide
+    const notification = new Notification({
+      recipient: tourGuide.username,
+      role: "Tour Guide", // Assuming the role is Tour Guide
+      message: flag
+        ? `Your itinerary "${updated.name}" has been flagged as inappropriate by the admin.`
+        : `Your itinerary "${updated.name}" has been unflagged.`,
+    });
+
+    // Save the notification to the database
+    await notification.save();
+
+    // Return the response
     const statusMessage = flag ? "Itinerary flagged" : "Itinerary unflagged";
     res.status(200).json({ message: statusMessage, itinerary: updated });
   } catch (error) {
@@ -530,7 +640,7 @@ const flagActivity = async (req, res) => {
 
     const mailOptions = {
       from: {
-        name: "Admin",
+        name: "JetSet",
         address: process.env.EMAIL_USER, // Corrected to reference the environment variable
       },
       to: adv.email,
@@ -543,6 +653,17 @@ const flagActivity = async (req, res) => {
     };
 
     sendMail(transporter, mailOptions);
+
+    const notification = new Notification({
+      recipient: adv.username,
+      role: "Advertiser", // Assuming the role is Tour Guide
+      message: flag
+        ? `Your Activity "${updated.title}" has been flagged as inappropriate by the admin.`
+        : `Your Activity "${updated.title}" has been unflagged.`,
+    });
+
+    // Save the notification to the database
+    await notification.save();
 
     const statusMessage = flag ? "Activity flagged" : "Activity unflagged";
     res.status(200).json({ message: statusMessage, itinerary: updated });
@@ -658,4 +779,6 @@ module.exports = {
   getComplaintsByStatus,
   loginAdmin,
   getAdminbyid,
+  forgetPass,
+  restPass,
 };

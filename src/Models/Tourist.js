@@ -86,6 +86,7 @@ const touristSchema = new Schema(
         ref: "Activity",
       },
     ],
+    resetOtp: { type: String },
   },
   { timestamps: true }
 );
