@@ -1,27 +1,190 @@
+/* Base styling */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7f9; /* Light background for a clean look */
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* General Button Styles */
+button {
+  border: none;
+  cursor: pointer;
+  outline: none;
+  font-size: 1em;
+  transition: all 0.3s ease;
+}
+
+/* Bookmark Button */
 .bookmark-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2em;
-    color: #007bff;
-    transition: transform 0.2s ease, color 0.3s ease;
-    margin-left: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+  color: #007bff;
+  transition: transform 0.2s ease, color 0.3s ease, box-shadow 0.2s ease;
+  margin-left: 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.bookmark-button i {
+  color: #aaa; /* Default color when not bookmarked */
+  transition: color 0.3s ease;
+}
+
+.bookmark-button:hover i {
+  color: #0056b3;
+  transform: scale(1.1);
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.bookmark-button i.fa-bookmark {
+  color: #f39c12; /* Color when bookmarked */
+}
+
+.bookmark-button:active i {
+  transform: scale(0.95);
+}
+
+/* Toggle Button */
+.toggle-btn {
+  padding: 12px 24px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s ease;
+  font-size: 1.1em;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-btn:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+}
+
+.toggle-btn:active {
+  transform: translateY(1px);
+}
+
+/* Activity Item Styling */
+.activity-item {
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.activity-item h3 {
+  font-size: 1.4em;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.activity-item p {
+  margin: 8px 0;
+  font-size: 1em;
+  color: #555;
+}
+
+.activity-item .activity-details {
+  margin-top: 15px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+/* Loading and Error States */
+.loading {
+  font-size: 1.5em;
+  color: #888;
+  text-align: center;
+}
+
+.error {
+  color: red;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+/* Filter and Sort Options */
+.filters, .sort-options {
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.filters input, .filters button,
+.sort-options select, .sort-options button {
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+  outline: none;
+}
+
+.filters button, .sort-options button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.filters input:focus, .filters button:focus,
+.sort-options select:focus, .sort-options button:focus {
+  border-color: #007bff;
+}
+
+.filters button:hover, .sort-options button:hover {
+  background-color: #0056b3;
+}
+
+/* Activity List Layout */
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul li {
+  margin-bottom: 20px;
+}
+
+ul li:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filters, .sort-options {
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .bookmark-button i {
-    color: #aaa; /* Default color when not bookmarked */
-    transition: color 0.3s ease;
+
+  .toggle-btn {
+    width: 100%;
+    margin-top: 10px;
   }
-  
-  .bookmark-button:hover i {
-    color: #0056b3;
-    transform: scale(1.1);
+
+  .activity-item {
+    margin: 10px;
+    padding: 15px;
   }
-  
-  .bookmark-button i.fa-bookmark {
-    color: #f39c12; /* Color when bookmarked */
+
+  .bookmark-button {
+    font-size: 1.3em;
+    margin-left: 5px;
   }
-  
-  .bookmark-button:active i {
-    transform: scale(0.95);
-  }
+}

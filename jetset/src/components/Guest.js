@@ -6,6 +6,8 @@ import HistoricalPlaces from "./Place/HistoricalPlacesList";
 import Search from "./tourist/SearchComponent.js";
 import ActivityByCategory from "./Activity/ActivitiesByCategory.js";
 import VacationGuestGuide from "./Guest/VacationGuestGuide.js";
+import ActivitiesListGuest from "./Activity/ActivitiesListGuest.js";
+import ItineraryListGuest from "./Itinerary/ItineraryListGuest.js";
 // Import the new ShareItem component
 
 import "./styles.css";
@@ -16,9 +18,9 @@ const Guest = () => {
   const renderPage = () => {
     switch (currentPage) {
       case "activityList":
-        return <ActivityList />;
+        return <ActivitiesListGuest />;
       case "itineraryList":
-        return <ItineraryList />;
+        return <ItineraryListGuest />;
       case "historicalPlaces":
         return <HistoricalPlaces />;
       case "search":

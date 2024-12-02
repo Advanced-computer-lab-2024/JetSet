@@ -754,6 +754,22 @@ const getBookedItinerary = async (req, res) => {
   }
 };
 
+const getBookedActivities = async (req, res) => {
+  const { touristId } = req.params; // Correctly accessing touristId from req.params
+  try {
+    const tourist = await Tourist.findById(touristId).populate(
+      "bookedActivities"
+    );
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found." });
+    }
+
+    res.status(200).json({ bookedActivities: tourist.bookedActivities });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const rateandcommentItinerary = async (req, res) => {
   const { itineraryId, rating, comment } = req.body; // Expecting these fields in the request body
   const touristId = req.params.id; // Assuming the tourist ID is passed in the URL
@@ -1164,18 +1180,18 @@ const bookActivity = async (req, res) => {
 
     // Update the tourist's bookedActivities and increment bookings count
     tourist.bookedActivities.push(activityId);
-    tourist.wallet -= activity.budget;
+    //tourist.wallet -= activity.budget;
     // activity.bookings += 1; // Increment bookings count
     await tourist.save();
     // await activity.save();
 
-    const loyaltyUpdate = await addLoyaltyPoints(activity.budget, touristId);
+    //const loyaltyUpdate = await addLoyaltyPoints(activity.budget, touristId);
 
     res.status(200).json({
       message: "Activity booked successfully",
-      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
-      level: loyaltyUpdate.level,
-      badge: loyaltyUpdate.badge,
+      //loyaltyPoints: loyaltyUpdate.loyaltyPoints,
+      //level: loyaltyUpdate.level,
+      //badge: loyaltyUpdate.badge,
     });
   } catch (error) {
     res.status(500).json({ message: "Error booking activity", error });
@@ -1206,18 +1222,18 @@ const bookItinerary = async (req, res) => {
     // Update the tourist's bookedItineraries and increment bookings count
     tourist.bookedItineraries.push(itineraryId);
     // itinerary.bookings += 1; // Increment bookings count
-    tourist.wallet -= itinerary.budget;
+    //tourist.wallet -= itinerary.budget;
     itinerary.booked += 1;
     await tourist.save();
     await itinerary.save();
 
-    const loyaltyUpdate = await addLoyaltyPoints(itinerary.budget, touristId);
+    //const loyaltyUpdate = await addLoyaltyPoints(itinerary.budget, touristId);
 
     res.status(200).json({
       message: "Itinerary booked successfully",
-      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
-      level: loyaltyUpdate.level,
-      badge: loyaltyUpdate.badge,
+      //loyaltyPoints: loyaltyUpdate.loyaltyPoints,
+      //level: loyaltyUpdate.level,
+      //badge: loyaltyUpdate.badge,
     });
 
     //res.status(200).json({ message: "Itinerary booked successfully" });
@@ -1251,21 +1267,32 @@ const cancelActivityBooking = async (req, res) => {
       });
     }
 
+    // Check if the activity is in payedActivities
+    const isPaid = tourist.payedActivities.includes(activityId);
+    if (isPaid) {
+      // Refund the activity budget to the tourist's wallet
+      tourist.wallet += activity.budget;
+
+      // Remove the activity ID from payedActivities
+      tourist.payedActivities = tourist.payedActivities.filter(
+        (id) => id.toString() !== activityId
+      );
+    }
+
     // Remove the activity ID from tourist's bookedActivities
     tourist.bookedActivities = tourist.bookedActivities.filter(
       (id) => id.toString() !== activityId
     );
+
+    // Save updates
     await tourist.save();
 
-    res
-      .status(200)
-      .json({ message: "Activity booking cancelled successfully" });
+    res.status(200).json({ message: "Activity booking cancelled successfully",wallet: tourist.wallet });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error cancelling activity booking", error });
+    res.status(500).json({ message: "Error cancelling activity booking", error });
   }
 };
+
 
 const cancelItineraryBooking = async (req, res) => {
   const { touristId, itineraryId } = req.params;
@@ -1293,22 +1320,31 @@ const cancelItineraryBooking = async (req, res) => {
       });
     }
 
+    const isPaid = tourist.payedItineraries.includes(itineraryId);
+    if (isPaid) {
+      // Refund the activity budget to the tourist's wallet
+      tourist.wallet += itinerary.budget;
+
+      // Remove the activity ID from payedActivities
+      tourist.payedItineraries = tourist.payedItineraries.filter(
+        (id) => id.toString() !== itineraryId
+      );
+    }
+
     // Remove the itinerary ID from tourist's bookedItineraries
     tourist.bookedItineraries = tourist.bookedItineraries.filter(
       (id) => id.toString() !== itineraryId
     );
+
+    
     await tourist.save();
 
     itinerary.booked -= 1;
     await itinerary.save();
 
-    res
-      .status(200)
-      .json({ message: "Itinerary booking cancelled successfully" });
+    res.status(200).json({ message: "Itinerary booking cancelled successfully",wallet: tourist.wallet });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error cancelling itinerary booking", error });
+    res.status(500).json({ message: "Error cancelling itinerary booking", error });
   }
 };
 
@@ -2024,8 +2060,18 @@ module.exports = {
   viewFlight,
   viewHotel,
   getBookedItinerary,
+  getBookedActivities,
   bookmarkActivity,
+  unbookmarkActivity,
   loginTourist,
+  payByWallet,
+  payByWalletAct,
+  payByWalletIti,
+  payByWalletProduct,
+  paidUpcoming,
+  paidHistory,
+  bookmarkItinerary,
+  unbookmarkItinerary,
   addToWishlist,
   viewMyWishlist,
   removeFromMyWishlist,

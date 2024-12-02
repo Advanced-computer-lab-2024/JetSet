@@ -164,7 +164,14 @@ const {
   viewFlight,
   viewHotel,
   getBookedItinerary,
+  getBookedActivities,
   loginTourist,
+  payByWallet,
+  payByWalletAct,
+  payByWalletIti,
+  payByWalletProduct,
+  paidUpcoming,
+  paidHistory,
   addToWishlist,
   viewMyWishlist,
   removeFromMyWishlist,
@@ -263,7 +270,7 @@ app.get("/api/activities", async (req, res) => {
   }
 });
 
-const { bookmarkActivity } = require("../src/Routes/touristController"); // Adjust this path
+const { bookmarkActivity,unbookmarkActivity,bookmarkItinerary,unbookmarkItinerary } = require("../src/Routes/touristController"); // Adjust this path
 app.post("/api/bookmarkActivity", async (req, res) => {
   const { touristId, activityId } = req.body;
 
@@ -278,6 +285,48 @@ app.post("/api/bookmarkActivity", async (req, res) => {
     return res.status(500).json({ error: "Failed to bookmark activity" });
   }
 });
+app.post('/api/unbookmarkActivity', async (req, res) => {
+  const { touristId, activityId } = req.body;
+  
+  try {
+    const result = await unbookmarkActivity(touristId, activityId);
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+    res.status(200).json({ message: result.message, tourist: result.tourist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+app.post("/api/bookmarkItinerary", async (req, res) => {
+  const { touristId, itineraryId } = req.body;
+
+  try {
+    const result = await bookmarkItinerary(touristId, itineraryId);
+    if (result.message) {
+      return res.json({ message: result.message });
+    }
+    return res.status(400).json({ error: result.error });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to bookmark itinerary" });
+  }
+});
+app.post("/api/unbookmarkItinerary", async (req, res) => {
+  const { touristId, itineraryId } = req.body;
+
+  try {
+    const result = await unbookmarkItinerary(touristId, itineraryId);
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+    res.status(200).json({ message: result.message, tourist: result.tourist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 // Basic route for testing
 app.get("/home", (req, res) => {
@@ -467,6 +516,12 @@ app.post(
   "/bookTransportation/:touristId/:transportationId",
   bookTransportation
 );
+app.post("/payByWallet/:touristId/:itemId", payByWallet);
+app.post("/payWalletAct/:touristId/:activityId", payByWalletAct);
+app.post("/payWalletIti/:touristId/:iteniraryId", payByWalletIti);
+app.post("/payWalletPro/:touristId/:productId", payByWalletProduct);
+app.get("/paidUpcoming/:touristId",paidUpcoming);
+app.get("/paidHistory/:touristId",paidHistory);
 app.post("/transportation", createTransportation);
 app.get("/gettrans", gettransportation);
 app.delete("/deleteAccTourist/:id", deleteTouristAccount);
@@ -535,6 +590,7 @@ app.get("/category", async (req, res) => {
 });
 
 app.get("/bookedIti/:touristId", getBookedItinerary);
+app.get("/bookedAct/:touristId", getBookedActivities);
 
 // Route to get tourist's preferred currency and conversion rate
 app.get("/tourist/:id/preferredCurrency", async (req, res) => {

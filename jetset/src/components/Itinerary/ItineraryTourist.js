@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "./bookmark.css";
+import "font-awesome/css/font-awesome.min.css";
 
 const ItineraryList = ({ touristId }) => {
   const [itineraries, setItineraries] = useState([]);
+  const [bookmarkedItineraries, setBookmarkedItineraries] = useState([]); // Store bookmarked itineraries
+  // Toggle between showing all or only bookmarked itineraries
+  const [showBookmarked, setShowBookmarked] = useState(false);
   const [filters, setFilters] = useState({
     budget: "",
     startDate: "",
@@ -15,6 +20,8 @@ const ItineraryList = ({ touristId }) => {
 
   const [selectedCurrency, setSelectedCurrency] = useState("EGP");
   const [conversionRate, setConversionRate] = useState(1);
+ 
+
 
   const fetchConversionRate = async () => {
     try {
@@ -36,6 +43,10 @@ const ItineraryList = ({ touristId }) => {
           params: { sortBy, sortOrder },
         });
         setItineraries(response.data);
+        const touristResponse = await axios.get(`/getTourist/${touristId}`);
+      setBookmarkedItineraries(
+        touristResponse.data.bookmarkedItineraries || []
+      );
       } catch (error) {
         console.error("Error fetching itineraries:", error);
       }
@@ -43,6 +54,32 @@ const ItineraryList = ({ touristId }) => {
 
     fetchItineraries();
   }, [sortBy, sortOrder]); // Only fetch when sorting changes
+  // Bookmark or unbookmark an itinerary
+  const bookmarkItinerary = async (itineraryId, isBookmarked) => {
+    try {
+      const endpoint = isBookmarked
+        ? "/api/unbookmarkItinerary"
+        : "/api/bookmarkItinerary";
+
+      const response = await axios.post(endpoint, {
+        touristId,
+        itineraryId,
+      });
+
+      if (response.data.message) {
+        setBookmarkedItineraries((prevBookmarked) =>
+          isBookmarked
+            ? prevBookmarked.filter((id) => id !== itineraryId)
+            : [...prevBookmarked, itineraryId]
+        );
+      } else {
+        alert(response.data.error || "Error updating bookmark status");
+      }
+    } catch (err) {
+      console.error("Error updating bookmark:", err);
+      alert("Error updating bookmark: " + err.message);
+    }
+  };
 
   // Fetch filtered itineraries
   useEffect(() => {
@@ -103,6 +140,18 @@ const ItineraryList = ({ touristId }) => {
     fetchConversionRate(selectedCurrency);
   }, [selectedCurrency]);
 
+  // Toggle between showing all itineraries and only bookmarked ones
+  const handleToggleBookmarked = () => {
+    setShowBookmarked((prev) => !prev);
+  };
+
+  // Filter itineraries to show only bookmarked ones if the flag is true
+  const displayedItineraries = showBookmarked
+    ? itineraries.filter((itinerary) =>
+        bookmarkedItineraries.includes(itinerary._id)
+      )
+    : itineraries;
+
   return (
     <div>
       <h2>Itineraries</h2>
@@ -148,51 +197,48 @@ const ItineraryList = ({ touristId }) => {
         <option value={1}>Ascending</option>
         <option value={-1}>Descending</option>
       </select>
+      {/* Toggle Bookmarked Itineraries Button */}
+      <div className="toggle-bookmarked">
+        <button
+          className="toggle-btn"
+          onClick={handleToggleBookmarked}
+        >
+          {showBookmarked
+            ? "Show All Itineraries"
+            : "Show Bookmarked Itineraries"}
+        </button>
+      </div>
+      {/* Itineraries List */}
       <ul>
-        {itineraries.map((itinerary) => (
-          <li key={itinerary._id}>
-            <strong>Title:</strong> {itinerary.name}
-            <br />
-            <strong>Locations:</strong>{" "}
-            {itinerary.locations ? itinerary.locations.join(", ") : "N/A"}
-            <br />
-            <strong>Timeline:</strong> {itinerary.timeline}
-            <br />
-            <strong>Duration:</strong> {itinerary.duration} days
-            <br />
-            <strong>Language:</strong> {itinerary.language}
-            <br />
-            <strong>Budget:</strong>{" "}
-            {(itinerary.budget * conversionRate).toFixed(2)}
-            {selectedCurrency}
-            <br />
-            <strong>Availability Dates:</strong>{" "}
-            {itinerary.availability_dates
-              ? itinerary.availability_dates.join(", ")
-              : "N/A"}
-            <br />
-            <strong>Pickup Location:</strong> {itinerary.pickup_location}
-            <br />
-            <strong>Dropoff Location:</strong> {itinerary.dropoff_location}
-            <br />
-            <strong>Accessibility:</strong> {itinerary.accessibility}
-            <br />
-            <strong>Tags:</strong>{" "}
-            {Array.isArray(itinerary.tags) && itinerary.tags.length > 0
-              ? itinerary.tags.join(", ")
-              : "None"}
-            <br />
-            <strong>Created By:</strong> {itinerary.created_by}
-            <br />
-            <strong>Created At:</strong>{" "}
-            {new Date(itinerary.createdAt).toLocaleDateString()}
-            <br />
-            <strong>Updated At:</strong>{" "}
-            {new Date(itinerary.updatedAt).toLocaleDateString()}
-            <br />
-          </li>
-        ))}
-      </ul>
+  {displayedItineraries.length > 0 ? (
+    displayedItineraries.map((itinerary) => {
+      const isBookmarked = bookmarkedItineraries.includes(itinerary._id);
+      return (
+        <li key={itinerary._id} className="itinerary-item">
+          <h3>{itinerary.name || "No Title Available"}</h3>
+          <p>Duration: {itinerary.duration} days</p>
+          <p>Budget: ${itinerary.budget}</p>
+          <p>Tags: {Array.isArray(itinerary.tags) ? itinerary.tags.join(", ") : "None"}</p>
+          <p>Language: {itinerary.language || "Not specified"}</p>
+          <button
+            className="bookmark-button"
+            onClick={() => bookmarkItinerary(itinerary._id, isBookmarked)}
+          >
+            <i
+              className={`fa ${
+                isBookmarked ? "fa-bookmark" : "fa-bookmark-o"
+              }`}
+            ></i>
+            {isBookmarked ? " Unbookmark" : " Bookmark"}
+          </button>
+        </li>
+      );
+    })
+  ) : (
+    <div>No itineraries available.</div>
+  )}
+</ul>
+
     </div>
   );
 };

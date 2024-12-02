@@ -26,6 +26,7 @@ import FlightBooking from "./Booking/FlightBooking";
 import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
+import PaidItemsView from "./tourist/PaidItemsView";
 import Wishlist from "./tourist/Wishlist";
 
 import "./styles.css";
@@ -90,6 +91,8 @@ const Tourist = () => {
         return <BookedItineraries touristId={touristId} />;
       case "vacationGuide": // New case for Vacation Guide
         return <VacationGuide touristId={touristId} />;
+      case "viewPaid": 
+        return <PaidItemsView touristId={touristId} />;
 
       default:
         return (
@@ -146,6 +149,9 @@ const Tourist = () => {
                 </button>
                 <button onClick={() => setCurrentPage("bookIti")}>
                   Booked itineraries
+                </button>
+                <button onClick={() => setCurrentPage("viewPaid")}>
+                  Paid Activities and Iteniraries
                 </button>
               </section>
 
