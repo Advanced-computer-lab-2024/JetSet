@@ -31,8 +31,16 @@ const touristSchema = new Schema(
     job: String,
     products: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true, // Ensure a product ID is always provided
+        },
+        purchaseQuantity: {
+          type: Number,
+          required: true, // Ensure a purchase quantity is always provided
+          default: 1, // Default quantity
+        },
       },
     ],
     wallet: { type: Number, default: 0 },
@@ -94,6 +102,18 @@ const touristSchema = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Activity",
+      },
+    ],wishlist: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product", // Reference to the Product model
+          required: true,
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
     bookmarkedIteniraries: [

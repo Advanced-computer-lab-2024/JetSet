@@ -8,10 +8,13 @@ const Category = require("../Models/Category.js");
 const Complaint = require("../Models/Complaint.js");
 const Transportation = require("../Models/Transportation");
 const nodemailer = require("nodemailer");
+const cron = require("node-cron");
+const Seller = require("../Models/Seller.js");
+const Admin = require("../Models/Admin.js");
+const path = require("path");
+const crypto = require("crypto");
 
 const { default: mongoose } = require("mongoose");
-const express = require("express"); // Importing express
-const router = express.Router(); // Creating a new router object
 
 const dotenv = require("dotenv");
 
@@ -19,6 +22,154 @@ dotenv.config();
 
 //const { default: mongoose } = require("mongoose");
 const FlightBooking = require("../Models/flightBookingSchema.js");
+
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+cron.schedule("0 20 * * *", async () => {
+  try {
+    const now = new Date();
+    const nextDay = new Date();
+    nextDay.setDate(now.getDate() + 1);
+
+    // Fetch tourists and their upcoming bookings
+    const tourists = await Tourist.find({
+      $or: [
+        { bookedActivities: { $exists: true, $not: { $size: 0 } } },
+        { bookedItineraries: { $exists: true, $not: { $size: 0 } } },
+        { bookedTransportations: { $exists: true, $not: { $size: 0 } } },
+      ],
+    }).populate([
+      {
+        path: "bookedActivities",
+        match: { date: { $gte: now } },
+      },
+      {
+        path: "bookedItineraries",
+        match: { availability_dates: { $gte: now } },
+      },
+      {
+        path: "bookedTransportations",
+        match: { availability: { $gte: now } },
+      },
+    ]);
+
+    for (const tourist of tourists) {
+      const reminders = [];
+
+      // Add activities
+      tourist.bookedActivities?.forEach((activity) =>
+        reminders.push(`Activity: ${activity.title} on ${activity.date}`)
+      );
+
+      // Add itineraries
+      tourist.bookedItineraries?.forEach((itinerary) =>
+        reminders.push(
+          `Itinerary: ${itinerary.name} on ${itinerary.availability_dates}`
+        )
+      );
+
+      // Add transportations
+      tourist.bookedTransportations?.forEach((transport) =>
+        reminders.push(
+          `Transportation from ${transport.pickup_location} to ${transport.dropoff_location} on ${transport.availability}`
+        )
+      );
+
+      if (reminders.length > 0) {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: tourist.email,
+          subject: "Upcoming Event Reminder",
+          text: `Hello ${
+            tourist.username
+          },\n\nYou have the following events coming up:\n\n${reminders.join(
+            "\n"
+          )}\n\nThank you!`,
+        });
+        console.log(`Reminder sent to ${tourist.email}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error sending reminders:", error);
+  }
+});
+
+const sendPromoCodeToTourist = async (touristId, promoCode) => {
+  try {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return console.log("Tourist not found");
+    }
+
+    const imagePath = path.join(__dirname, "JetSet/src/uploads/birthday.jpg");
+
+    // Send the promo code via email
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: tourist.email,
+      subject: "Happy Birthday! Here's Your Promo Code",
+      html: `
+        <h1>Happy Birthday, ${tourist.username}!</h1>
+        <p>Use the promo code <strong>${promoCode}</strong> to enjoy discounts on any products on our website.</p>
+        <img src="cid:promoImage" alt="Promo Image" />
+        <p>Enjoy your special day!</p>
+      `,
+      attachments: [
+        {
+          filename: "birthday.jpg", // Optional: Name of the file
+          path: imagePath, // Path to the image
+          cid: "promoImage", // Content-ID, this will link to the <img> tag in HTML
+        },
+      ],
+    });
+
+    console.log(`Promo code sent to ${tourist.email}`);
+  } catch (error) {
+    console.error("Error sending promo code:", error);
+  }
+};
+
+// Function to check birthdays and send promo codes
+const checkBirthdaysAndSendPromoCodes = async () => {
+  const today = new Date();
+  const day = today.getDate();
+  const month = today.getMonth(); // Get current month (0-based index)
+
+  try {
+    // Find all tourists whose birthday is today
+    const tourists = await Tourist.find({
+      DOB: { $gte: new Date(today.getFullYear(), month, day) },
+    });
+
+    if (tourists.length === 0) {
+      console.log("No tourists have a birthday today");
+      return;
+    }
+
+    // Send promo code to each tourist
+    const promoCode = "20%"; // Replace with your actual promo code
+    for (const tourist of tourists) {
+      await sendPromoCodeToTourist(tourist._id, promoCode);
+    }
+
+    console.log(`Promo codes sent to ${tourists.length} tourists today.`);
+  } catch (error) {
+    console.error("Error checking birthdays:", error);
+  }
+};
+
+cron.schedule("0 0 * * *", () => {
+  checkBirthdaysAndSendPromoCodes();
+});
 
 const createTourist = async (req, res) => {
   const { username, password, email, mobile, nationality, dob, job } = req.body;
@@ -1279,44 +1430,78 @@ const deleteTouristAccount = async (req, res) => {
   }
 };
 
+const sendEmailNotification = async (name, recipientEmail, productName) => {
+  try {
+    await transporter.sendMail({
+      from: '"Inventory Alert" <your-email@example.com>',
+      to: recipientEmail,
+      subject: "Product Out of Stock Alert",
+      text: `Dear ${name} \n The product "${productName}" is now out of stock.`,
+    });
+  } catch (error) {
+    console.error("Failed to send email notification:", error);
+  }
+};
+
 const buyProduct = async (req, res) => {
-  const { touristId } = req.params; // Get the tourist ID from the route parameters
-  const { productId, purchaseQuantity } = req.body; // Get product ID and quantity to purchase from the request body
+  const { touristId } = req.params;
+  const { productId, purchaseQuantity } = req.body;
 
   try {
-    // Find the tourist by ID
     const tourist = await Tourist.findById(touristId);
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    // Find the product by ID
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Check if there is enough stock
     if (product.quantity < purchaseQuantity) {
       return res.status(400).json({ message: "Insufficient product quantity" });
     }
 
-    // Update the product's quantity and sales
     product.quantity -= purchaseQuantity;
     product.sales += purchaseQuantity;
-    await product.save(); // Save the updated product document
+    await product.save();
 
-    // Add the product ID to the tourist's products array
-    tourist.products.push(productId);
-    tourist.wallet -= product.price;
-    // activity.bookings += 1; // Increment bookings count
+    const existingProduct = tourist.products.find(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (existingProduct) {
+      existingProduct.purchaseQuantity += purchaseQuantity;
+    } else {
+      tourist.products.push({ productId, purchaseQuantity });
+    }
+
+    const totalCost = product.price * purchaseQuantity;
+    if (tourist.wallet < totalCost) {
+      return res.status(400).json({ message: "Insufficient wallet balance" });
+    }
+    tourist.wallet -= totalCost;
+
     await tourist.save();
-    // await activity.save();
+
+    // Notify admin/seller if the product is out of stock
+    if (product.quantity === 0) {
+      const seller = await Seller.findById(product.seller_id); // Assuming each product has a sellerId field
+      if (seller) {
+        await sendEmailNotification(seller.name, seller.email, product.name);
+      }
+      const admins = await Admin.find({}, "email"); // Fetch all admin emails
+      const emailPromises = admins.map((admin) =>
+        sendEmailNotification(admin.username, admin.email, product.name)
+      );
+
+      await Promise.all(emailPromises);
+    }
 
     const loyaltyUpdate = await addLoyaltyPoints(product.price, touristId);
 
     res.status(200).json({
-      message: "Product booked successfully",
+      message: "Product purchased successfully",
       loyaltyPoints: loyaltyUpdate.loyaltyPoints,
       level: loyaltyUpdate.level,
       badge: loyaltyUpdate.badge,
@@ -1551,7 +1736,6 @@ const bookFlight = async (req, res) => {
   }
 };
 
-const crypto = require("crypto");
 const HOTELBEDS_BASE_URL =
   "https://api.test.hotelbeds.com/hotel-api/1.0/hotels";
 
@@ -1747,438 +1931,83 @@ async function bookmarkActivity(touristId, activityId) {
   }
 }
 
+const addToWishlist = async(req, res) => {
+  const {productID} = req.body;
+  const {touristID} = req.params;
 
-async function unbookmarkActivity(touristId, activityId) {
   try {
-    // Check for valid input
-    if (!touristId || !activityId) {
-      throw new Error("Invalid touristId or activityId");
-    }
+    const tourist = await Tourist.findById(touristID);
 
-    // Find the tourist
-    const tourist = await Tourist.findById(touristId);
     if (!tourist) {
-      throw new Error("Tourist not found");
+      return res.status(404).json({ error: "Tourist not found" });
     }
 
-    // Check if the activity is already bookmarked
-    if (!tourist.bookmarkedActivities.includes(activityId)) {
-      throw new Error("Activity is not bookmarked");
+    const productExistsInDb = await Product.findById(productID);
+    if (!productExistsInDb) {
+      return res.status(404).json({ error: "Product not found" });
     }
 
-    // Remove the activity ID from the bookmarkedActivities array
-    tourist.bookmarkedActivities = tourist.bookmarkedActivities.filter(
-      (id) => id.toString() !== activityId.toString()
+    // Check if the product is already in the wishlist
+    const productExists = tourist.wishlist.some(
+      (item) => item.productId.toString() === productID
     );
 
-    // Save the tourist document
-    const updatedTourist = await tourist.save();
+    if (productExists) {
+      return res.status(400).json({ message: "Product already exists in the wishlist" });
+    }
 
-    // Return a success message with the updated tourist object (if needed)
-    return {
-      message: "Activity unbookmarked successfully!",
-      tourist: updatedTourist,
-    };
-  } catch (error) {
-    console.error("Error in unbookmarkActivity function:", error); // Log the error details
-    return { error: error.message };
+    // Add the product to the wishlist
+    tourist.wishlist.push({ productId: productID });
+    await tourist.save();
+
+    return res.status(200).json({ message: "Added Sucessfully"});
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 }
 
-async function bookmarkItinerary(touristId, itineraryId) {
-  try {
-    // Check for valid input
-    if (!touristId || !itineraryId) {
-      throw new Error("Invalid touristId or itineraryId");
-    }
+const viewMyWishlist= async(req, res)=>{
+  const {touristID} = req.params;
 
-    // Find the tourist
-    const tourist = await Tourist.findById(touristId);
+  try{
+
+    const tourist = await Tourist.findById(touristID).populate('wishlist.productId');
+
     if (!tourist) {
-      throw new Error("Tourist not found");
+      return res.status(404).json({ error: "Tourist not found" });
     }
 
-    // Check if the itinerary is already bookmarked
-    if (tourist.bookmarkedIteniraries.includes(itineraryId)) {
-      throw new Error("Itinerary already bookmarked");
-    }
-
-    // Add the itinerary to the bookmarkedIteniraries array
-    tourist.bookmarkedIteniraries.push(itineraryId);
-
-    // Save the tourist document
-    const updatedTourist = await tourist.save();
-
-    // Return a success message with the updated tourist object (if needed)
-    return {
-      message: "Itinerary bookmarked successfully!",
-      tourist: updatedTourist,
-    };
-  } catch (error) {
-    console.error("Error in bookmarkItinerary function:", error); // Log the error details
-    return { error: error.message };
+    res.status(200).json({ wishlist: tourist.wishlist });
+  }catch(err){
+    return res.status(400).json({ error: err.message });
   }
+
 }
 
-async function unbookmarkItinerary(touristId, itineraryId) {
-  try {
-    // Check for valid input
-    if (!touristId || !itineraryId) {
-      throw new Error("Invalid touristId or itineraryId");
-    }
+const removeFromMyWishlist= async(req, res)=>{
+  const {touristID} = req.params;
+  const {productID} = req.body;
+  try{
 
-    // Find the tourist
-    const tourist = await Tourist.findById(touristId);
+    const tourist = await Tourist.findById(touristID);
+
     if (!tourist) {
-      throw new Error("Tourist not found");
+      return res.status(404).json({ error: "Tourist not found" });
     }
 
-    // Check if the itinerary is already bookmarked
-    if (!tourist.bookmarkedIteniraries.includes(itineraryId)) {
-      throw new Error("Itinerary is not bookmarked");
-    }
-
-    // Remove the itinerary ID from the bookmarkedIteniraries array
-    tourist.bookmarkedIteniraries = tourist.bookmarkedIteniraries.filter(
-      (id) => id.toString() !== itineraryId.toString()
+    tourist.wishlist = tourist.wishlist.filter(
+      (item) => item.productId.toString() !== productID
     );
 
-    // Save the tourist document
-    const updatedTourist = await tourist.save();
+    await tourist.save();
 
-    // Return a success message with the updated tourist object (if needed)
-    return {
-      message: "Itinerary unbookmarked successfully!",
-      tourist: updatedTourist,
-    };
-  } catch (error) {
-    console.error("Error in unbookmarkItinerary function:", error); // Log the error details
-    return { error: error.message };
+    return res.status(200).json({ message: "Product removed from wishlist successfully" });
+
+  }catch(err){
+    return res.status(400).json({ error: err.message });
   }
+
 }
-
-
-
-const payByWallet = async (req, res) => {
-  const { touristId, itemId } = req.params;
-  const { type } = req.body; // Use req.body to get the type
-
-  try {
-    // Find the tourist
-    const tourist = await Tourist.findById(touristId);
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    // Determine the amount to be paid based on the type
-    let amount = 0;
-
-    if (type === "activity") {
-      const activity = await Activity.findById(itemId);
-      // if (!activity || !activity.booking_open) {
-      //   return res
-      //     .status(404)
-      //     .json({ message: "Activity not found or not available for payment" });
-      // }
-      amount = activity.budget;
-    } else if (type === "itinerary") {
-      const itinerary = await Itinerary.findById(itemId);
-      if (!itinerary) {
-        return res.status(404).json({ message: "Itinerary not found" });
-      }
-      amount = itinerary.budget;
-    } else {
-      return res.status(400).json({ message: "Invalid payment type" });
-    }
-
-    // Check if wallet balance is sufficient
-    if (tourist.wallet < amount) {
-      return res.status(400).json({ message: "Insufficient wallet balance" });
-    }
-
-    // Deduct amount from wallet
-    tourist.wallet -= amount;
-
-    // Add the ID to the corresponding paid field
-    if (type === "activity") {
-      if (!tourist.payedActivities.includes(itemId)) {
-        tourist.payedActivities.push(itemId);
-      }
-    } else if (type === "itinerary") {
-      if (!tourist.payedItineraries.includes(itemId)) {
-        tourist.payedItineraries.push(itemId);
-      }
-    }
-
-    // Add loyalty points
-    const loyaltyUpdate = await addLoyaltyPoints(amount, touristId);
-
-    // Save tourist data
-    await tourist.save();
-
-    // Return success response
-    return res.status(200).json({
-      message: "Payment successful",
-      wallet: tourist.wallet,
-      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
-      level: loyaltyUpdate.level,
-      badge: loyaltyUpdate.badge,
-    });
-  } catch (error) {
-    // Return error response
-    return res.status(500).json({
-      message: "Error processing payment",
-      error: error.message,
-    });
-  }
-};
-
-const payByWalletAct = async (req, res) => {
-  const { touristId, activityId } = req.params;
-
-  try {
-    // Find the tourist
-    const tourist = await Tourist.findById(touristId);
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    // Determine the amount to be paid based on the type
-    let amount = 0;
-
-  
-      const activity = await Activity.findById(activityId);
-      if (!activity) {
-        return res
-          .status(404)
-          .json({ message: "Activity not found" });
-      }
-      amount = activity.budget;
-   
-
-    // Check if wallet balance is sufficient
-    if (tourist.wallet < amount) {
-      return res.status(400).json({ message: "Insufficient wallet balance" });
-    }
-
-    // Deduct amount from wallet
-    tourist.wallet -= amount;
-
-    // Add the ID to the corresponding paid field
-      if (!tourist.payedActivities.includes(activityId)) {
-        tourist.payedActivities.push(activityId);
-      }
-      // Add loyalty points
-    const loyaltyUpdate = await addLoyaltyPoints(amount, touristId);
-
-    // Save tourist data
-    await tourist.save();
-
-    // Return success response
-    return res.status(200).json({
-      message: "Payment successful",
-      wallet: tourist.wallet,
-      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
-      level: loyaltyUpdate.level,
-      badge: loyaltyUpdate.badge,
-    });
-  } catch (error) {
-    // Return error response
-    return res.status(500).json({
-      message: "Error processing payment",
-      error: error.message,
-    });
-  }
-};
-
-const payByWalletIti = async (req, res) => {
-  const { touristId, iteniraryId } = req.params;
-
-  try {
-    // Find the tourist
-    const tourist = await Tourist.findById(touristId);
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    // Determine the amount to be paid based on the type
-    let amount = 0;
-
-    
-   
-      const itinerary = await Itinerary.findById(iteniraryId);
-      if (!itinerary) {
-        return res.status(404).json({ message: "Itinerary not found" });
-      }
-      amount = itinerary.budget;
-   
-
-    // Check if wallet balance is sufficient
-    if (tourist.wallet < amount) {
-      return res.status(400).json({ message: "Insufficient wallet balance" });
-    }
-
-    // Deduct amount from wallet
-    tourist.wallet -= amount;
-
-    // Add the ID to the corresponding paid field
-    
-      if (!tourist.payedItineraries.includes(iteniraryId)) {
-        tourist.payedItineraries.push(iteniraryId);
-      }
-
-    // Add loyalty points
-    const loyaltyUpdate = await addLoyaltyPoints(amount, touristId);
-
-    // Save tourist data
-    await tourist.save();
-
-    // Return success response
-    return res.status(200).json({
-      message: "Payment successful",
-      wallet: tourist.wallet,
-      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
-      level: loyaltyUpdate.level,
-      badge: loyaltyUpdate.badge,
-    });
-  } catch (error) {
-    // Return error response
-    return res.status(500).json({
-      message: "Error processing payment",
-      error: error.message,
-    });
-  }
-};
-
-const payByWalletProduct = async (req, res) => {
-  const { touristId, productId } = req.params;
-
-  try {
-    // Find the tourist
-    const tourist = await Tourist.findById(touristId);
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    // Find the product
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    // Check if wallet balance is sufficient
-    if (tourist.wallet < product.price) {
-      return res.status(400).json({ message: "Insufficient wallet balance" });
-    }
-
-    // Deduct product price from wallet
-    tourist.wallet -= product.price;
-
-    // Add the product ID to the payedProducts array
-    if (!tourist.payedProducts.includes(productId)) {
-      tourist.payedProducts.push(productId);
-    }
-
-    // Increment product sales count
-    product.sales += 1;
-
-    // Save the updated data
-    await tourist.save();
-    await product.save();
-
-    // Optionally: Add loyalty points for the purchase
-    const loyaltyUpdate = await addLoyaltyPoints(product.price, touristId);
-
-    // Return success response
-    return res.status(200).json({
-      message: "Payment successful",
-      wallet: tourist.wallet,
-      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
-      level: loyaltyUpdate.level,
-      badge: loyaltyUpdate.badge,
-    });
-  } catch (error) {
-    // Return error response
-    return res.status(500).json({
-      message: "Error processing payment",
-      error: error.message,
-    });
-  }
-};
-
-
-// Helper function to filter by date
-const filterByDate = (items, isUpcoming) => {
-  const now = new Date();
-  return items.filter((item) => {
-    return isUpcoming ? new Date(item.date) > now : new Date(item.date) <= now;
-  });
-};
-const filterItinerariesByDate = (itineraries, isUpcoming) => {
-  const now = new Date();
-  return itineraries.filter((itinerary) => {
-    const hasValidDates = itinerary.availability_dates.some((date) =>
-      isUpcoming ? new Date(date) > now : new Date(date) <= now
-    );
-    return hasValidDates;
-  });
-};
-const filterItinerariesAllPastDates = (itineraries) => {
-  const now = new Date();
-  return itineraries.filter((itinerary) => {
-    const allPastDates = itinerary.availability_dates.every((date) => new Date(date) < now);
-    return allPastDates;
-  });
-};
-
-
-const paidUpcoming = async (req, res) => {
-  const { touristId } = req.params;
-
-  try {
-    const tourist = await Tourist.findById(touristId)
-      .populate("payedActivities")
-      .populate("payedItineraries");
-
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    const upcomingActivities = filterByDate(tourist.payedActivities, true);
-    const upcomingItineraries = filterItinerariesByDate(tourist.payedItineraries, true);
-
-    res.status(200).json({
-      upcomingActivities,
-      upcomingItineraries,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching upcoming items", error });
-  }
-};
-
-const paidHistory = async (req, res) => {
-  const { touristId } = req.params;
-
-  try {
-    const tourist = await Tourist.findById(touristId)
-      .populate("payedActivities")
-      .populate("payedItineraries");
-
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    const historyActivities = filterByDate(tourist.payedActivities, false);
-    const historyItineraries = filterItinerariesAllPastDates(tourist.payedItineraries, false);
-
-    res.status(200).json({
-      historyActivities,
-      historyItineraries,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching history items", error });
-  }
-};
 
 module.exports = {
   getProducts,
@@ -2243,4 +2072,7 @@ module.exports = {
   paidHistory,
   bookmarkItinerary,
   unbookmarkItinerary,
+  addToWishlist,
+  viewMyWishlist,
+  removeFromMyWishlist,
 };

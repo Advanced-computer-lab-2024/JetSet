@@ -172,6 +172,9 @@ const {
   payByWalletProduct,
   paidUpcoming,
   paidHistory,
+  addToWishlist,
+  viewMyWishlist,
+  removeFromMyWishlist,
 } = require("../src/Routes/touristController");
 
 const {
@@ -527,6 +530,11 @@ app.put("/cr/:id", updateActivityCreator);
 app.delete("/deleteAccAdvertiser/:id", deleteAdvertiserAccount);
 app.delete("/deleteAccSeller/:id", deleteSellerAccount);
 
+app.post("/Wishlist/:touristID",addToWishlist);
+app.get("/Wishlist/:touristID",viewMyWishlist);
+app.delete("/Wishlist/:touristID",removeFromMyWishlist);
+
+
 app.put("/touristwallet/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -612,5 +620,27 @@ app.get("/tourist/:id/preferredCurrency", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Error fetching currency data", error });
+  }
+});
+
+// Import necessary modules and models
+const Admin = require("../src/Models/Admin.js"); // Replace with your Admin model's path
+
+app.delete("/deleteAdmin/:id", async (req, res) => {
+  const { id } = req.params; // Get admin ID from route parameters
+
+  try {
+    // Find and delete the admin
+    const deletedAdmin = await Admin.findByIdAndDelete(id);
+
+    // Check if the admin was found and deleted
+    if (!deletedAdmin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    res.status(200).json({ message: "Admin deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting admin" });
   }
 });

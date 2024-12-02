@@ -27,13 +27,14 @@ import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
 import PaidItemsView from "./tourist/PaidItemsView";
+import Wishlist from "./tourist/Wishlist";
 
 import "./styles.css";
 
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
-  const touristId = location.state?.touristId || "6723896c185909fcd367634a";
+  const touristId = location.state?.touristId;
   const [showPurchasedProducts, setShowPurchasedProducts] = useState(false);
 
   const renderPage = () => {
@@ -52,6 +53,8 @@ const Tourist = () => {
         return <Search touristId={touristId} />;
       case "touristProduct":
         return <TouristProducts touristId={touristId} />;
+      case "Wishlist":
+        return <Wishlist touristId={touristId} />;
       case "ActivityByCategory":
         return <ActivityByCategory touristId={touristId} />;
       case "SetPreferredCurrency":
@@ -156,6 +159,9 @@ const Tourist = () => {
                 <h2>Products & Purchases</h2>
                 <button onClick={() => setCurrentPage("productList")}>
                   View Products
+                </button>
+                <button onClick={() => setCurrentPage("Wishlist")}>
+                  View My WishList
                 </button>
                 <button
                   onClick={() =>

@@ -103,6 +103,20 @@ const ProductList = ({ touristId }) => {
     }
   };
 
+  const handleAddToWishlist = async (product) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/Wishlist/${touristId}`,
+        {
+          productID: product._id,
+        }
+      );
+      alert(response.data.message); // Show a success message
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      alert("Failed to add product to wishlist.");
+    }
+  };
   return (
     <div>
       <h1>Product List</h1>
@@ -214,6 +228,7 @@ const ProductList = ({ touristId }) => {
                   <button onClick={() => setSelectedProduct(product)}>
                     Want to Buy?
                   </button>
+                  <button onClick={() => handleAddToWishlist(product)}>Add to Wishlist</button>
                 </td>
               </tr>
             ))
