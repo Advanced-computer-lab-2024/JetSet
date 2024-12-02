@@ -66,6 +66,24 @@ const touristSchema = new Schema(
         ref: "Transportation",
       },
     ],
+    payedActivities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Activity",
+      },
+    ],
+    payedItineraries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Itinerary",
+      },
+    ],
+    payedProducts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
     preferredCurrency: {
       type: String,
       default: "EGP",
@@ -76,6 +94,12 @@ const touristSchema = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Activity",
+      },
+    ],
+    bookmarkedIteniraries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Itinerary",
       },
     ],
   },
