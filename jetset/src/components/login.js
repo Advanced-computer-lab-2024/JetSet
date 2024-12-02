@@ -2,12 +2,16 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./styles.css";
+import NavAdmin from "./Admin/navAdmin";
 
 const Register = () => {
   const [role, setRole] = useState("");
   const [message, setMessage] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showForgetPassword, setShowForgetPassword] = useState(false);
+  const [forgetPasswordUsername, setForgetPasswordUsername] = useState("");
+  const [forgetPasswordRole, setForgetPasswordRole] = useState("");
   const navigate = useNavigate();
 
   // Handle login
@@ -27,8 +31,6 @@ const Register = () => {
     };
 
     try {
-      console.log(role);
-      console.log(endpointMap[role]);
       const response = await axios.post(endpointMap[role], {
         user: username,
         password,
@@ -57,6 +59,30 @@ const Register = () => {
     } catch (error) {
       setMessage(
         error.response?.data?.message || "Error during authentication."
+      );
+    }
+  };
+
+  // Handle forget password
+  const handleForgetPassword = async () => {
+    if (!forgetPasswordUsername || !forgetPasswordRole) {
+      setMessage("Please enter your username and select a role.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/forgot-password",
+        {
+          username: forgetPasswordUsername,
+          role: forgetPasswordRole,
+        }
+      );
+
+      setMessage(response.data.message || "OTP sent to your email.");
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || "Error sending reset password link."
       );
     }
   };
@@ -93,8 +119,42 @@ const Register = () => {
           <option value="tourismgovernor">Tourism Governor</option>
         </select>
         <button onClick={handleLogin}>Next</button>
+        <button
+          className="forget-password-btn"
+          onClick={() => setShowForgetPassword(true)}
+        >
+          Forget Password?
+        </button>
         {message && <p className="message">{message}</p>}
       </div>
+
+      {/* Forget Password Modal */}
+      {showForgetPassword && (
+        <div className="forget-password-modal">
+          <h3>Forget Password</h3>
+          <input
+            type="text"
+            placeholder="Enter username"
+            value={forgetPasswordUsername}
+            onChange={(e) => setForgetPasswordUsername(e.target.value)}
+          />
+          <select
+            value={forgetPasswordRole}
+            onChange={(e) => setForgetPasswordRole(e.target.value)}
+            className="role-dropdown"
+          >
+            <option value="">Select a role</option>
+            <option value="tourist">Tourist</option>
+            <option value="admin">Admin</option>
+            <option value="seller">Seller</option>
+            <option value="tourguide">Tour Guide</option>
+            <option value="advertisor">Advertisor</option>
+            <option value="tourismgovernor">Tourism Governor</option>
+          </select>
+          <button onClick={handleForgetPassword}>Send Reset Link</button>
+          <button onClick={() => setShowForgetPassword(false)}>Cancel</button>
+        </div>
+      )}
     </div>
   );
 };

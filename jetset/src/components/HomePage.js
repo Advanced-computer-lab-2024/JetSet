@@ -1,5 +1,6 @@
 import React from "react";
 import Guest from "./Guest";
+
 const Home = () => {
   return (
     <div style={styles.container}>

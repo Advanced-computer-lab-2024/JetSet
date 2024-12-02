@@ -122,6 +122,7 @@ const touristSchema = new Schema(
         ref: "Itinerary",
       },
     ],
+    resetOtp: { type: String },
   },
   { timestamps: true }
 );

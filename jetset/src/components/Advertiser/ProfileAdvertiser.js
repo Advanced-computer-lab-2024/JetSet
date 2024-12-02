@@ -25,6 +25,8 @@ const ProfileForm = ({ onProfileCreated }) => {
   const [error, setError] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [showChangePassword, setShowChangePassword] = useState(false); // State to toggle ChangePasswordForm
+  const [notifications, setNotifications] = useState([]);
+  const [username, setUsername] = useState("");
 
   const handleChange = (e) => {
     if (e.target.name === "image") {
@@ -119,6 +121,7 @@ const ProfileForm = ({ onProfileCreated }) => {
       try {
         const response = await axios.get(`${BASE_URL}/getAdv/${id}`);
         setAdvertiser(response.data.adv);
+        setUsername(response.data.username);
       } catch (err) {
         setError(
           err.response
@@ -132,6 +135,32 @@ const ProfileForm = ({ onProfileCreated }) => {
 
     fetchAdvertiser();
   }, [BASE_URL, id]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!username) return; // Wait until username is set
+      setLoading(true);
+      setError(null); // Reset error before fetching
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/notification?recipient=${username}&role=Advertiser`
+        );
+        setNotifications(response.data.notifications);
+      } catch (err) {
+        console.error("Error fetching notifications:", err);
+        // Only set error if it's an unexpected error
+        if (err.response?.status !== 404) {
+          setError(
+            err.response?.data?.message || "Error fetching notifications"
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, [username]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -167,6 +196,36 @@ const ProfileForm = ({ onProfileCreated }) => {
           </div>
         ) : (
           <div>No advertiser found.</div>
+        )}
+      </div>
+
+      <div>
+        <h2>Notifications</h2>
+        {/* Show error if it's present */}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        {/* Show loading spinner/message */}
+        {loading && <p>Loading notifications...</p>}
+
+        {/* Show no notifications message when no notifications exist */}
+        {!loading && !error && notifications.length === 0 && (
+          <p>No notifications found.</p>
+        )}
+
+        {/* Render notifications if they exist */}
+        {!loading && !error && notifications.length > 0 && (
+          <ul>
+            {notifications.map((notification, index) => (
+              <li key={index}>
+                <p>{notification.message}</p>
+                <p>
+                  <small>
+                    {new Date(notification.createdAt).toLocaleString()}
+                  </small>
+                </p>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 

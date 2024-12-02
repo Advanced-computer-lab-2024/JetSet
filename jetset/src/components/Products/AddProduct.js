@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const AddProduct = ({ sellerId }) => {
+const AddProduct = ({ sellerId, adminId }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -17,24 +17,28 @@ const AddProduct = ({ sellerId }) => {
     setMessage("");
     setError("");
 
-    const formData = new FormData(); // Create a new FormData object
+    const formData = new FormData();
 
-    // Append the product details to FormData
     formData.append("name", name);
     formData.append("description", description);
     formData.append("price", price);
     formData.append("quantity", quantity);
-    formData.append("seller_id", sellerId || ""); // Use sellerId instead of sellerUsername
+
+    // Only append seller_id if it's valid
+    if (sellerId) {
+      formData.append("seller_id", sellerId);
+    }
+    if (adminId) {
+      formData.append("admin_id", adminId);
+    }
     formData.append("rating", Number(rating));
 
-    // Append each review to FormData individually
     reviews.forEach((review, index) => {
-      formData.append(`reviews[${index}]`, review); // Append each review
+      formData.append(`reviews[${index}]`, review);
     });
 
-    // Append each image file to FormData
     images.forEach((image) => {
-      formData.append("images", image); // Append each image file
+      formData.append("images", image);
     });
 
     try {
@@ -43,14 +47,14 @@ const AddProduct = ({ sellerId }) => {
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data", // Set the content type to multipart/form-data
+            "Content-Type": "multipart/form-data",
           },
         }
       );
       console.log(response.data);
       setMessage("Product created successfully!");
     } catch (error) {
-      console.error("Error creating product:", error.response.data);
+      console.error("Error creating product:", error.response?.data);
       setError(
         "Error creating product: " +
           (error.response?.data?.message || error.message)

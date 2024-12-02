@@ -4,6 +4,7 @@ import axios from "axios";
 const CreateTourismGovernor = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -16,6 +17,7 @@ const CreateTourismGovernor = () => {
         {
           username: username.trim(), // Trim whitespace
           password: password.trim(), // Trim whitespace
+          email: email,
         }
       );
       setMessage(response.data.message); // Use 'message' instead of 'msg'
@@ -53,6 +55,12 @@ const CreateTourismGovernor = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+          />
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 

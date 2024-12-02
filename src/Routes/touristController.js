@@ -4,15 +4,13 @@ const Itinerary = require("../Models/Itinerary");
 const Historical = require("../Models/Historical");
 const Tourist = require("../Models/Tourist.js");
 const TourGuide = require("../Models/TourGuide.js");
-const Category = require("../Models/Category.js");
 const Complaint = require("../Models/Complaint.js");
 const Transportation = require("../Models/Transportation");
 const nodemailer = require("nodemailer");
 const cron = require("node-cron");
-const Seller = require("../Models/Seller.js");
-const Admin = require("../Models/Admin.js");
 const path = require("path");
 const crypto = require("crypto");
+const Notification = require("../Models/Notification.js");
 
 const { default: mongoose } = require("mongoose");
 
@@ -34,7 +32,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-cron.schedule("0 20 * * *", async () => {
+cron.schedule("45 08 * * *", async () => {
   try {
     const now = new Date();
     const nextDay = new Date();
@@ -86,7 +84,10 @@ cron.schedule("0 20 * * *", async () => {
 
       if (reminders.length > 0) {
         await transporter.sendMail({
-          from: process.env.EMAIL_USER,
+          from: {
+            name: "Admin",
+            address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+          },
           to: tourist.email,
           subject: "Upcoming Event Reminder",
           text: `Hello ${
@@ -96,6 +97,19 @@ cron.schedule("0 20 * * *", async () => {
           )}\n\nThank you!`,
         });
         console.log(`Reminder sent to ${tourist.email}`);
+
+        const notification = new Notification({
+          recipient: tourist.username,
+          role: "Tourist", // Assuming the role is Tour Guide
+          message: `Hello ${
+            tourist.username
+          },\n\nYou have the following events coming up:\n\n${reminders.join(
+            "\n"
+          )}\n\nThank you!`,
+        });
+
+        // Save the notification to the database
+        await notification.save();
       }
     }
   } catch (error) {
@@ -110,11 +124,14 @@ const sendPromoCodeToTourist = async (touristId, promoCode) => {
       return console.log("Tourist not found");
     }
 
-    const imagePath = path.join(__dirname, "JetSet/src/uploads/birthday.jpg");
+    const imagePath = path.join(__dirname, "../uploads/birthday.jpg");
 
     // Send the promo code via email
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: {
+        name: "Admin",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
       to: tourist.email,
       subject: "Happy Birthday! Here's Your Promo Code",
       html: `
@@ -142,13 +159,24 @@ const sendPromoCodeToTourist = async (touristId, promoCode) => {
 const checkBirthdaysAndSendPromoCodes = async () => {
   const today = new Date();
   const day = today.getDate();
-  const month = today.getMonth(); // Get current month (0-based index)
+  const month = today.getMonth() + 1; // Month is 0-based, so add 1
 
   try {
-    // Find all tourists whose birthday is today
-    const tourists = await Tourist.find({
-      DOB: { $gte: new Date(today.getFullYear(), month, day) },
-    });
+    // Find all tourists whose birthday matches today's day and month
+    const tourists = await Tourist.aggregate([
+      {
+        $addFields: {
+          day: { $dayOfMonth: "$DOB" },
+          month: { $month: "$DOB" },
+        },
+      },
+      {
+        $match: {
+          day: day,
+          month: month,
+        },
+      },
+    ]);
 
     if (tourists.length === 0) {
       console.log("No tourists have a birthday today");
@@ -167,7 +195,7 @@ const checkBirthdaysAndSendPromoCodes = async () => {
   }
 };
 
-cron.schedule("0 0 * * *", () => {
+cron.schedule("31 13 * * *", () => {
   checkBirthdaysAndSendPromoCodes();
 });
 
@@ -1433,7 +1461,10 @@ const deleteTouristAccount = async (req, res) => {
 const sendEmailNotification = async (name, recipientEmail, productName) => {
   try {
     await transporter.sendMail({
-      from: '"Inventory Alert" <your-email@example.com>',
+      from: {
+        name: "JetSet",
+        address: process.env.EMAIL_USER,
+      },
       to: recipientEmail,
       subject: "Product Out of Stock Alert",
       text: `Dear ${name} \n The product "${productName}" is now out of stock.`,
@@ -1453,7 +1484,9 @@ const buyProduct = async (req, res) => {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate(
+      "admin_id seller_id"
+    );
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -1461,6 +1494,12 @@ const buyProduct = async (req, res) => {
     if (product.quantity < purchaseQuantity) {
       return res.status(400).json({ message: "Insufficient product quantity" });
     }
+
+    const totalCost = product.price * purchaseQuantity;
+    if (tourist.wallet < totalCost) {
+      return res.status(400).json({ message: "Insufficient wallet balance" });
+    }
+    tourist.wallet -= totalCost;
 
     product.quantity -= purchaseQuantity;
     product.sales += purchaseQuantity;
@@ -1476,28 +1515,35 @@ const buyProduct = async (req, res) => {
       tourist.products.push({ productId, purchaseQuantity });
     }
 
-    const totalCost = product.price * purchaseQuantity;
-    if (tourist.wallet < totalCost) {
-      return res.status(400).json({ message: "Insufficient wallet balance" });
-    }
-    tourist.wallet -= totalCost;
-
     await tourist.save();
 
-    // Notify admin/seller if the product is out of stock
+    // Notify seller and specific admin if the product is out of stock
+    // Notify seller and specific admin if the product is out of stock
     if (product.quantity === 0) {
-      const seller = await Seller.findById(product.seller_id); // Assuming each product has a sellerId field
+      // Notify the seller
+      const seller = product.seller_id;
       if (seller) {
         await sendEmailNotification(seller.name, seller.email, product.name);
+        await Notification.create({
+          recipient: seller.username,
+          role: "Seller",
+          message: `Product "${product.name}" is out of stock.`,
+        });
       }
-      const admins = await Admin.find({}, "email"); // Fetch all admin emails
-      const emailPromises = admins.map((admin) =>
-        sendEmailNotification(admin.username, admin.email, product.name)
-      );
 
-      await Promise.all(emailPromises);
+      // Notify the specific admin
+      const admin = product.admin_id;
+      if (admin) {
+        await sendEmailNotification(admin.username, admin.email, product.name);
+        await Notification.create({
+          recipient: admin.username,
+          role: "Admin",
+          message: `Product "${product.name}" is out of stock.`,
+        });
+      }
     }
 
+    // Add loyalty points
     const loyaltyUpdate = await addLoyaltyPoints(product.price, touristId);
 
     res.status(200).json({

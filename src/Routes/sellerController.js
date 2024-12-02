@@ -52,7 +52,7 @@ const getSellerById = async (req, res) => {
       return res.status(404).json({ message: "Seller not found." });
     }
     await seller.save();
-    res.status(200).json({ seller });
+    res.status(200).json({ seller, username: seller.username });
   } catch (error) {
     console.error("Error retrieving seller profile:", error); // Debug log
     res
@@ -182,8 +182,7 @@ const sortProductsSeller = async (req, res) => {
 
 // Add a product with its details, price, and available quantity
 const createProductSeller = async (req, res) => {
-  const { name, description, price, quantity, seller_id, rating, reviews } =
-    req.body;
+  const { name, description, price, quantity, seller_id, admin_id } = req.body;
 
   try {
     // Get the image filename from the uploaded file
@@ -197,8 +196,7 @@ const createProductSeller = async (req, res) => {
       quantity: quantity || 0,
       seller_id: seller_id,
       images: [imageFilename], // Store the filename in an array
-      ratings: rating || 0,
-      reviews: reviews || [],
+      admin_id: admin_id,
     });
 
     // Return the newly created product along with a success message

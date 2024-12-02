@@ -65,7 +65,6 @@ const CreateAdmin = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          readOnly // Make it read-only since it's passed from the Register component
         />
         {/* Submit button */}
         <button type="submit" disabled={loading}>

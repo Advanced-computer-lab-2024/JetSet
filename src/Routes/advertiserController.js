@@ -53,7 +53,7 @@ const getAdsById = async (req, res) => {
     }
 
     // No need to save the document if we are just retrieving it
-    res.status(200).json({ adv });
+    res.status(200).json({ adv, username: adv.username });
   } catch (error) {
     console.error("Error retrieving Advertisor profile:", error); // Debug log
     // Check for validation errors

@@ -17,6 +17,7 @@ const adminSchema = new Schema(
       type: String,
       required: true,
     },
+    resetOtp: { type: String },
   },
   { timestamps: true }
 );
