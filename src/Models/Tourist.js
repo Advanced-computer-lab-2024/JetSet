@@ -120,7 +120,10 @@ const touristSchema = new Schema(
         },
       },
     ],
-  
+    addresses: {
+      type: [String], // Array of strings
+      default: [], // Default value as an empty array
+    },
     wishlist: [
       {
         productId: {

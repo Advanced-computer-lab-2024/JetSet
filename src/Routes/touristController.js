@@ -2855,6 +2855,58 @@ const paidHistory = async (req, res) => {
     res.status(500).json({ message: "Error fetching history items", error });
   }
 };
+//   const addTouristAddress = async (req, res) => {
+//     try{
+//     const { newAddress } = req.body; 
+//     const touristId = req.params.id; 
+  
+//     if (!newAddress || !touristId) {
+//       return res.status(400).json({ error: "Tourist ID and address are required." });
+//     }
+
+//     // Update the tourist's addresses array
+//     const updatedTourist = await Tourist.findByIdAndUpdate(
+//       touristId,
+//       { $push: { addresses: newAddress } }, // Push the new address into the addresses array
+//       { new: true } // Return the updated document
+//     );
+
+//     if (!updatedTourist) {
+//       return res.status(404).json({ error: "Tourist not found." });
+//     }
+
+//     // Return the updated tourist document as a response
+//     res.status(200).json({ message: "Address added successfully.", tourist: updatedTourist });
+//   } catch (error) {
+//     console.error("Error adding address:", error.message);
+//     res.status(500).json({ error: "Internal server error." });
+//   }
+// };
+const addTouristAddress = async (req, res) => {
+  try {
+    const { addresses } = req.body;
+    const touristId = req.params.id;
+
+    if (!addresses || !addresses.length || !touristId) {
+      return res.status(400).json({ error: "Tourist ID and addresses are required." });
+    }
+
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      touristId,
+      { $push: { addresses: { $each: addresses } } },
+      { new: true }
+    );
+
+    if (!updatedTourist) {
+      return res.status(404).json({ error: "Tourist not found." });
+    }
+
+    res.status(200).json({ message: "Addresses added successfully.", tourist: updatedTourist });
+  } catch (error) {
+    console.error("Error adding addresses:", error.message);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
 
 module.exports = {
   getProducts,
@@ -2930,4 +2982,5 @@ module.exports = {
   removeFromMyWishlist,
   payByCardAct,
   payByCardIti,
+  addTouristAddress,
 };
