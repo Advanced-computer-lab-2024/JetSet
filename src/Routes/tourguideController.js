@@ -75,12 +75,12 @@ const updateTourGuideProfile = async (req, res) => {
 };
 
 const readTourGuideProfile = async (req, res) => {
-  const { mobile_number, years_of_experience, previous_work } = req.body;
   const tourGuideID = req.params.tourGuideID;
   try {
     const myProfile = await TourGuide.findById(tourGuideID);
     res.status(200).json({
       myProfile,
+      username: myProfile.username,
     });
   } catch (error) {
     res.status(400).json({
@@ -91,8 +91,6 @@ const readTourGuideProfile = async (req, res) => {
 };
 
 const getTourGuides = async (req, res) => {
-  const { mobile_number, years_of_experience, previous_work } = req.body;
-  const tourGuideID = req.params.tourGuideID;
   try {
     const result = await TourGuide.find({});
     res.status(200).json(result);

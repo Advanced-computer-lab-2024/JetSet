@@ -3,7 +3,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-
 const multer = require("multer");
 const path = require("path");
 const router = express.Router();
@@ -25,6 +24,7 @@ const upload = multer({ storage: storage });
 const TourGuide = require("./Models/TourGuide.js");
 const Itinerary = require("./Models/Itinerary"); // Adjust path as necessary
 const Activity = require("./Models/Activity"); // Adjust the path
+const Place = require("./Models/Historical.js");
 
 const {
   createProfile,
@@ -115,6 +115,9 @@ const {
   flagItinerary,
   flagActivity,
   getAdminbyid,
+  forgetPass,
+  restPass,
+  createPromoCode,
 } = require("./Routes/adminController");
 
 const {
@@ -165,6 +168,7 @@ const {
   viewFlight,
   viewHotel,
   getBookedItinerary,
+  getBookedActivities,
   loginTourist,
   getCartItems,
   addToCart,
@@ -172,6 +176,17 @@ const {
   batchFetchProducts,
   getProductQuantity,
   checkout,
+  payByWallet,
+  payByWalletAct,
+  payByWalletIti,
+  payByWalletProduct,
+  paidUpcoming,
+  paidHistory,
+  addToWishlist,
+  viewMyWishlist,
+  removeFromMyWishlist,
+  payByCardAct,
+  payByCardIti,
 } = require("../src/Routes/touristController");
 
 const {
@@ -207,7 +222,13 @@ dotenv.config();
 // App variables
 const app = express();
 
+app.use(cors());
+
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Server is running.");
+});
 
 const MongoURI = process.env.MONGO_URI;
 const port = process.env.PORT;
@@ -225,8 +246,6 @@ mongoose
 app.get("/home", (req, res) => {
   res.status(200).send("You have everything installed!");
 });
-
-app.use(cors());
 
 // app.use(
 //   "/uploads",
@@ -267,7 +286,12 @@ app.get("/api/activities", async (req, res) => {
   }
 });
 
-const { bookmarkActivity } = require("../src/Routes/touristController"); // Adjust this path
+const {
+  bookmarkActivity,
+  unbookmarkActivity,
+  bookmarkItinerary,
+  unbookmarkItinerary,
+} = require("../src/Routes/touristController"); // Adjust this path
 app.post("/api/bookmarkActivity", async (req, res) => {
   const { touristId, activityId } = req.body;
 
@@ -282,13 +306,51 @@ app.post("/api/bookmarkActivity", async (req, res) => {
     return res.status(500).json({ error: "Failed to bookmark activity" });
   }
 });
+app.post("/api/unbookmarkActivity", async (req, res) => {
+  const { touristId, activityId } = req.body;
+
+  try {
+    const result = await unbookmarkActivity(touristId, activityId);
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+    res.status(200).json({ message: result.message, tourist: result.tourist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+app.post("/api/bookmarkItinerary", async (req, res) => {
+  const { touristId, itineraryId } = req.body;
+
+  try {
+    const result = await bookmarkItinerary(touristId, itineraryId);
+    if (result.message) {
+      return res.json({ message: result.message });
+    }
+    return res.status(400).json({ error: result.error });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to bookmark itinerary" });
+  }
+});
+app.post("/api/unbookmarkItinerary", async (req, res) => {
+  const { touristId, itineraryId } = req.body;
+
+  try {
+    const result = await unbookmarkItinerary(touristId, itineraryId);
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+    res.status(200).json({ message: result.message, tourist: result.tourist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Basic route for testing
 app.get("/home", (req, res) => {
   res.status(200).send("You have everything installed!");
 });
-
-app.use(express.json());
 
 app.post("/addTourist", createTourist);
 app.post("/register", upload.array("documents", 5), register); // Adjust maxCount as needed
@@ -417,6 +479,8 @@ app.put("/flagActivity/:id", flagActivity);
 
 app.get("/getadminbyId/:id", getAdminbyid);
 app.get("/getTourismbyId/:id", getTourismbyid);
+
+app.post("/createPromoCode/:id", createPromoCode);
 //Tourist Controller
 app.get("/sortactivities", SortActivities);
 app.get("/SortItineraries", SortItineraries);
@@ -471,6 +535,14 @@ app.post(
   "/bookTransportation/:touristId/:transportationId",
   bookTransportation
 );
+app.post("/payByWallet/:touristId/:itemId", payByWallet);
+app.post("/payWalletAct/:touristId/:activityId", payByWalletAct);
+app.post("/payCardAct/:touristId/:activityId", payByCardAct);
+app.post("/payCardIti/:touristId/:iteniraryId", payByCardIti);
+app.post("/payWalletIti/:touristId/:iteniraryId", payByWalletIti);
+app.post("/payWalletPro/:touristId/:productId", payByWalletProduct);
+app.get("/paidUpcoming/:touristId", paidUpcoming);
+app.get("/paidHistory/:touristId", paidHistory);
 app.post("/transportation", createTransportation);
 app.get("/gettrans", gettransportation);
 app.delete("/deleteAccTourist/:id", deleteTouristAccount);
@@ -478,6 +550,10 @@ app.delete("/deleteAccTourguide/:id", deleteTourGuideAccount);
 app.put("/cr/:id", updateActivityCreator);
 app.delete("/deleteAccAdvertiser/:id", deleteAdvertiserAccount);
 app.delete("/deleteAccSeller/:id", deleteSellerAccount);
+
+app.post("/Wishlist/:touristID", addToWishlist);
+app.get("/Wishlist/:touristID", viewMyWishlist);
+app.delete("/Wishlist/:touristID", removeFromMyWishlist);
 
 app.put("/touristwallet/:id", async (req, res) => {
   try {
@@ -541,6 +617,7 @@ app.get("/category", async (req, res) => {
 });
 
 app.get("/bookedIti/:touristId", getBookedItinerary);
+app.get("/bookedAct/:touristId", getBookedActivities);
 
 // Route to get tourist's preferred currency and conversion rate
 app.get("/tourist/:id/preferredCurrency", async (req, res) => {
@@ -597,3 +674,90 @@ app.delete("/deleteAdmin/:id", async (req, res) => {
 });
 
 module.exports = router;
+app.post("/forgot-password", forgetPass);
+app.post("/reset-password", restPass);
+
+const Notification = require("../src/Models/Notification.js");
+app.get("/notification", async (req, res) => {
+  try {
+    const { recipient, role } = req.query; // Pass recipient's username to get notifications
+    const notifications = await Notification.find({ recipient, role });
+
+    if (!notifications.length) {
+      return res.status(404).json({ message: "No notifications found" });
+    }
+
+    res.status(200).json({ notifications });
+  } catch (error) {
+    res.status(500).json({ message: "Error", error });
+  }
+});
+
+app.get("/not", async (req, res) => {
+  try {
+    const notifications = await Notification.find();
+
+    if (!notifications.length) {
+      return res.status(404).json({ message: "No notifications found" });
+    }
+
+    res.status(200).json({ notifications });
+  } catch (error) {
+    res.status(500).json({ message: "Error", error });
+  }
+});
+
+app.get("/unread", async (req, res) => {
+  const { recipient, role } = req.query;
+  try {
+    // Get the count of unread notifications
+    const unreadCount = await Notification.countDocuments({
+      read: false,
+      recipient,
+      role,
+    });
+
+    res.status(200).json({ unreadCount });
+  } catch (error) {
+    res.status(500).json({ message: "Error", error });
+  }
+});
+
+app.get("/activity/:id", async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+    res.json(activity);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/itinerary/:id", async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
+    }
+    res.json(itinerary);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/historical/:id", async (req, res) => {
+  try {
+    const place = await Place.findById(req.params.id);
+    if (!place) {
+      return res.status(404).json({ message: "Place not found" });
+    }
+    res.json(place);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});

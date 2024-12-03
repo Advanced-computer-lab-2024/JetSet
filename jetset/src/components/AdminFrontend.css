@@ -1,0 +1,47 @@
+.management-section {
+  margin: 20px 0; /* Adjust as needed */
+}
+
+.account-actions {
+  display: flex;
+  justify-content: space-between; /* Space between buttons */
+  align-items: center; /* Align items vertically in the center */
+  margin: 20px 0;
+}
+
+.account-actions button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #00b4d8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.account-actions button:hover {
+  background-color: #0077b6; /* Darker shade on hover */
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between; /* Space between buttons */
+  align-items: center; /* Align buttons vertically in the center */
+  margin-bottom: 20px; /* Add some space below the buttons */
+}
+
+.management-section button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #00b4d8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.management-section button:hover {
+  background-color: #0077b6; /* Darker shade on hover */
+}

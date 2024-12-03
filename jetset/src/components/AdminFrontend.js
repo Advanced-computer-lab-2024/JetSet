@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import NavAdmin from "./Admin/navAdmin";
+import "./AdminFrontend.css";
 
 // Import components for Tag Management
 import CreateTag from "./Tag/CreateTag";
@@ -30,7 +32,6 @@ import CreateTourismGovernor from "./Admin/CreateTourismGovernor";
 import GuestList from "./Admin/viewGuest";
 
 import ComplaintList from "./Admin/viewComplaints"; // Assuming this is the correct path and filename
-import ChangePasswordForm from "./Admin/ChangePasswordForm";
 
 import Itineraries from "./Itinerary/FlagItinerary";
 import ActivityList from "./Activity/FlagActivity";
@@ -39,12 +40,9 @@ import ComplaintsReply from "./Complaints/ComplaintsReply";
 import ComplaintsFilter from "./Complaints/ComplaintsFilter ";
 import ComplaintsSort from "./Complaints/ComplaintsSort";
 import ComplaintsStatus from "./Complaints/ComplaintsStatus";
-
 function AdminFrontend() {
-  // State for managing tags
-
-  const [adminUsername, setAdminUsername] = useState(""); // State for storing the admin's username
   const { adminId } = useParams();
+  const [adminUsername, setAdminUsername] = useState("");
 
   const [tags, setTags] = useState([]);
   const [tagLoading, setTagLoading] = useState(true);
@@ -62,28 +60,27 @@ function AdminFrontend() {
   const [showTagActions, setShowTagActions] = useState(false);
   const [showCategoryActions, setShowCategoryActions] = useState(false);
   const [showProductActions, setShowProductActions] = useState(false);
-  const [showAccountActions, setShowAccountActions] = useState(false);
   const [showGuestActions, setShowGuestActions] = useState(false);
-  const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
   const [showItineraryActions, setShowItineraryActions] = useState(false);
   const [showActivityActions, setShowActivityActions] = useState(false);
   const [showComplaintActions, setshowComplaintActions] = useState(false);
   const [currentPage, setCurrentPage] = useState("");
-
-  const fetchAdminData = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/getadminbyId/${adminId}`
-      );
-      setAdminUsername(response.data.username);
-    } catch (error) {
-      console.error("Error fetching admin data:", error);
-    }
-  };
+  const [currentAction, setCurrentAction] = useState("");
 
   useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/getadminbyId/${adminId}`
+        );
+        setAdminUsername(response.data.username);
+      } catch (error) {
+        console.error("Error fetching admin data:", error);
+      }
+    };
+
     fetchAdminData();
-  }, []);
+  }, [adminId]);
 
   const fetchTags = async () => {
     setTagLoading(true);
@@ -157,163 +154,47 @@ function AdminFrontend() {
     );
   };
 
+  const renderCurrentAction = () => {
+    switch (currentAction) {
+      case "createAdmin":
+        return <CreateAdmin />;
+      case "createTourismGovernor":
+        return <CreateTourismGovernor />;
+      case "deleteAccount":
+        return <DeleteAccount />;
+      case "back":
+        return null;
+    }
+  };
+
   return (
     <div className="admin-frontend">
-      <header>
-        <h1>
-          Welcome, <strong>{adminUsername || "Loading..."}</strong>
-        </h1>
-        <p>Manage tags, categories, products, and accounts below.</p>
-      </header>
-
+      <NavAdmin adminUsername={adminUsername} />
       <main>
         {/* Account Management Section */}
         <section className="management-section account-management">
           <h2>Account Management</h2>
-          <button onClick={() => setShowAccountActions(!showAccountActions)}>
-            {showAccountActions
-              ? "Hide Account Actions"
-              : "Show Account Actions"}
-          </button>
-          {showAccountActions && (
-            <div className="account-actions">
-              <DeleteAccount />
-              <CreateAdmin />
-              <CreateTourismGovernor />
-            </div>
-          )}
+          <div className="account-actions">
+            <button onClick={() => setCurrentAction("createAdmin")}>
+              Create Admin
+            </button>
+            <button onClick={() => setCurrentAction("createTourismGovernor")}>
+              Create Tourism Governor
+            </button>
+            <button onClick={() => setCurrentAction("deleteAccount")}>
+              Delete Account
+            </button>
+          </div>
         </section>
-        {/* Button to toggle ChangePasswordForm */}
-        <button
-          onClick={() => setShowChangePasswordForm(!showChangePasswordForm)}
-        >
-          {showChangePasswordForm ? "Hide Change Password" : "Change Password"}
-        </button>
-
-        {/* Conditionally render ChangePasswordForm */}
-        {showChangePasswordForm && <ChangePasswordForm />}
-
+        {/* Render the selected action */}
+        <section className="action-display">{renderCurrentAction()}</section>
         {/* Guest Management Section */}
         <section className="management-section guest-management">
           <h2>Guest Management</h2>
-          <button onClick={toggleGuestActions}>
-            {showGuestActions ? "Hide Guest List" : "View Guest List"}
-          </button>
-          {showGuestActions && (
-            <div className="guest-actions">
-              <GuestList />
-            </div>
-          )}
-        </section>
-
-        {/* Tag Management Section */}
-        <section className="management-section tag-management">
-          <h2>Tag Management</h2>
-          <button onClick={() => setShowTagActions(!showTagActions)}>
-            {showTagActions ? "Hide Tag Actions" : "Show Tag Actions"}
-          </button>
-          <div className="status-message" aria-live="polite">
-            {tagLoading && <p>Loading tags...</p>}
-            {tagError && <p className="error">{tagError}</p>}
+          <div className="guest-actions">
+            <GuestList />
           </div>
-          {showTagActions && (
-            <div className="tag-actions">
-              <CreateTag setTags={setTags} />
-              {tags.length > 0 ? (
-                <>
-                  <TagList tags={tags} />
-                  <UpdateTag tags={tags} />
-                  <DeleteTag tags={tags} setTags={setTags} />
-                </>
-              ) : (
-                <p>No tags available to update, delete, or display.</p>
-              )}
-            </div>
-          )}
         </section>
-
-        {/* Category Management Section */}
-        <section className="management-section category-management">
-          <h2>Category Management</h2>
-          <button onClick={() => setShowCategoryActions(!showCategoryActions)}>
-            {showCategoryActions
-              ? "Hide Category Actions"
-              : "Show Category Actions"}
-          </button>
-          <div className="status-message" aria-live="polite">
-            {categoryLoading && <p>Loading categories...</p>}
-            {categoryError && <p className="error">{categoryError}</p>}
-          </div>
-          {showCategoryActions && (
-            <div className="category-actions">
-              <CreateCategory setCategories={setCategories} />
-              {categories.length > 0 ? (
-                <>
-                  <CategoryList categories={categories} />
-                  <UpdateCategory categories={categories} />
-                  <DeleteCategory
-                    categories={categories}
-                    setCategories={setCategories}
-                  />
-                </>
-              ) : (
-                <p>No categories available to update, delete, or display.</p>
-              )}
-            </div>
-          )}
-        </section>
-
-        {/* Product Management Section */}
-        <section className="management-section product-management">
-          <h2>Product Management</h2>
-          <button onClick={() => setShowProductActions(!showProductActions)}>
-            {showProductActions
-              ? "Hide Product Actions"
-              : "Show Product Actions"}
-          </button>
-          {showProductActions && (
-            <div className="product-actions">
-              <AddProduct />
-              <EditProduct />
-              <FilterProducts />
-              <SearchProduct />
-              <ProductList
-                products={products}
-                loading={productLoading}
-                error={productError}
-              />
-              <aside aria-labelledby="sort-products">
-                <h3 id="sort-products">Sort Products</h3>
-                <SortProducts products={products} />
-              </aside>
-            </div>
-          )}
-        </section>
-
-        {/* Itinerary Management Section */}
-        <section className="management-section itinerary-management">
-          <h2>Itinerary Management</h2>
-          <button
-            onClick={() => setShowItineraryActions(!showItineraryActions)}
-          >
-            {showItineraryActions
-              ? "Hide Itinerary Actions"
-              : "Show Itinerary Actions"}
-          </button>
-          {showItineraryActions && <Itineraries />}
-        </section>
-
-        {/* Activity Management Section */}
-        <section className="management-section activity-management">
-          <h2>Activity Management</h2>
-          <button onClick={() => setShowActivityActions(!showActivityActions)}>
-            {showActivityActions
-              ? "Hide Activity Actions"
-              : "Show Activity Actions"}
-          </button>
-          {showActivityActions && <ActivityList />}
-        </section>
-
         {/* Complaints Management Section */}
         <section className="Complaints-management">
           <h2>Complaints Management</h2>
@@ -326,6 +207,115 @@ function AdminFrontend() {
           </button>
           {showComplaintActions && renderPage()}
         </section>
+        {/* Tag Management Section */}
+        <section className="management-section tag-management">
+          <h2>Tag Management</h2>
+
+          <button onClick={() => setShowTagActions(!showTagActions)}>
+            {showTagActions ? "Hide Tag Actions" : "Show Tag Actions"}
+          </button>
+
+          <div className="status-message" aria-live="polite">
+            {tagLoading && <p>Loading tags...</p>}
+            {tagError && <p className="error">{tagError}</p>}
+          </div>
+        </section>
+        {/* Category Management Section */}
+        <section className="management-section category-management">
+          <h2>Category Management</h2>
+          <button onClick={() => setShowCategoryActions(!showCategoryActions)}>
+            {showCategoryActions
+              ? "Hide Category Actions"
+              : "Show Category Actions"}
+          </button>
+
+          <div className="status-message" aria-live="polite">
+            {categoryLoading && <p>Loading categories...</p>}
+            {categoryError && <p className="error">{categoryError}</p>}
+          </div>
+        </section>
+        {/* Product Management Section */}
+        <section className="management-section product-management">
+          <h2>Product Management</h2>
+
+          <button onClick={() => setShowProductActions(!showProductActions)}>
+            {showProductActions
+              ? "Hide Product Actions"
+              : "Show Product Actions"}
+          </button>
+        </section>
+        {/* Itinerary Management Section */}
+        <section className="management-section itinerary-management">
+          <h2>Itinerary Management</h2>
+
+          <button
+            onClick={() => setShowItineraryActions(!showItineraryActions)}
+          >
+            {showItineraryActions
+              ? "Hide Itinerary Actions"
+              : "Show Itinerary Actions"}
+          </button>
+        </section>
+        {/* Activity Management Section */}
+        <section className="management-section activity-management">
+          <h2>Activity Management</h2>
+
+          <button onClick={() => setShowActivityActions(!showActivityActions)}>
+            {showActivityActions
+              ? "Hide Activity Actions"
+              : "Show Activity Actions"}
+          </button>
+        </section>{" "}
+        {showTagActions && (
+          <div className="tag-actions">
+            <CreateTag setTags={setTags} />
+            {tags.length > 0 ? (
+              <>
+                <TagList tags={tags} />
+                <UpdateTag tags={tags} />
+                <DeleteTag tags={tags} setTags={setTags} />
+              </>
+            ) : (
+              <p>No tags available to update, delete, or display.</p>
+            )}
+          </div>
+        )}
+        {showCategoryActions && (
+          <div className="category-actions">
+            <CreateCategory setCategories={setCategories} />
+            {categories.length > 0 ? (
+              <>
+                <CategoryList categories={categories} />
+                <UpdateCategory categories={categories} />
+                <DeleteCategory
+                  categories={categories}
+                  setCategories={setCategories}
+                />
+              </>
+            ) : (
+              <p>No categories available to update, delete, or display.</p>
+            )}
+          </div>
+        )}
+        {showProductActions && (
+          <div className="product-actions">
+            <AddProduct adminId={adminId} />
+            <EditProduct />
+            <FilterProducts />
+            <SearchProduct />
+            <ProductList
+              products={products}
+              loading={productLoading}
+              error={productError}
+            />
+            <aside aria-labelledby="sort-products">
+              <h3 id="sort-products">Sort Products</h3>
+              <SortProducts products={products} />
+            </aside>
+          </div>
+        )}
+        {showItineraryActions && <Itineraries />}
+        {showActivityActions && <ActivityList />}
       </main>
     </div>
   );

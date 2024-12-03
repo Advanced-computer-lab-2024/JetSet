@@ -27,6 +27,9 @@ import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
 import Cart from './tourist/Cart'; 
+import PaidItemsView from "./tourist/PaidItemsView";
+import Wishlist from "./tourist/Wishlist";
+
 import "./styles.css";
 
 const Tourist = () => {
@@ -51,6 +54,8 @@ const Tourist = () => {
         return <Search touristId={touristId} />;
       case "touristProduct":
         return <TouristProducts touristId={touristId} />;
+      case "Wishlist":
+        return <Wishlist touristId={touristId} />;
       case "ActivityByCategory":
         return <ActivityByCategory touristId={touristId} />;
       case "SetPreferredCurrency":
@@ -89,6 +94,9 @@ const Tourist = () => {
         return <VacationGuide touristId={touristId} />;
         case "cart": // New case for Vacation Guide
         return <Cart touristId={touristId} />;
+      case "viewPaid": 
+        return <PaidItemsView touristId={touristId} />;
+
       default:
         return (
           <section className="tourist-frontend">
@@ -145,6 +153,9 @@ const Tourist = () => {
                 <button onClick={() => setCurrentPage("bookIti")}>
                   Booked itineraries
                 </button>
+                <button onClick={() => setCurrentPage("viewPaid")}>
+                  Paid Activities and Iteniraries
+                </button>
               </section>
 
               <section>
@@ -154,6 +165,8 @@ const Tourist = () => {
                 </button>
                 <button onClick={() => setCurrentPage("cart")}>
                   View My Cart
+                <button onClick={() => setCurrentPage("Wishlist")}>
+                  View My WishList
                 </button>
                 <button
                   onClick={() =>

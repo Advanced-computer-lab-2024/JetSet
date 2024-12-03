@@ -102,6 +102,7 @@ const ProductList = ({ touristId }) => {
       console.error("Error purchasing product:", error);
     }
   };
+
   const handleAddToCart = async (product) => {
     try {
       const response = await axios.post(
@@ -116,6 +117,20 @@ const ProductList = ({ touristId }) => {
     } catch (error) {
       console.error("Error adding item to cart:", error);
       alert(error.response?.data?.error || "An error occurred while adding the item to the cart");
+
+
+  const handleAddToWishlist = async (product) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/Wishlist/${touristId}`,
+        {
+          productID: product._id,
+        }
+      );
+      alert(response.data.message); // Show a success message
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      alert("Failed to add product to wishlist.");
     }
   };
   return (
@@ -229,6 +244,7 @@ const ProductList = ({ touristId }) => {
                   <button onClick={() => setSelectedProduct(product)}>
                     Want to Buy?
                   </button>
+                  <button onClick={() => handleAddToWishlist(product)}>Add to Wishlist</button>
                 </td>
                 <td>
                 <button onClick={() => {

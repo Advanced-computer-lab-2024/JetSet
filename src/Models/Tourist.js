@@ -34,11 +34,9 @@ const touristSchema = new Schema(
         productId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
-          required: true, // Ensure a product ID is always provided
         },
         purchaseQuantity: {
           type: Number,
-          required: true, // Ensure a purchase quantity is always provided
           default: 1, // Default quantity
         },
       },
@@ -74,6 +72,24 @@ const touristSchema = new Schema(
         ref: "Transportation",
       },
     ],
+    payedActivities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Activity",
+      },
+    ],
+    payedItineraries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Itinerary",
+      },
+    ],
+    payedProducts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
     preferredCurrency: {
       type: String,
       default: "EGP",
@@ -105,6 +121,32 @@ const touristSchema = new Schema(
       },
     ],
   
+    wishlist: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product", // Reference to the Product model
+          required: true,
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    bookmarkedIteniraries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Itinerary",
+      },
+    ],
+    promoCodes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PromoCode",
+      },
+    ],
+    resetOtp: { type: String },
   },
   { timestamps: true }
 );

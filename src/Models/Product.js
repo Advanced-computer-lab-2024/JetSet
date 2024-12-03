@@ -15,7 +15,11 @@ const productSchema = new Schema(
     seller_id: {
       type: Schema.Types.ObjectId,
       ref: "Seller",
-    }, // added
+    },
+    admin_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Admin",
+    },
     ratings: {
       type: Number,
       min: 0,

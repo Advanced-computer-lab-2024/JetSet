@@ -38,6 +38,7 @@ const advertiserSchema = new Schema(
       default: [],
     },
     document: { type: [String] },
+    resetOtp: { type: String },
   },
   { timestamps: true }
 );

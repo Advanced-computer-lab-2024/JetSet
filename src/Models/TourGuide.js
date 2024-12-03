@@ -38,6 +38,7 @@ const tourGuideSchema = new Schema(
         comment: { type: String, required: false },
       },
     ],
+    resetOtp: { type: String },
   },
   { timestamps: true }
 );

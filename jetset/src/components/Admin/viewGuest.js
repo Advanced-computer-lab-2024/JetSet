@@ -52,7 +52,6 @@ const GuestList = () => {
 
   return (
     <div className="guest-list">
-      <h2>Guests</h2>
       {error && <p className="error-message">{error}</p>}
 
       {guests.length > 0 ? (
@@ -110,7 +109,7 @@ const GuestList = () => {
           </tbody>
         </table>
       ) : (
-        <p>No guests found.</p>
+        <p>No guests Regiesterd Yet.</p>
       )}
     </div>
   );

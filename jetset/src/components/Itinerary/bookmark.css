@@ -1,0 +1,71 @@
+/* Base styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f9; /* Light background for a clean look */
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* General Button Styles */
+  button {
+    border: none;
+    cursor: pointer;
+    outline: none;
+    font-size: 1em;
+    transition: all 0.3s ease;
+  }
+  
+  /* Bookmark Button */
+  .bookmark-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5em;
+    color: #007bff;
+    transition: transform 0.2s ease, color 0.3s ease, box-shadow 0.2s ease;
+    margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  .bookmark-button i {
+    color: #aaa; /* Default color when not bookmarked */
+    transition: color 0.3s ease;
+  }
+  
+  .bookmark-button:hover i {
+    color: #0056b3;
+    transform: scale(1.1);
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  .bookmark-button i.fa-bookmark {
+    color: #f39c12; /* Color when bookmarked */
+  }
+  
+  .bookmark-button:active i {
+    transform: scale(0.95);
+  }
+  
+  /* Toggle Button */
+  .toggle-btn {
+    padding: 12px 24px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s ease;
+    font-size: 1.1em;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .toggle-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+  }
+  
+  .toggle-btn:active {
+    transform: translateY(1px);
+  }
