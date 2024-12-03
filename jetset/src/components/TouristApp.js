@@ -26,7 +26,7 @@ import FlightBooking from "./Booking/FlightBooking";
 import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
-
+import Cart from './tourist/Cart'; 
 import "./styles.css";
 
 const Tourist = () => {
@@ -87,7 +87,8 @@ const Tourist = () => {
         return <BookedItineraries touristId={touristId} />;
       case "vacationGuide": // New case for Vacation Guide
         return <VacationGuide touristId={touristId} />;
-
+        case "cart": // New case for Vacation Guide
+        return <Cart touristId={touristId} />;
       default:
         return (
           <section className="tourist-frontend">
@@ -150,6 +151,9 @@ const Tourist = () => {
                 <h2>Products & Purchases</h2>
                 <button onClick={() => setCurrentPage("productList")}>
                   View Products
+                </button>
+                <button onClick={() => setCurrentPage("cart")}>
+                  View My Cart
                 </button>
                 <button
                   onClick={() =>

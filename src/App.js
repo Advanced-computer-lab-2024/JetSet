@@ -6,6 +6,7 @@ const cors = require("cors");
 
 const multer = require("multer");
 const path = require("path");
+const router = express.Router();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -165,6 +166,12 @@ const {
   viewHotel,
   getBookedItinerary,
   loginTourist,
+  getCartItems,
+  addToCart,
+  removeFromCart,
+  batchFetchProducts,
+  getProductQuantity,
+  checkout,
 } = require("../src/Routes/touristController");
 
 const {
@@ -495,6 +502,13 @@ app.put("/touristwallet/:id", async (req, res) => {
   }
 });
 
+app.post("/addToCart/:id", addToCart);
+app.post("/removeFromCart/:id", removeFromCart);
+app.get("/cart/:id", getCartItems);
+app.post("/productQuantity/:id", getProductQuantity);
+
+app.post("/batchFetch", batchFetchProducts);
+
 app.get("/activities/by-category", getActivitiesByCategoryForGuest);
 app.get("/activities/by-category", getActivitiesByCategory);
 app.post("/share", shareItem);
@@ -558,6 +572,7 @@ app.get("/tourist/:id/preferredCurrency", async (req, res) => {
     res.status(500).json({ message: "Error fetching currency data", error });
   }
 });
+app.post('/checkout/:touristId', checkout);
 
 // Import necessary modules and models
 const Admin = require("../src/Models/Admin.js"); // Replace with your Admin model's path
@@ -580,3 +595,5 @@ app.delete("/deleteAdmin/:id", async (req, res) => {
     res.status(500).json({ message: "Error deleting admin" });
   }
 });
+
+module.exports = router;
