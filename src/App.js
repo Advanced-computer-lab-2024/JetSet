@@ -116,6 +116,7 @@ const {
   getAdminbyid,
   forgetPass,
   restPass,
+  createPromoCode,
 } = require("./Routes/adminController");
 
 const {
@@ -177,6 +178,8 @@ const {
   addToWishlist,
   viewMyWishlist,
   removeFromMyWishlist,
+  payByCardAct,
+  payByCardIti,
 } = require("../src/Routes/touristController");
 
 const {
@@ -276,7 +279,12 @@ app.get("/api/activities", async (req, res) => {
   }
 });
 
-const { bookmarkActivity,unbookmarkActivity,bookmarkItinerary,unbookmarkItinerary } = require("../src/Routes/touristController"); // Adjust this path
+const {
+  bookmarkActivity,
+  unbookmarkActivity,
+  bookmarkItinerary,
+  unbookmarkItinerary,
+} = require("../src/Routes/touristController"); // Adjust this path
 app.post("/api/bookmarkActivity", async (req, res) => {
   const { touristId, activityId } = req.body;
 
@@ -291,9 +299,9 @@ app.post("/api/bookmarkActivity", async (req, res) => {
     return res.status(500).json({ error: "Failed to bookmark activity" });
   }
 });
-app.post('/api/unbookmarkActivity', async (req, res) => {
+app.post("/api/unbookmarkActivity", async (req, res) => {
   const { touristId, activityId } = req.body;
-  
+
   try {
     const result = await unbookmarkActivity(touristId, activityId);
     if (result.error) {
@@ -331,8 +339,6 @@ app.post("/api/unbookmarkItinerary", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 // Basic route for testing
 app.get("/home", (req, res) => {
@@ -466,6 +472,8 @@ app.put("/flagActivity/:id", flagActivity);
 
 app.get("/getadminbyId/:id", getAdminbyid);
 app.get("/getTourismbyId/:id", getTourismbyid);
+
+app.post("/createPromoCode/:id", createPromoCode);
 //Tourist Controller
 app.get("/sortactivities", SortActivities);
 app.get("/SortItineraries", SortItineraries);
@@ -522,10 +530,12 @@ app.post(
 );
 app.post("/payByWallet/:touristId/:itemId", payByWallet);
 app.post("/payWalletAct/:touristId/:activityId", payByWalletAct);
+app.post("/payCardAct/:touristId/:activityId", payByCardAct);
+app.post("/payCardIti/:touristId/:iteniraryId", payByCardIti);
 app.post("/payWalletIti/:touristId/:iteniraryId", payByWalletIti);
 app.post("/payWalletPro/:touristId/:productId", payByWalletProduct);
-app.get("/paidUpcoming/:touristId",paidUpcoming);
-app.get("/paidHistory/:touristId",paidHistory);
+app.get("/paidUpcoming/:touristId", paidUpcoming);
+app.get("/paidHistory/:touristId", paidHistory);
 app.post("/transportation", createTransportation);
 app.get("/gettrans", gettransportation);
 app.delete("/deleteAccTourist/:id", deleteTouristAccount);
@@ -534,10 +544,9 @@ app.put("/cr/:id", updateActivityCreator);
 app.delete("/deleteAccAdvertiser/:id", deleteAdvertiserAccount);
 app.delete("/deleteAccSeller/:id", deleteSellerAccount);
 
-app.post("/Wishlist/:touristID",addToWishlist);
-app.get("/Wishlist/:touristID",viewMyWishlist);
-app.delete("/Wishlist/:touristID",removeFromMyWishlist);
-
+app.post("/Wishlist/:touristID", addToWishlist);
+app.get("/Wishlist/:touristID", viewMyWishlist);
+app.delete("/Wishlist/:touristID", removeFromMyWishlist);
 
 app.put("/touristwallet/:id", async (req, res) => {
   try {

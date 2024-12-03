@@ -184,13 +184,10 @@ function AdminFrontend() {
             <button onClick={() => setCurrentAction("deleteAccount")}>
               Delete Account
             </button>
-            <button onClick={() => setCurrentAction("back")}>Back</button>
           </div>
         </section>
-
         {/* Render the selected action */}
         <section className="action-display">{renderCurrentAction()}</section>
-
         {/* Guest Management Section */}
         <section className="management-section guest-management">
           <h2>Guest Management</h2>
@@ -198,7 +195,6 @@ function AdminFrontend() {
             <GuestList />
           </div>
         </section>
-
         {/* Complaints Management Section */}
         <section className="Complaints-management">
           <h2>Complaints Management</h2>
@@ -211,72 +207,65 @@ function AdminFrontend() {
           </button>
           {showComplaintActions && renderPage()}
         </section>
+        {/* Tag Management Section */}
+        <section className="management-section tag-management">
+          <h2>Tag Management</h2>
 
-        <div className="button-container">
-          {/* Tag Management Section */}
-          <section className="management-section tag-management">
-            <h2>Tag Management</h2>
+          <button onClick={() => setShowTagActions(!showTagActions)}>
+            {showTagActions ? "Hide Tag Actions" : "Show Tag Actions"}
+          </button>
 
-            <button onClick={() => setShowTagActions(!showTagActions)}>
-              {showTagActions ? "Hide Tag Actions" : "Show Tag Actions"}
-            </button>
+          <div className="status-message" aria-live="polite">
+            {tagLoading && <p>Loading tags...</p>}
+            {tagError && <p className="error">{tagError}</p>}
+          </div>
+        </section>
+        {/* Category Management Section */}
+        <section className="management-section category-management">
+          <h2>Category Management</h2>
+          <button onClick={() => setShowCategoryActions(!showCategoryActions)}>
+            {showCategoryActions
+              ? "Hide Category Actions"
+              : "Show Category Actions"}
+          </button>
 
-            <div className="status-message" aria-live="polite">
-              {tagLoading && <p>Loading tags...</p>}
-              {tagError && <p className="error">{tagError}</p>}
-            </div>
-          </section>
-          {/* Category Management Section */}
-          <section className="management-section category-management">
-            <h2>Category Management</h2>
-            <button
-              onClick={() => setShowCategoryActions(!showCategoryActions)}
-            >
-              {showCategoryActions
-                ? "Hide Category Actions"
-                : "Show Category Actions"}
-            </button>
+          <div className="status-message" aria-live="polite">
+            {categoryLoading && <p>Loading categories...</p>}
+            {categoryError && <p className="error">{categoryError}</p>}
+          </div>
+        </section>
+        {/* Product Management Section */}
+        <section className="management-section product-management">
+          <h2>Product Management</h2>
 
-            <div className="status-message" aria-live="polite">
-              {categoryLoading && <p>Loading categories...</p>}
-              {categoryError && <p className="error">{categoryError}</p>}
-            </div>
-          </section>
-          {/* Product Management Section */}
-          <section className="management-section product-management">
-            <h2>Product Management</h2>
+          <button onClick={() => setShowProductActions(!showProductActions)}>
+            {showProductActions
+              ? "Hide Product Actions"
+              : "Show Product Actions"}
+          </button>
+        </section>
+        {/* Itinerary Management Section */}
+        <section className="management-section itinerary-management">
+          <h2>Itinerary Management</h2>
 
-            <button onClick={() => setShowProductActions(!showProductActions)}>
-              {showProductActions
-                ? "Hide Product Actions"
-                : "Show Product Actions"}
-            </button>
-          </section>
-          {/* Itinerary Management Section */}
-          <section className="management-section itinerary-management">
-            <h2>Itinerary Management</h2>
+          <button
+            onClick={() => setShowItineraryActions(!showItineraryActions)}
+          >
+            {showItineraryActions
+              ? "Hide Itinerary Actions"
+              : "Show Itinerary Actions"}
+          </button>
+        </section>
+        {/* Activity Management Section */}
+        <section className="management-section activity-management">
+          <h2>Activity Management</h2>
 
-            <button
-              onClick={() => setShowItineraryActions(!showItineraryActions)}
-            >
-              {showItineraryActions
-                ? "Hide Itinerary Actions"
-                : "Show Itinerary Actions"}
-            </button>
-          </section>
-          {/* Activity Management Section */}
-          <section className="management-section activity-management">
-            <h2>Activity Management</h2>
-
-            <button
-              onClick={() => setShowActivityActions(!showActivityActions)}
-            >
-              {showActivityActions
-                ? "Hide Activity Actions"
-                : "Show Activity Actions"}
-            </button>
-          </section>{" "}
-        </div>
+          <button onClick={() => setShowActivityActions(!showActivityActions)}>
+            {showActivityActions
+              ? "Hide Activity Actions"
+              : "Show Activity Actions"}
+          </button>
+        </section>{" "}
         {showTagActions && (
           <div className="tag-actions">
             <CreateTag setTags={setTags} />

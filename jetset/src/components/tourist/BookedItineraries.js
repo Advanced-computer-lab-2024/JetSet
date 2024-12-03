@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe(
+  "pk_test_51QRqvnLaP0939m1yMtkhu1iljNRs7gNXmNvljQEXF0eIRBM1zfzukqyTYtVG78YIkdf8qe3K4sPMsTQlG0lV7rvj00Tqpogk3L"
+);
 
 const BookedItems = ({ touristId }) => {
   const [bookedItineraries, setBookedItineraries] = useState([]);
@@ -92,7 +103,6 @@ const BookedItems = ({ touristId }) => {
     }
   };
 
-
   const cancelActivityBooking = async (activityId) => {
     try {
       const response = await axios.delete(
@@ -122,7 +132,6 @@ const BookedItems = ({ touristId }) => {
     setItemType(type); // Set the type as activity or itinerary
     setShowPaymentModal(true);
   };
-  
 
   const handlePaymentChoice = (type) => {
     if (type === "Wallet") {
@@ -135,29 +144,28 @@ const BookedItems = ({ touristId }) => {
     }
   };
 
-const confirmWalletPayment = async () => {
-  try {
-    let response;
+  const confirmWalletPayment = async () => {
+    try {
+      let response;
 
-    if (itemType === "activity") {
-      response = await axios.post(
-        `/payWalletAct/${touristId}/${currentItem._id}`
-      );
-    } else if (itemType === "itinerary") {
-      response = await axios.post(
-        `/payWalletIti/${touristId}/${currentItem._id}`
-      );
-    } else {
-      throw new Error("Invalid payment type");
+      if (itemType === "activity") {
+        response = await axios.post(
+          `/payWalletAct/${touristId}/${currentItem._id}`
+        );
+      } else if (itemType === "itinerary") {
+        response = await axios.post(
+          `/payWalletIti/${touristId}/${currentItem._id}`
+        );
+      } else {
+        throw new Error("Invalid payment type");
+      }
+
+      setWalletBalance(response.data.wallet); // Update wallet balance
+      setPaymentStatus("success");
+    } catch (error) {
+      setPaymentStatus("error");
     }
-
-    setWalletBalance(response.data.wallet); // Update wallet balance
-    setPaymentStatus("success");
-  } catch (error) {
-    setPaymentStatus("error");
-  }
-};
-
+  };
 
   return (
     <div>
@@ -180,8 +188,8 @@ const confirmWalletPayment = async () => {
             )}
             {/* <button onClick={() => handlePayClick(itinerary, "itinerary")}>Pay</button> */}
             <button onClick={() => cancelItineraryBooking(itinerary._id)}>
-               Cancel Booking
-             </button>
+              Cancel Booking
+            </button>
           </li>
         ))}
       </ul>
@@ -204,7 +212,7 @@ const confirmWalletPayment = async () => {
             )}
             {/* <button onClick={() => handlePayClick(activity, "activity")}>Pay</button> */}
             <button onClick={() => cancelActivityBooking(activity._id)}>
-               Cancel Booking
+              Cancel Booking
             </button>
           </li>
         ))}
@@ -260,7 +268,10 @@ const confirmWalletPayment = async () => {
                   {convertPrice(currentItem?.budget)} {selectedCurrency}
                 </p>
                 <div style={paymentOptionsStyle}>
-                  <button style={confirmButtonStyle} onClick={confirmWalletPayment}>
+                  <button
+                    style={confirmButtonStyle}
+                    onClick={confirmWalletPayment}
+                  >
                     Yes, Pay
                   </button>
                   <button
@@ -294,7 +305,9 @@ const confirmWalletPayment = async () => {
             {paymentStatus === "error" && (
               <>
                 <h2>Payment Failed</h2>
-                <p>There was an issue processing your payment. Please try again.</p>
+                <p>
+                  There was an issue processing your payment. Please try again.
+                </p>
                 <button
                   style={closeButtonStyle}
                   onClick={() => setShowConfirmModal(false)}
@@ -307,28 +320,28 @@ const confirmWalletPayment = async () => {
         </div>
       )}
       {showCancelModal && (
-  <div style={backdropStyle}>
-    <div style={modalStyle}>
-      {cancelStatus === "success" ? (
-        <>
-          <h2>Cancellation Successful</h2>
-          <p>{cancelMessage}</p>
-        </>
-      ) : (
-        <>
-          <h2>Cancellation Failed</h2>
-          <p>{cancelMessage}</p>
-        </>
+        <div style={backdropStyle}>
+          <div style={modalStyle}>
+            {cancelStatus === "success" ? (
+              <>
+                <h2>Cancellation Successful</h2>
+                <p>{cancelMessage}</p>
+              </>
+            ) : (
+              <>
+                <h2>Cancellation Failed</h2>
+                <p>{cancelMessage}</p>
+              </>
+            )}
+            <button
+              style={confirmButtonStyle}
+              onClick={() => setShowCancelModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
-      <button
-        style={confirmButtonStyle}
-        onClick={() => setShowCancelModal(false)}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
     </div>
   );
 };
