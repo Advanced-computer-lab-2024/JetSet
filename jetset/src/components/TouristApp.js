@@ -26,6 +26,7 @@ import FlightBooking from "./Booking/FlightBooking";
 import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
+import Cart from './tourist/Cart'; 
 import PaidItemsView from "./tourist/PaidItemsView";
 import Wishlist from "./tourist/Wishlist";
 
@@ -91,6 +92,8 @@ const Tourist = () => {
         return <BookedItineraries touristId={touristId} />;
       case "vacationGuide": // New case for Vacation Guide
         return <VacationGuide touristId={touristId} />;
+        case "cart": // New case for Vacation Guide
+        return <Cart touristId={touristId} />;
       case "viewPaid": 
         return <PaidItemsView touristId={touristId} />;
 
@@ -160,6 +163,8 @@ const Tourist = () => {
                 <button onClick={() => setCurrentPage("productList")}>
                   View Products
                 </button>
+                <button onClick={() => setCurrentPage("cart")}>
+                  View My Cart
                 <button onClick={() => setCurrentPage("Wishlist")}>
                   View My WishList
                 </button>

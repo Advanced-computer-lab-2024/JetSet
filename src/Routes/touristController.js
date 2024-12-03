@@ -2013,6 +2013,226 @@ async function bookmarkActivity(touristId, activityId) {
     return { error: error.message };
   }
 }
+const removeFromCart = async (req, res) => {
+  const { item } = req.body; // The item to remove from the cart
+  const touristId = req.params.id; // The tourist's ID from the URL parameters
+
+  if (!item) {
+    return res.status(400).json({ error: "Item is required" });
+  }
+
+  try {
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      touristId,
+      { $pull: { cart: item } }, // Remove the item from the cart array
+      { new: true } // Return the updated document after modification
+    );
+
+    if (!updatedTourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+    const updatedTourist2 = await Tourist.findByIdAndUpdate(
+      touristId,
+      { $pull: { cartQuantities: item } }, // Remove the item from the cart array
+      { new: true } // Return the updated document after modification
+    );
+
+    if (!updatedTourist2) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    res.status(200).json({
+      message: "Item removed from cart successfully",
+      tourist: updatedTourist,
+    });
+  } catch (error) {
+    console.error("Error removing item from cart:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+const getCartItems = async (req, res) => {
+  const touristId = req.params.id; 
+
+  try {
+    const tourist = await Tourist.findById(touristId);
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+    if (tourist.cart.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    res.status(200).json({ cart: tourist.cart });
+  } catch (error) {
+    console.error("Error fetching cart items:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+const getProductQuantity = async (req, res) => {
+  const touristId = req.params.id; // Extract tourist ID from URL params
+  const { productId } = req.body; // Extract product ID from request body
+
+  try {
+    // Find the tourist by ID and populate the product details in the cart
+    const tourist = await Tourist.findById(touristId);
+
+    if (!tourist) {
+      return res.status(404).json({ error: 'Tourist not found' });
+    }
+
+    // Find the product in the tourist's cart using the productId
+    const product = tourist.products.find(
+      (item) => item.productId._id.toString() === productId
+    );
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found in tourist cart' });
+    }
+
+    // Return the product quantity
+    return res.status(200).json({
+      productId,
+      quantity: product.purchaseQuantity,
+    });
+  } catch (error) {
+    console.error('Error fetching product quantity:', error.message);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const addToCart = async (req, res) => {
+  const { item } = req.body; 
+  const touristId = req.params.id; 
+
+  if (!item) {
+    return res.status(400).json({ error: "Item is required" });
+  }
+
+  try {
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      touristId,
+      { $push: { cart: item } }, 
+      { new: true, runValidators: true } 
+    );
+
+    if (!updatedTourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+   
+   
+    res.status(200).json({
+      message: "Item added to cart successfully",
+      tourist: updatedTourist,
+    });
+  } catch (error) {
+    console.error("Error adding item to cart:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+const batchFetchProducts = async (req, res) => {
+  const { ids } = req.body; // Array of product IDs
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: "Invalid or empty product IDs array" });
+  }
+
+  try {
+    // Fetch products using the provided IDs
+    const products = await Product.find({ _id: { $in: ids } });
+
+    if (!products.length) {
+      return res.status(404).json({ error: "No products found for the provided IDs" });
+    }
+
+    // Return the products
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error("Error fetching products:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+// Checkout route handler
+const checkout = async (req, res) => {
+  // const rateandcommentItinerary = async (req, res) => {
+    // const { itineraryId, rating, comment } = req.body; // Expecting these fields in the request body
+    // const touristId = req.params.id; // Assuming the tourist ID is passed in the URL
+    // const { activityId, rating, comment } = req.body; // Expecting these fields in the request body
+    // const touristId = req.params.id; 
+    const {updatedCart} = req.body;
+  // const {touristId}  = req.params;
+  const { touristId } = req.params;
+  // const { products } = req.body; // Get the products and quantities from the request body
+ 
+
+  try {
+    // Find the tourist by ID
+    console.log("Products in touristController:",updatedCart);
+    console.log("Inside Iteration[0] :",updatedCart[0]);
+
+    const tourist = await Tourist.findById(touristId);
+    console.log("Tourist  :",tourist);
+
+    if (!tourist) {
+
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Ensure cart is not empty
+    if (tourist.cart.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+    console.log("Inside Iteration[0] :",updatedCart[0]);
+    // Add the products and quantities to the tourist's products field
+    for (let i = 0; i < tourist.cart.length; i++) {
+      const { productId, quantity } = updatedCart[i];
+      console.log("Inside Iteration :",updatedCart[i]);
+      if (!productId || !quantity) {
+        return res.status(400).json({ message: `Invalid product data at index ${i}` });
+      }
+      // Ensure the product exists in the database
+      const product = await Product.findById(productId);
+      if (!product) {
+              console.log("Product Not found :");
+
+        return res.status(404).json({ message: `Product with ID ${productId} not found` });
+      }
+
+      // Check if the product has enough stock
+      // if (product.quantity < quantity) {
+      //   return res.status(400).json({ message: `Not enough stock for product ${productId}` });
+      // }
+
+      // Add the product and quantity to the tourist's products array
+      tourist.cartQuantities.push({
+        productId: product._id,
+        purchaseQuantity: quantity,
+      });
+      // console.log("Cart :",cart);
+      // Optionally, decrease the quantity of the product in stock
+      // product.quantity -= quantity;
+      // await product.save();
+    }
+
+    // Clear the cart after checkout
+    tourist.cart = [];
+    console.log("Cart After emptying:",tourist.cart);
+
+    await tourist.save();
+    // await clearCartForTourist(touristId);
+
+    // Respond with a success message
+    res.status(200).json({ message: "Checkout successful" });
+  } catch (error) {
+    console.error("Error during checkout:", error);
+    res.status(500).json({ message: "Error processing checkout" });
+  }
+};
+
+
+
 
 async function unbookmarkActivity(touristId, activityId) {
   try {
@@ -2691,6 +2911,12 @@ module.exports = {
   bookmarkActivity,
   unbookmarkActivity,
   loginTourist,
+  getCartItems,
+  addToCart, 
+  removeFromCart,
+  batchFetchProducts,
+  getProductQuantity,
+  checkout, 
   payByWallet,
   payByWalletAct,
   payByWalletIti,

@@ -102,6 +102,25 @@ const touristSchema = new Schema(
         ref: "Activity",
       },
     ],
+    cart: {
+      type: [String], // An array of strings
+      default: [], // Default value as an empty array
+    },
+    cartQuantities: [
+      {
+        productId: {
+          type: String,
+          required: true,
+          
+        },
+        quantity: {
+          type: Number,
+          // required: true,
+          
+        },
+      },
+    ],
+  
     wishlist: [
       {
         productId: {
@@ -131,6 +150,17 @@ const touristSchema = new Schema(
   },
   { timestamps: true }
 );
+// touristSchema.virtual("cartWithQuantities").get(function () {
+//   return this.products.map(product => ({
+//     productId: product.productId,
+//     quantity: product.purchaseQuantity,
+//   }));
+// });
+
+// // Ensure virtual fields are included in the output
+// touristSchema.set("toJSON", {
+//   virtuals: true,
+// });
 
 const Tourist = mongoose.model("Tourist", touristSchema);
 module.exports = Tourist;
