@@ -165,6 +165,7 @@ const Tourist = () => {
                 </button>
                 <button onClick={() => setCurrentPage("cart")}>
                   View My Cart
+                  </button>
                 <button onClick={() => setCurrentPage("Wishlist")}>
                   View My WishList
                 </button>
