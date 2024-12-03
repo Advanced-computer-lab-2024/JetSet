@@ -29,6 +29,7 @@ import VacationGuide from "./tourist/VacationGuide";
 import Cart from './tourist/Cart'; 
 import PaidItemsView from "./tourist/PaidItemsView";
 import Wishlist from "./tourist/Wishlist";
+import AddAddress from "./tourist/AddAddress"; 
 
 import "./styles.css";
 
@@ -92,11 +93,12 @@ const Tourist = () => {
         return <BookedItineraries touristId={touristId} />;
       case "vacationGuide": // New case for Vacation Guide
         return <VacationGuide touristId={touristId} />;
-        case "cart": // New case for Vacation Guide
+      case "cart": // New case for Vacation Guide
         return <Cart touristId={touristId} />;
       case "viewPaid": 
         return <PaidItemsView touristId={touristId} />;
-
+        case "addAddress": // New case for Vacation Guide
+        return <AddAddress touristId={touristId} />;
       default:
         return (
           <section className="tourist-frontend">
@@ -117,9 +119,13 @@ const Tourist = () => {
                 <button onClick={() => setCurrentPage("changepassword")}>
                   Change Password
                 </button>
+                <button onClick={() => setCurrentPage("addAddress")}>
+                  Add New Address
+                </button>
                 <button onClick={() => setCurrentPage("deleteAcc")}>
                   Delete My Account
                 </button>
+                
               </section>
 
               <section>

@@ -187,6 +187,7 @@ const {
   removeFromMyWishlist,
   payByCardAct,
   payByCardIti,
+  addTouristAddress,
 } = require("../src/Routes/touristController");
 
 const {
@@ -582,6 +583,7 @@ app.post("/addToCart/:id", addToCart);
 app.post("/removeFromCart/:id", removeFromCart);
 app.get("/cart/:id", getCartItems);
 app.post("/productQuantity/:id", getProductQuantity);
+app.post("/addTouristAddress/:id", addTouristAddress);
 
 app.post("/batchFetch", batchFetchProducts);
 
