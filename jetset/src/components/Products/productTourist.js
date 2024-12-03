@@ -117,7 +117,7 @@ const ProductList = ({ touristId }) => {
     } catch (error) {
       console.error("Error adding item to cart:", error);
       alert(error.response?.data?.error || "An error occurred while adding the item to the cart");
-
+    }};
 
   const handleAddToWishlist = async (product) => {
     try {
@@ -280,5 +280,4 @@ const ProductList = ({ touristId }) => {
     </div>
   );
 };
-
 export default ProductList;
