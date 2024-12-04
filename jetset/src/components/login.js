@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./styles.css";
-import NavAdmin from "./Admin/navAdmin";
+import "./login.css";
 
 const Register = () => {
   const [role, setRole] = useState("");
@@ -12,9 +11,9 @@ const Register = () => {
   const [showForgetPassword, setShowForgetPassword] = useState(false);
   const [forgetPasswordUsername, setForgetPasswordUsername] = useState("");
   const [forgetPasswordRole, setForgetPasswordRole] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
   const navigate = useNavigate();
 
-  // Handle login
   const handleLogin = async () => {
     if (!username || !password) {
       setMessage("Please enter both username and password.");
@@ -63,10 +62,11 @@ const Register = () => {
     }
   };
 
-  // Handle forget password
   const handleForgetPassword = async () => {
+    setMessage("");
+    setResetMessage(""); // Clear previous messages
     if (!forgetPasswordUsername || !forgetPasswordRole) {
-      setMessage("Please enter your username and select a role.");
+      setResetMessage("Please enter your username and select a role.");
       return;
     }
 
@@ -78,69 +78,37 @@ const Register = () => {
           role: forgetPasswordRole,
         }
       );
-
-      setMessage(response.data.message || "OTP sent to your email.");
+      setResetMessage(response.data.message || "Reset link sent successfully.");
     } catch (error) {
-      setMessage(
+      setResetMessage(
         error.response?.data?.message || "Error sending reset password link."
       );
     }
   };
 
   return (
-    <div className="App">
-      {/* Login Form */}
+    <div className="register-container">
       <div className="login-form">
-        <h2>Login</h2>
+        <h2 className="form-header">Login</h2>
         <input
           type="text"
           placeholder="Enter username"
+          className="input-field"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
           type="password"
           placeholder="Enter password"
+          className="input-field"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
         <h3>Select Your Role</h3>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="role-dropdown"
-        >
-          <option value="">Select a role</option>
-          <option value="tourist">Tourist</option>
-          <option value="admin">Admin</option>
-          <option value="seller">Seller</option>
-          <option value="tourguide">Tour Guide</option>
-          <option value="advertisor">Advertisor</option>
-          <option value="tourismgovernor">Tourism Governor</option>
-        </select>
-        <button onClick={handleLogin}>Next</button>
-        <button
-          className="forget-password-btn"
-          onClick={() => setShowForgetPassword(true)}
-        >
-          Forget Password?
-        </button>
-        {message && <p className="message">{message}</p>}
-      </div>
-
-      {/* Forget Password Modal */}
-      {showForgetPassword && (
-        <div className="forget-password-modal">
-          <h3>Forget Password</h3>
-          <input
-            type="text"
-            placeholder="Enter username"
-            value={forgetPasswordUsername}
-            onChange={(e) => setForgetPasswordUsername(e.target.value)}
-          />
+        <div className="role-selection">
           <select
-            value={forgetPasswordRole}
-            onChange={(e) => setForgetPasswordRole(e.target.value)}
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
             className="role-dropdown"
           >
             <option value="">Select a role</option>
@@ -151,8 +119,55 @@ const Register = () => {
             <option value="advertisor">Advertisor</option>
             <option value="tourismgovernor">Tourism Governor</option>
           </select>
-          <button onClick={handleForgetPassword}>Send Reset Link</button>
-          <button onClick={() => setShowForgetPassword(false)}>Cancel</button>
+        </div>
+        <button onClick={handleLogin} className="primary-btn">
+          Login
+        </button>
+        <button
+          className="secondary-btn"
+          onClick={() => setShowForgetPassword(true)}
+        >
+          Forgot Password?
+        </button>
+        {message && <p className="message">{message}</p>}
+      </div>
+
+      {showForgetPassword && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Forgot Password</h3>
+            <input
+              type="text"
+              placeholder="Enter username"
+              value={forgetPasswordUsername}
+              onChange={(e) => setForgetPasswordUsername(e.target.value)}
+              className="input-field"
+            />
+            <select
+              value={forgetPasswordRole}
+              onChange={(e) => setForgetPasswordRole(e.target.value)}
+              className="role-dropdown"
+            >
+              <option value="">Select a role</option>
+              <option value="tourist">Tourist</option>
+              <option value="admin">Admin</option>
+              <option value="seller">Seller</option>
+              <option value="tourguide">Tour Guide</option>
+              <option value="advertisor">Advertisor</option>
+              <option value="tourismgovernor">Tourism Governor</option>
+            </select>
+            <button onClick={handleForgetPassword} className="primary-btn">
+              Send Reset Link
+            </button>
+            <button
+              onClick={() => setShowForgetPassword(false)}
+              className="secondary-btn"
+            >
+              Cancel
+            </button>
+            {/* Render reset message */}
+            {resetMessage && <p className="message">{resetMessage}</p>}
+          </div>
         </div>
       )}
     </div>

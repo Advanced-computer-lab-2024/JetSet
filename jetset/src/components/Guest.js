@@ -10,8 +10,6 @@ import ActivitiesListGuest from "./Activity/ActivitiesListGuest.js";
 import ItineraryListGuest from "./Itinerary/ItineraryListGuest.js";
 // Import the new ShareItem component
 
-import "./styles.css";
-
 const Guest = () => {
   const [currentPage, setCurrentPage] = useState("home"); // Initial page
 
@@ -27,8 +25,8 @@ const Guest = () => {
         return <Search />;
       case "activitiesByCategory":
         return <ActivityByCategory />;
-        case "vacationguestguide": // New case for Vacation Guide
-        return <VacationGuestGuide  />;
+      case "vacationguestguide": // New case for Vacation Guide
+        return <VacationGuestGuide />;
       default:
         return (
           <div>
@@ -46,8 +44,8 @@ const Guest = () => {
               Filter Activities by Category
             </button>
             <button onClick={() => setCurrentPage("vacationguestguide")}>
-                View Guest Vacation Guide
-                </button>
+              View Guest Vacation Guide
+            </button>
           </div>
         );
     }

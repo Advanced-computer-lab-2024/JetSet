@@ -180,6 +180,10 @@ const {
   removeFromMyWishlist,
   payByCardAct,
   payByCardIti,
+  viewOrders,
+  viewOrderDetails,
+  cancelOrder,
+  viewRefundAmount,
 } = require("../src/Routes/touristController");
 
 const {
@@ -452,6 +456,11 @@ app.get("/products", getProducts);
 app.get("/productsAdmin", getProductsAdmin);
 
 app.put("/archieve/:productId", archiveProduct);
+
+app.get("/getorders/:touristId", viewOrders);
+app.get("/vieworder/:touristId/:orderId", viewOrderDetails);
+app.delete("/cancelorder/:touristId/:orderId", cancelOrder);
+app.get("/viewRefundAmount/:touristId/:orderId", viewRefundAmount);
 
 //Admin Controller
 app.delete("/deleteAccount", deleteAccount);

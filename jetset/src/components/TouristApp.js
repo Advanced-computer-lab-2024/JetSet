@@ -28,8 +28,10 @@ import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
 import PaidItemsView from "./tourist/PaidItemsView";
 import Wishlist from "./tourist/Wishlist";
-
-import "./styles.css";
+import ViewOrders from "./tourist/vieworders";
+import ViewOrderDetails from "./tourist/ViewOrderDetails";
+import CancelOrder from "./tourist/CancelOrder";
+import ViewRefundAmount from "./tourist/ViewRefundAmount";
 
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("");
@@ -91,8 +93,16 @@ const Tourist = () => {
         return <BookedItineraries touristId={touristId} />;
       case "vacationGuide": // New case for Vacation Guide
         return <VacationGuide touristId={touristId} />;
-      case "viewPaid": 
+      case "viewPaid":
         return <PaidItemsView touristId={touristId} />;
+      case "viewOrders":
+        return <ViewOrders touristId={touristId} />;
+      case "viewOrderDetails":
+        return <ViewOrderDetails touristId={touristId} />;
+      case "cancelOrder":
+        return <CancelOrder touristId={touristId} />;
+      case "viewRefundAmount":
+        return <ViewRefundAmount touristId={touristId} />;
 
       default:
         return (
@@ -175,6 +185,18 @@ const Tourist = () => {
                 {showPurchasedProducts && (
                   <TouristProducts touristId={touristId} />
                 )}
+                <button onClick={() => setCurrentPage("viewOrders")}>
+                  View Orders
+                </button>
+                <button onClick={() => setCurrentPage("viewOrderDetails")}>
+                  View Order Details
+                </button>
+                <button onClick={() => setCurrentPage("cancelOrder")}>
+                  Cancel Order
+                </button>
+                <button onClick={() => setCurrentPage("viewRefundAmount")}>
+                  View Refund Amount
+                </button>
               </section>
 
               <section>

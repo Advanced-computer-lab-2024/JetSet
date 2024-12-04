@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./styles.css";
 
 const Register = () => {
   const [role, setRole] = useState("seller"); // Start with 'seller' by default for this page

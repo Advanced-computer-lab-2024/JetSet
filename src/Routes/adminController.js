@@ -64,7 +64,7 @@ const forgetPass = async (req, res) => {
     // Send OTP and reset link via email
     const mailOptions = {
       from: {
-        name: "Admin",
+        name: "JetSet",
         address: process.env.EMAIL_USER, // Corrected to reference the environment variable
       },
       to: user.email,

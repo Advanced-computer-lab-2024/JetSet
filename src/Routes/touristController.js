@@ -1555,7 +1555,6 @@ const buyProduct = async (req, res) => {
     await tourist.save();
 
     // Notify seller and specific admin if the product is out of stock
-    // Notify seller and specific admin if the product is out of stock
     if (product.quantity === 0) {
       // Notify the seller
       const seller = product.seller_id;
@@ -2278,6 +2277,7 @@ const payByWallet = async (req, res) => {
 
 const payByWalletAct = async (req, res) => {
   const { touristId, activityId } = req.params;
+  const { isApplied, promoCode } = req.body;
 
   try {
     // Find the tourist
@@ -2295,6 +2295,29 @@ const payByWalletAct = async (req, res) => {
     }
     amount = activity.budget;
 
+    if (isApplied) {
+      const promo = await PromoCode.findOne({ code: promoCode });
+
+      if (!promo) {
+        return res
+          .status(400)
+          .json({ message: "Promo code not assigned to you" });
+      }
+      if (!promo.isActive || new Date() > promo.expirationDate) {
+        return res
+          .status(400)
+          .json({ message: "Invalid or expired promo code" });
+      }
+
+      amount -= (promo.discount / 100) * amount;
+
+      tourist.promoCodes = tourist.promoCodes.filter(
+        (assignedPromo) => !assignedPromo.equals(promo._id)
+      );
+
+      await tourist.save(); // Persist changes
+    }
+
     // Check if wallet balance is sufficient
     if (tourist.wallet < amount) {
       return res.status(400).json({ message: "Insufficient wallet balance" });
@@ -2309,6 +2332,26 @@ const payByWalletAct = async (req, res) => {
     }
     // Add loyalty points
     const loyaltyUpdate = await addLoyaltyPoints(amount, touristId);
+
+    const mailOptions = {
+      from: {
+        name: "JetSet",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
+      to: tourist.email,
+      subject: "Payment Confirmation for Your Activity Booking",
+      html: `
+        <p>Hello ${tourist.username},</p>
+        <p>Thank you for booking an activity with JetSet!</p>
+        <p>We are pleased to confirm your payment of <strong>${amount}</strong> has been successfully processed using your wallet.</p>
+        <p>Activity: ${activity.title}</p>
+        <p>Enjoy your activity, and thank you for choosing JetSet!</p>
+        <p>Warm regards,</p>
+        <p>JetSet Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     // Save tourist data
     await tourist.save();
@@ -2332,7 +2375,8 @@ const payByWalletAct = async (req, res) => {
 
 const payByCardAct = async (req, res) => {
   const { touristId, activityId } = req.params;
-  //const { paymentMethodId } = req.body; // This will be sent by the frontend
+  //const { paymentMethodId } = req.body; //This will be sent by the frontend
+  const { isApplied, promoCode } = req.body;
   try {
     // Find the tourist
     const tourist = await Tourist.findById(touristId);
@@ -2347,6 +2391,29 @@ const payByCardAct = async (req, res) => {
     }
 
     const amount = activity.budget * 100; // Convert to cents for Stripe
+
+    if (isApplied) {
+      const promo = await PromoCode.findOne({ code: promoCode });
+
+      if (!promo) {
+        return res
+          .status(400)
+          .json({ message: "Promo code not assigned to you" });
+      }
+      if (!promo.isActive || new Date() > promo.expirationDate) {
+        return res
+          .status(400)
+          .json({ message: "Invalid or expired promo code" });
+      }
+
+      amount -= (promo.discount / 100) * amount;
+
+      tourist.promoCodes = tourist.promoCodes.filter(
+        (assignedPromo) => !assignedPromo.equals(promo._id)
+      );
+
+      await tourist.save(); // Persist changes
+    }
 
     // Create a payment intent
     const paymentIntent = await stripe.paymentIntents.create({
@@ -2365,6 +2432,26 @@ const payByCardAct = async (req, res) => {
 
     // Add loyalty points
     const loyaltyUpdate = await addLoyaltyPoints(activity.budget, touristId);
+
+    const mailOptions = {
+      from: {
+        name: "JetSet",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
+      to: tourist.email,
+      subject: "Payment Confirmation for Your Activity Booking",
+      html: `
+        <p>Hello ${tourist.username},</p>
+        <p>Thank you for booking an activity with JetSet!</p>
+        <p>We are pleased to confirm your payment of <strong>${amount}</strong> has been successfully processed using your credit card</p>
+        <p>Activity: ${activity.title}</p>
+        <p>Enjoy your activity, and thank you for choosing JetSet!</p>
+        <p>Warm regards,</p>
+        <p>JetSet Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     // Save the tourist data
     await tourist.save();
@@ -2390,6 +2477,7 @@ const payByCardAct = async (req, res) => {
 const payByCardIti = async (req, res) => {
   const { touristId, iteniraryId } = req.params;
   //const { paymentMethodId } = req.body; // This will be sent by the frontend
+  const { isApplied, promoCode } = req.body;
   try {
     // Find the tourist
     const tourist = await Tourist.findById(touristId);
@@ -2404,6 +2492,29 @@ const payByCardIti = async (req, res) => {
     }
 
     const amount = itinerary.budget * 100; // Convert to cents for Stripe
+
+    if (isApplied) {
+      const promo = await PromoCode.findOne({ code: promoCode });
+
+      if (!promo) {
+        return res
+          .status(400)
+          .json({ message: "Promo code not assigned to you" });
+      }
+      if (!promo.isActive || new Date() > promo.expirationDate) {
+        return res
+          .status(400)
+          .json({ message: "Invalid or expired promo code" });
+      }
+
+      amount -= (promo.discount / 100) * amount;
+
+      tourist.promoCodes = tourist.promoCodes.filter(
+        (assignedPromo) => !assignedPromo.equals(promo._id)
+      );
+
+      await tourist.save(); // Persist changes
+    }
 
     // Create a payment intent
     const paymentIntent = await stripe.paymentIntents.create({
@@ -2422,6 +2533,26 @@ const payByCardIti = async (req, res) => {
 
     // Add loyalty points
     const loyaltyUpdate = await addLoyaltyPoints(itinerary.budget, touristId);
+
+    const mailOptions = {
+      from: {
+        name: "JetSet",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
+      to: tourist.email,
+      subject: "Payment Confirmation for Your Itinerary Booking",
+      html: `
+        <p>Hello ${tourist.username},</p>
+        <p>Thank you for booking an Itinerary with JetSet!</p>
+        <p>We are pleased to confirm your payment of <strong>${amount}</strong> has been successfully processed using your credit card.</p>
+        <p>Itinerary: ${itinerary.name}</p>
+        <p>Enjoy your Itinerary, and thank you for choosing JetSet!</p>
+        <p>Warm regards,</p>
+        <p>JetSet Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     // Save the tourist data
     await tourist.save();
@@ -2446,6 +2577,7 @@ const payByCardIti = async (req, res) => {
 
 const payByWalletIti = async (req, res) => {
   const { touristId, iteniraryId } = req.params;
+  const { isApplied, promoCode } = req.body;
 
   try {
     // Find the tourist
@@ -2463,6 +2595,29 @@ const payByWalletIti = async (req, res) => {
     }
     amount = itinerary.budget;
 
+    if (isApplied) {
+      const promo = await PromoCode.findOne({ code: promoCode });
+
+      if (!promo) {
+        return res
+          .status(400)
+          .json({ message: "Promo code not assigned to you" });
+      }
+      if (!promo.isActive || new Date() > promo.expirationDate) {
+        return res
+          .status(400)
+          .json({ message: "Invalid or expired promo code" });
+      }
+
+      amount -= (promo.discount / 100) * amount;
+
+      tourist.promoCodes = tourist.promoCodes.filter(
+        (assignedPromo) => !assignedPromo.equals(promo._id)
+      );
+
+      await tourist.save(); // Persist changes
+    }
+
     // Check if wallet balance is sufficient
     if (tourist.wallet < amount) {
       return res.status(400).json({ message: "Insufficient wallet balance" });
@@ -2479,6 +2634,26 @@ const payByWalletIti = async (req, res) => {
 
     // Add loyalty points
     const loyaltyUpdate = await addLoyaltyPoints(amount, touristId);
+
+    const mailOptions = {
+      from: {
+        name: "JetSet",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
+      to: tourist.email,
+      subject: "Payment Confirmation for Your Itinerary Booking",
+      html: `
+        <p>Hello ${tourist.username},</p>
+        <p>Thank you for booking an Itinerary with JetSet!</p>
+        <p>We are pleased to confirm your payment of <strong>${amount}</strong> has been successfully processed using your Wallet</p>
+        <p>Itinerary: ${itinerary.name}</p>
+        <p>Enjoy your Itinerary, and thank you for choosing JetSet!</p>
+        <p>Warm regards,</p>
+        <p>JetSet Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     // Save tourist data
     await tourist.save();
@@ -2504,6 +2679,7 @@ const payByWalletProduct = async (req, res) => {
   const { touristId, productId } = req.params;
 
   try {
+    let amount = 0;
     // Find the tourist
     const tourist = await Tourist.findById(touristId);
     if (!tourist) {
@@ -2520,9 +2696,33 @@ const payByWalletProduct = async (req, res) => {
     if (tourist.wallet < product.price) {
       return res.status(400).json({ message: "Insufficient wallet balance" });
     }
+    amount = product.price;
+
+    if (isApplied) {
+      const promo = await PromoCode.findOne({ code: promoCode });
+
+      if (!promo) {
+        return res
+          .status(400)
+          .json({ message: "Promo code not assigned to you" });
+      }
+      if (!promo.isActive || new Date() > promo.expirationDate) {
+        return res
+          .status(400)
+          .json({ message: "Invalid or expired promo code" });
+      }
+
+      amount -= (promo.discount / 100) * amount;
+
+      tourist.promoCodes = tourist.promoCodes.filter(
+        (assignedPromo) => !assignedPromo.equals(promo._id)
+      );
+
+      await tourist.save(); // Persist changes
+    }
 
     // Deduct product price from wallet
-    tourist.wallet -= product.price;
+    tourist.wallet -= amount;
 
     // Add the product ID to the payedProducts array
     if (!tourist.payedProducts.includes(productId)) {
@@ -2538,6 +2738,26 @@ const payByWalletProduct = async (req, res) => {
 
     // Optionally: Add loyalty points for the purchase
     const loyaltyUpdate = await addLoyaltyPoints(product.price, touristId);
+
+    const mailOptions = {
+      from: {
+        name: "JetSet",
+        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+      },
+      to: tourist.email,
+      subject: "Payment Confirmation for Your Product",
+      html: `
+        <p>Hello ${tourist.username},</p>
+        <p>Thank you for buying Product with JetSet!</p>
+        <p>We are pleased to confirm your payment of <strong>${amount}</strong> has been successfully processed using your Wallet</p>
+        <p>Product: ${product.name}</p>
+        <p>Enjoy your Product, and thank you for choosing JetSet!</p>
+        <p>Warm regards,</p>
+        <p>JetSet Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     // Return success response
     return res.status(200).json({
@@ -2635,6 +2855,227 @@ const paidHistory = async (req, res) => {
     res.status(500).json({ message: "Error fetching history items", error });
   }
 };
+const viewOrders = async (req, res) => {
+  const { touristId } = req.params; // Get the touristId from the URL parameters
+
+  try {
+    // Get the tourist data
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found." });
+    }
+
+    // Fetch the purchased products for the tourist
+    const purchasedProducts = await Tourist.findById(touristId).populate(
+      "products"
+    );
+    if (!purchasedProducts) {
+      return res.status(404).json({ message: "No purchased products found." });
+    }
+
+    // Fetch the booked itineraries for the tourist
+    const bookedItineraries = await Tourist.findById(touristId).populate(
+      "bookedItineraries"
+    );
+    if (!bookedItineraries) {
+      return res.status(404).json({ message: "No booked itineraries found." });
+    }
+
+    // Fetch the booked activities for the tourist
+    const bookedActivities = await Tourist.findById(touristId).populate(
+      "bookedActivities"
+    );
+    if (!bookedActivities) {
+      return res.status(404).json({ message: "No booked activities found." });
+    }
+
+    // Return the combined order data (current and past orders)
+    res.status(200).json({
+      purchasedProducts: purchasedProducts.products,
+      bookedItineraries: bookedItineraries.bookedItineraries,
+      bookedActivities: bookedActivities.bookedActivities,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const viewOrderDetails = async (req, res) => {
+  const { touristId, orderId } = req.params;
+
+  try {
+    // Step 1: Find the tourist by ID
+    const tourist = await Tourist.findById(touristId).populate(
+      "products bookedActivities bookedItineraries"
+    );
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found." });
+    }
+
+    // Step 2: Check for the order in purchased products
+    const purchasedProduct = tourist.products.find(
+      (product) => product._id.toString() === orderId
+    );
+    if (purchasedProduct) {
+      return res.status(200).json({
+        orderDetails: purchasedProduct,
+        status: purchasedProduct.status || "No status available", // Customize this according to your data structure
+      });
+    }
+
+    // Step 3: Check for the order in booked activities
+    const bookedActivity = tourist.bookedActivities.find(
+      (activity) => activity._id.toString() === orderId
+    );
+    if (bookedActivity) {
+      return res.status(200).json({
+        orderDetails: bookedActivity,
+        status: bookedActivity.status || "No status available", // Customize this according to your data structure
+      });
+    }
+
+    // Step 4: Check for the order in booked itineraries
+    const bookedItinerary = tourist.bookedItineraries.find(
+      (itinerary) => itinerary._id.toString() === orderId
+    );
+    if (bookedItinerary) {
+      return res.status(200).json({
+        orderDetails: bookedItinerary,
+        status: bookedItinerary.status || "No status available", // Customize this according to your data structure
+      });
+    }
+
+    // Step 5: If no order found, return an error message
+    return res.status(404).json({ message: "Order not found." });
+  } catch (err) {
+    // Step 6: Handle any errors that occur during the process
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+const cancelOrder = async (req, res) => {
+  const { touristId, orderId } = req.params;
+
+  try {
+    // Step 1: Find the tourist by ID
+    const tourist = await Tourist.findById(touristId).populate(
+      "products bookedActivities bookedItineraries"
+    );
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found." });
+    }
+
+    // Step 2: Check for the order in purchased products
+    const purchasedProduct = tourist.products.find(
+      (product) => product._id.toString() === orderId
+    );
+    if (purchasedProduct) {
+      // Remove product from the tourist's products
+      tourist.products = tourist.products.filter(
+        (product) => product._id.toString() !== orderId
+      );
+      await tourist.save();
+
+      return res.status(200).json({
+        message: "Product order canceled successfully.",
+        canceledOrder: purchasedProduct,
+      });
+    }
+
+    // Step 3: Check for the order in booked activities
+    const bookedActivity = tourist.bookedActivities.find(
+      (activity) => activity._id.toString() === orderId
+    );
+    if (bookedActivity) {
+      // Remove activity from the tourist's bookedActivities and refund wallet
+      tourist.bookedActivities = tourist.bookedActivities.filter(
+        (activity) => activity._id.toString() !== orderId
+      );
+      tourist.wallet += bookedActivity.budget; // Refund the cost of the activity
+      await tourist.save();
+
+      return res.status(200).json({
+        message: "Activity booking canceled successfully.",
+        canceledOrder: bookedActivity,
+      });
+    }
+
+    // Step 4: Check for the order in booked itineraries
+    const bookedItinerary = tourist.bookedItineraries.find(
+      (itinerary) => itinerary._id.toString() === orderId
+    );
+    if (bookedItinerary) {
+      // Remove itinerary from the tourist's bookedItineraries and refund wallet
+      tourist.bookedItineraries = tourist.bookedItineraries.filter(
+        (itinerary) => itinerary._id.toString() !== orderId
+      );
+      tourist.wallet += bookedItinerary.budget; // Refund the cost of the itinerary
+      await tourist.save();
+
+      return res.status(200).json({
+        message: "Itinerary booking canceled successfully.",
+        canceledOrder: bookedItinerary,
+      });
+    }
+
+    // Step 5: If no order found, return an error
+    return res.status(404).json({ message: "Order not found." });
+  } catch (err) {
+    // Step 6: Handle any errors that occur during the process
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+const viewRefundAmount = async (req, res) => {
+  const { touristId, orderId } = req.params;
+
+  // Check if the touristId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(touristId)) {
+    return res.status(400).json({ message: "Invalid tourist ID format." });
+  }
+
+  try {
+    // Find the tourist by ID and populate the products
+    const tourist = await Tourist.findById(touristId).populate("products");
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found." });
+    }
+
+    let refundedAmount = 0;
+
+    // Ensure wallet is a valid number
+    if (isNaN(tourist.wallet)) {
+      return res.status(400).json({ message: "Invalid wallet balance." });
+    }
+
+    // Check if the order is a purchased product
+    const purchasedProduct = tourist.products.find(
+      (product) => product._id.toString() === orderId
+    );
+    if (purchasedProduct) {
+      // Make sure the product has a valid price
+      refundedAmount = purchasedProduct.price; // Assuming 'price' is the field to refund
+      if (isNaN(refundedAmount)) {
+        return res.status(400).json({ message: "Invalid refund amount." });
+      }
+      tourist.wallet += refundedAmount; // Add refund to wallet
+      await tourist.save();
+    }
+
+    // If no product is found for refund
+    if (refundedAmount === 0) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+
+    res.status(200).json({
+      message: "Refund successful",
+      refundedAmount,
+      updatedWalletBalance: tourist.wallet,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 module.exports = {
   getProducts,
@@ -2704,4 +3145,8 @@ module.exports = {
   removeFromMyWishlist,
   payByCardAct,
   payByCardIti,
+  viewOrders,
+  viewOrderDetails,
+  cancelOrder,
+  viewRefundAmount,
 };

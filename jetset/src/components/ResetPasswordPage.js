@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
+import "./ResetPasswordPage.css"; // Add custom styles here
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const handleResetPassword = async () => {
     const username = searchParams.get("username");
@@ -13,7 +16,12 @@ const ResetPasswordPage = () => {
     const otp = searchParams.get("otp");
 
     if (!username || !role || !otp) {
-      setMessage("Invalid reset link.");
+      setError("Invalid reset link.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -28,22 +36,42 @@ const ResetPasswordPage = () => {
         }
       );
       setMessage(response.data.message);
+      setError(""); // Clear any previous errors
     } catch (error) {
-      setMessage(error.response?.data?.message || "Error resetting password.");
+      setMessage("");
+      setError(error.response?.data?.message || "Error resetting password.");
     }
   };
 
   return (
-    <div>
-      <h1>Reset Password</h1>
-      <input
-        type="password"
-        placeholder="Enter new password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-      />
-      <button onClick={handleResetPassword}>Reset Password</button>
-      {message && <p>{message}</p>}
+    <div className="reset-password-container">
+      <div className="reset-password-card">
+        <h1 className="reset-password-header">Reset Password</h1>
+        <p className="reset-password-description">
+          Please enter your new password below.
+        </p>
+        <div className="reset-password-inputs">
+          <input
+            type="password"
+            placeholder="Enter new password"
+            className="input-field"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Confirm new password"
+            className="input-field"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+        </div>
+        <button className="primary-btn" onClick={handleResetPassword}>
+          Reset Password
+        </button>
+        {error && <p className="error-message">{error}</p>}
+        {message && <p className="success-message">{message}</p>}
+      </div>
     </div>
   );
 };
