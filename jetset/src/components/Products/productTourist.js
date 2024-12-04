@@ -103,6 +103,22 @@ const ProductList = ({ touristId }) => {
     }
   };
 
+  const handleAddToCart = async (product) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/addToCart/${touristId}`,
+        {
+          item: product._id,
+        }
+      );
+      alert(response.data.message);
+      // fetchCart(); 
+      setSelectedProduct(null); 
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+      alert(error.response?.data?.error || "An error occurred while adding the item to the cart");
+    }};
+
   const handleAddToWishlist = async (product) => {
     try {
       const response = await axios.post(
@@ -230,6 +246,15 @@ const ProductList = ({ touristId }) => {
                   </button>
                   <button onClick={() => handleAddToWishlist(product)}>Add to Wishlist</button>
                 </td>
+                <td>
+                <button onClick={() => {
+    // setSelectedProduct(product);
+    handleAddToCart(product);
+  }}
+>
+  Add to Cart
+</button>
+                </td>
               </tr>
             ))
           )}
@@ -247,6 +272,7 @@ const ProductList = ({ touristId }) => {
             value={purchaseQuantity}
             onChange={(e) => setPurchaseQuantity(parseInt(e.target.value))}
           />
+          
           <button onClick={handleBuyProduct}>Buy</button>
           <button onClick={() => setSelectedProduct(null)}>Cancel</button>
         </div>
@@ -254,5 +280,4 @@ const ProductList = ({ touristId }) => {
     </div>
   );
 };
-
 export default ProductList;

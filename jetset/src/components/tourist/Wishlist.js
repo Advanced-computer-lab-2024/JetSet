@@ -40,6 +40,20 @@ const Wishlist = ({ touristId }) => {
     }
   };
 
+  const handleAddToCart = async (productId) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/addToCart/${touristId}`,
+        {
+          item: productId,
+        }
+      );
+      alert(response.data.message); 
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+      alert(error.response?.data?.error || "An error occurred while adding the item to the cart");
+    }};
+
   return (
     <div>
       <h1>Your Wishlist</h1>
@@ -72,6 +86,11 @@ const Wishlist = ({ touristId }) => {
                       onClick={() => handleRemoveFromWishlist(item.productId._id)}
                     >
                       Remove
+                    </button>
+                    <button
+                      onClick={() => handleAddToCart(item.productId._id)}
+                    >
+                      Add To Cart
                     </button>
                   </td>
                 </tr>

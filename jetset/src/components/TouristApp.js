@@ -26,9 +26,12 @@ import FlightBooking from "./Booking/FlightBooking";
 import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
+import Cart from "./tourist/Cart";
 import PaidItemsView from "./tourist/PaidItemsView";
 import Wishlist from "./tourist/Wishlist";
 import ViewOrders from "./tourist/vieworders";
+import AddAddress from "./tourist/AddAddress";
+
 import ViewOrderDetails from "./tourist/ViewOrderDetails";
 import CancelOrder from "./tourist/CancelOrder";
 import ViewRefundAmount from "./tourist/ViewRefundAmount";
@@ -93,6 +96,8 @@ const Tourist = () => {
         return <BookedItineraries touristId={touristId} />;
       case "vacationGuide": // New case for Vacation Guide
         return <VacationGuide touristId={touristId} />;
+      case "cart": // New case for Vacation Guide
+        return <Cart touristId={touristId} />;
       case "viewPaid":
         return <PaidItemsView touristId={touristId} />;
       case "viewOrders":
@@ -103,7 +108,8 @@ const Tourist = () => {
         return <CancelOrder touristId={touristId} />;
       case "viewRefundAmount":
         return <ViewRefundAmount touristId={touristId} />;
-
+      case "addAddress": // New case for Vacation Guide
+        return <AddAddress touristId={touristId} />;
       default:
         return (
           <section className="tourist-frontend">
@@ -123,6 +129,9 @@ const Tourist = () => {
                 </button>
                 <button onClick={() => setCurrentPage("changepassword")}>
                   Change Password
+                </button>
+                <button onClick={() => setCurrentPage("addAddress")}>
+                  Add New Address
                 </button>
                 <button onClick={() => setCurrentPage("deleteAcc")}>
                   Delete My Account
@@ -169,6 +178,9 @@ const Tourist = () => {
                 <h2>Products & Purchases</h2>
                 <button onClick={() => setCurrentPage("productList")}>
                   View Products
+                </button>
+                <button onClick={() => setCurrentPage("cart")}>
+                  View My Cart
                 </button>
                 <button onClick={() => setCurrentPage("Wishlist")}>
                   View My WishList

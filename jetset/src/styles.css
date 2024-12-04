@@ -1,252 +1,296 @@
-/* modernTravelStyles.css */
-
-/* Global Styles */
+/* General Styles */
 body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f5f5f5; /* Light background */
+  color: #333;
   margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(
-    135deg,
-    #a0e0e0,
-    #f0f8ff
-  ); /* Soft gradient for a beachy feel */
-  color: #333; /* Dark gray text */
-  line-height: 1.6;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  padding: 0;
 }
 
-h1,
-h2,
-h3 {
-  color: #0077b6; /* Deep blue for headings */
-}
-
-/* Container Styles */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-/* Header Styles */
-header {
-  background-color: rgba(255, 255, 255, 0.9); /* Light white background */
-  color: #0077b6; /* Deep blue */
-  padding: 20px 0;
-  text-align: center;
-  border-radius: 0 0 30px 30px; /* Rounded corners */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-}
-
-/* Navigation Styles */
-nav {
-  display: flex;
-  justify-content: center;
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.8
-  ); /* Light semi-transparent background */
+.App {
+  max-width: 1000px; /* Increase max width for larger screens */
+  margin: 50px auto;
+  padding: 40px;
+  background-color: #fdf5e6; /* Royal off-white */
   border-radius: 20px;
-  margin: 10px 0;
-  padding: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-nav a {
-  color: #0077b6; /* Deep blue */
-  padding: 12px 20px;
-  text-decoration: none;
+.App:hover {
+  transform: translateY(-10px); /* Subtle lift effect on hover */
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+h1, h2 {
+  color: #1d3557; /* Royal blue for headers */
+  font-family: 'Georgia', serif;
   font-weight: bold;
-  transition: background-color 0.3s, transform 0.3s;
-  border-radius: 15px;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1); /* Light text shadow */
+  margin-bottom: 20px; /* Spacing below headers */
+  font-size: 3rem; /* Larger header text */
+  letter-spacing: 2px; /* Space out text for an elegant look */
 }
 
-nav a:hover {
-  background-color: #ffcc00; /* Bright yellow on hover */
-  color: white; /* Change text color on hover */
-  transform: translateY(-3px); /* Lift effect on hover */
+h1 {
+  font-size: 4rem; /* Larger for main headings */
 }
 
-/* Card Styles for Listings */
-.card {
-  background-color: #ffffff; /* White background for cards */
-  border: 2px solid #0077b6; /* Blue border */
-  border-radius: 20px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Stronger shadow for floating effect */
-  margin: 20px 0;
-  padding: 20px;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.card:hover {
-  transform: translateY(-8px); /* Lift effect on hover */
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
-}
-
-/* Floating Button Styles */
-.float-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #ffcc00; /* Bright yellow */
-  color: #0077b6; /* Deep blue */
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 24px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s, transform 0.3s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.float-button:hover {
-  background-color: #ffb300; /* Darker yellow on hover */
-  transform: scale(1.1); /* Slight zoom effect */
-}
-
-/* Form Styles */
-form {
-  background-color: #ffffff; /* White background for forms */
-  border: 2px solid #0077b6; /* Blue border */
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Shadow for floating effect */
-  margin-bottom: 20px;
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #ddd; /* Light gray */
-  border-radius: 10px;
-  margin-bottom: 10px;
-  transition: border-color 0.3s;
-}
-
-input:focus,
-textarea:focus {
-  border-color: #0077b6; /* Ocean blue on focus */
-  outline: none;
+h2 {
+  font-size: 3rem; /* Slightly smaller subheading */
 }
 
 /* Button Styles */
 button {
-  background-color: #00b4d8; /* Light blue */
-  color: white;
+  background-color: #1d3557; /* Royal blue */
+  color: #fff; /* White text */
   border: none;
+  padding: 18px 35px; /* Adjusted padding for more space */
   border-radius: 10px;
-  padding: 12px 20px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-  font-weight: bold;
+  margin: 20px 0; /* Margin between buttons, stacked vertically */
+  font-size: 18px; /* Larger button text */
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 button:hover {
-  background-color: #0077b6; /* Darker blue on hover */
-  transform: translateY(-3px); /* Lift effect on hover */
+  background-color: #457b9d; /* Lighter royal blue */
+  transform: scale(1.05); /* Slight button enlargement on hover */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+}
+
+button:active {
+  background-color: #a8d0e6; /* Soft blue on button click */
+  transform: scale(1); /* Reset scale on click */
+}
+
+button:focus {
+  outline: none; /* Remove default focus outline */
+  box-shadow: 0 0 0 4px rgba(72, 140, 223, 0.6); /* Blue glow on focus */
+}
+
+/* Form Fields (Textboxes, Textareas, Select) */
+input, textarea, select {
+  width: 100%;
+  padding: 16px 25px; /* More padding to space out text inside fields */
+  margin: 20px 0; /* Increased margin to provide more space between fields */
+  border: 2px solid #1d3557; /* Royal blue border */
+  border-radius: 8px;
+  background-color: #fff; /* White background */
+  font-size: 16px;
+  color: #333;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  margin-left: -20px; /* Shift text boxes slightly to the left */
+  outline: none;
+  border-color: #457b9d; /* Lighter blue border on focus */
+  box-shadow: 0 0 8px rgba(72, 140, 223, 0.3); /* Soft blue glow */
+}
+
+
+/* Success and Error Messages */
+.success-message {
+  color: #2a9d8f; /* Soft green for success messages */
+  font-size: 24px; /* Larger text for better visibility */
+  font-weight: bold;
+  padding: 15px 25px; /* Adjusted padding */
+  border: 2px solid #2a9d8f; /* Green border to match the message color */
+  border-radius: 8px;
+  background-color: #e6f9f0; /* Soft green background */
+  margin-bottom: 20px;
+  display: inline-block; /* Ensure it wraps well */
+}
+
+.error-message {
+  color: #e76f51; /* Warm red for error messages */
+  font-size: 24px; /* Larger text for better visibility */
+  font-weight: bold;
+  padding: 15px 25px; /* Adjusted padding */
+  border: 2px solid #e76f51; /* Red border to match the message color */
+  border-radius: 8px;
+  background-color: #fde0db; /* Soft red background */
+  margin-bottom: 20px;
+  display: inline-block; /* Ensure it wraps well */
 }
 
 /* List Styles */
 ul {
-  list-style-type: none; /* Remove default list styles */
+  list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 li {
-  background-color: #ffffff; /* White background for list items */
-  border: 2px solid #0077b6; /* Blue border */
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between; /* Align items */
+  background-color: #fff;
+  border: 2px solid #1d3557; /* Royal blue border */
+  border-radius: 12px;
+  padding: 30px; /* Increased padding for more space inside list items */
+  margin-bottom: 25px; /* More space between list items */
+  display: block; /* Changed to block to make it stack vertically */
+  word-wrap: break-word; /* Prevent words from breaking the layout */
+  overflow-wrap: break-word; /* Ensures long words wrap */
+  font-size: 1.2rem; /* Enlarged font size for list items */
 }
 
 li button {
-  background-color: #ff3333; /* Red for delete button */
-  border-radius: 5px;
+  background-color: #e76f51; /* Warm red for delete button */
+  color: #fff;
+  border-radius: 50%;
+  padding: 20px; /* Increased button padding */
+  border: none;
+  cursor: pointer;
+  font-size: 24px; /* Larger icon size */
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 li button:hover {
-  background-color: #cc0000; /* Darker red on hover */
+  background-color: #d15e3b; /* Darker red on hover */
+  transform: scale(1.1); /* Slight increase in size */
+}
+
+li button:active {
+  background-color: #c94e2f; /* Even darker red on click */
+  transform: scale(1); /* Reset scale on click */
+}
+
+li button i { /* Icon size adjustments */
+  font-size: 28px; /* Slightly larger icon */
+  transition: transform 0.2s ease;
+}
+
+li button:hover i {
+  transform: rotate(180deg); /* Rotate icon on hover for cool effect */
 }
 
 /* Footer Styles */
 footer {
-  background-color: rgba(255, 255, 255, 0.9); /* Light white background */
-  color: #0077b6; /* Deep blue */
+  background-color: rgba(255, 255, 255, 0.85); /* Light off-white background */
+  color: #1d3557; /* Royal blue */
   text-align: center;
-  padding: 15px 0;
+  padding: 30px 0;
   position: relative;
   bottom: 0;
   width: 100%;
-  border-top-left-radius: 30px; /* Rounded corners */
+  border-top-left-radius: 30px;
   border-top-right-radius: 30px;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 18px;
 }
 
-/* Overlay background */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(160, 224, 224, 0.9),
-    rgba(240, 248, 255, 0.9)
-  ); /* Soft gradient with transparency */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column; /* Center modal content vertically */
-  z-index: 1000; /* Ensure it appears above other content */
+footer a {
+  color: #1d3557; /* Royal blue for links */
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 20px;
 }
 
-/* Modal content */
-.modal {
-  background: white;
-  padding: 20px;
-  width: 400px;
-  max-width: 90%;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  text-align: center;
-  z-index: 1001;
+footer a:hover {
+  text-decoration: underline; /* Underline effect on hover */
+  color: #457b9d; /* Lighter royal blue on hover */
 }
 
-.terms-content {
-  height: 150px;
-  overflow-y: auto;
+footer p {
   margin: 10px 0;
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 4px;
+  font-size: 16px;
 }
 
-.modal button {
-  margin-top: 10px;
-  padding: 10px 20px;
-  background-color: #007bff;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .App {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  h1 {
+    font-size: 3rem; /* Smaller header text on mobile */
+  }
+
+  h2 {
+    font-size: 2rem; /* Smaller subheading on mobile */
+  }
+
+  button {
+    width: 100%; /* Make buttons full-width on smaller screens */
+    padding: 18px 20px; /* Adjust padding for buttons on mobile */
+  }
+
+  li {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px; /* More padding for list items on mobile */
+  }
+
+  li button {
+    margin-top: 15px;
+    width: 100%;
+  }
+
+  input, textarea, select {
+    width: 100%; /* Full-width input fields on mobile */
+    padding: 16px; /* Adjust padding for consistency */
+  }
+}
+
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background-color: #1d3557; /* Dark Royal Blue */
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  position: sticky;
+  top: 0;
 }
 
-.modal button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.navbar a {
+  color: white;
+  font-size: 20px;
+  text-decoration: none;
+  margin: 0 20px;
 }
 
-.modal label {
-  display: block;
-  margin-top: 10px;
-  font-size: 14px;
+.navbar a:hover {
+  color: #e76f51; /* Soft orange on hover */
+}
+
+/* Calendar Styles */
+input[type="date"] {
+  width: 100%;
+  padding: 16px 25px;
+  margin: 20px 0;
+  border: 2px solid #1d3557; /* Royal blue border */
+  border-radius: 8px;
+  background-color: #fff; /* White background */
+  font-size: 16px;
+  color: #333;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer; /* Indicate it's clickable */
+}
+
+/* Focused Calendar Input */
+input[type="date"]:focus {
+  outline: none;
+  border-color: #457b9d; /* Lighter blue border on focus */
+  box-shadow: 0 0 8px rgba(72, 140, 223, 0.3); /* Soft blue glow */
+}
+
+/* Disable past dates (optional feature) */
+input[type="date"]:invalid {
+  background-color: #fce4e4; /* Soft red background when date is invalid */
+  border-color: #e76f51; /* Red border when invalid */
+}
+
+/* Custom Calendar Pop-up Styles (only some browsers support customizing this) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background-color: #1d3557; /* Royal blue */
+  color: white;
+  border-radius: 50%;
+  padding: 5px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  background-color: #457b9d; /* Lighter blue when hovered */
+  transform: scale(1.1); /* Slight zoom effect */
 }
