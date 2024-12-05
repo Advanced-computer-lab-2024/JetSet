@@ -1,6 +1,6 @@
 /* General Styles */
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   background-color: #f5f5f5; /* Light background */
   color: #333;
   margin: 0;
@@ -22,9 +22,10 @@ body {
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
 }
 
-h1, h2 {
+h1,
+h2 {
   color: #1d3557; /* Royal blue for headers */
-  font-family: 'Georgia', serif;
+  font-family: "Georgia", serif;
   font-weight: bold;
   text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1); /* Light text shadow */
   margin-bottom: 20px; /* Spacing below headers */
@@ -50,7 +51,8 @@ button {
   cursor: pointer;
   margin: 20px 0; /* Margin between buttons, stacked vertically */
   font-size: 18px; /* Larger button text */
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 button:hover {
@@ -70,7 +72,9 @@ button:focus {
 }
 
 /* Form Fields (Textboxes, Textareas, Select) */
-input, textarea, select {
+input,
+textarea,
+select {
   width: 100%;
   padding: 16px 25px; /* More padding to space out text inside fields */
   margin: 20px 0; /* Increased margin to provide more space between fields */
@@ -85,7 +89,6 @@ input, textarea, select {
   border-color: #457b9d; /* Lighter blue border on focus */
   box-shadow: 0 0 8px rgba(72, 140, 223, 0.3); /* Soft blue glow */
 }
-
 
 /* Success and Error Messages */
 .success-message {
@@ -152,7 +155,8 @@ li button:active {
   transform: scale(1); /* Reset scale on click */
 }
 
-li button i { /* Icon size adjustments */
+li button i {
+  /* Icon size adjustments */
   font-size: 28px; /* Slightly larger icon */
   transition: transform 0.2s ease;
 }
@@ -224,7 +228,9 @@ footer p {
     width: 100%;
   }
 
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     width: 100%; /* Full-width input fields on mobile */
     padding: 16px; /* Adjust padding for consistency */
   }
