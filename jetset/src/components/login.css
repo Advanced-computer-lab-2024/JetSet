@@ -22,15 +22,16 @@
 }
 
 .input-field {
-  width: 90%;
   padding: 10px;
+  max-width: 500px;
   margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  text-align: center;
 }
 
 .role-dropdown {
-  width: 95%;
+  max-width: 500px;
   padding: 10px;
   margin-bottom: 15px;
 }

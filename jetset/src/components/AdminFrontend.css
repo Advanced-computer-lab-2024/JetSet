@@ -1,47 +1,49 @@
-.management-section {
-  margin: 20px 0; /* Adjust as needed */
-}
-
-.account-actions {
+.admin-container {
   display: flex;
-  justify-content: space-between; /* Space between buttons */
-  align-items: center; /* Align items vertically in the center */
-  margin: 20px 0;
+  height: 100vh;
 }
 
-.account-actions button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #00b4d8;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.account-actions button:hover {
-  background-color: #0077b6; /* Darker shade on hover */
-}
-
-.button-container {
+.admin-sidebar {
+  width: 250px;
+  background: #343a40;
+  color: #1d3557;
   display: flex;
-  justify-content: space-between; /* Space between buttons */
-  align-items: center; /* Align buttons vertically in the center */
-  margin-bottom: 20px; /* Add some space below the buttons */
+  flex-direction: column;
+  padding: 1rem;
 }
 
-.management-section button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #00b4d8;
-  color: white;
+.admin-sidebar button {
+  background: none;
   border: none;
-  border-radius: 5px;
+  color: white;
+  font-size: 1rem;
+  margin: 0.5rem 0;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  text-align: left;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: 0.3s ease;
 }
 
-.management-section button:hover {
-  background-color: #0077b6; /* Darker shade on hover */
+.admin-sidebar button:hover {
+  background: #495057;
+}
+
+.admin-main-content {
+  flex: 1;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  overflow-y: auto;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
 }
