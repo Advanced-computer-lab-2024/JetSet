@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowLeft,
+  faHome,
+  faTag,
+  faList,
+  faClipboardList,
+  faKey,
+} from "@fortawesome/free-solid-svg-icons";
 const ActivitiesList = () => {
   const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
 
@@ -8,6 +17,7 @@ const ActivitiesList = () => {
   const [isFetchingActivities, setIsFetchingActivities] = useState(false);
   const [activitiesFetched, setActivitiesFetched] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const navigate = useNavigate();
 
   const getActivities = async () => {
     setIsFetchingActivities(true);
@@ -27,8 +37,11 @@ const ActivitiesList = () => {
   return (
     <div>
       <h3>Activities List</h3>
+      
       <button onClick={getActivities}>Get Activities</button>
-
+      <button className="back-button" onClick={() => navigate(-1)}>
+      <FontAwesomeIcon icon={faArrowLeft} /> Back
+    </button>
       {isFetchingActivities ? (
         <p>Loading activities...</p>
       ) : activitiesFetched && activities.length > 0 ? (
@@ -62,13 +75,16 @@ const ActivitiesList = () => {
                 <td>{activity.tags?.join(", ") || "N/A"}</td>
               </tr>
             ))}
+            
           </tbody>
         </table>
       ) : (
         activitiesFetched && <p>No activities available.</p>
       )}
       {statusMessage && <p>{statusMessage}</p>}
+      
     </div>
+    
   );
 };
 

@@ -18,6 +18,15 @@ import CreateAdv from "./components/Advertiser/CreateAdv";
 import ResetPasswordPage from "./components/ResetPasswordPage";
 import ChangePasswordForm from "./components/Admin/ChangePasswordForm";
 
+// import PlaceManagement from "./components/PlaceManagement";
+import PlaceList from "./components/Place/PlaceList";
+import PlaceForm from "./components/Place/PlaceForm";
+import TagForm from "./components/Tag/TagForm";
+import ActivitiesList from "./components/Activity/ActivityListAdv";
+import ItineraryList from "./components/Itinerary/ItineraryList";
+// import ItineraryList from "./components/Itinerary/ItinerariesList";
+import ChangePasswordFormTourist from "./components/Place/ChangePasswordForm";
+
 const App = () => {
   return (
     <Router>
@@ -43,6 +52,14 @@ const App = () => {
         <Route path="/login" element={<Login />} />{" "}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         {/* Consistent casing here */}
+        {/* Place Management Routes */}
+        {/* <Route path="/place-management" element={<PlaceManagement />} /> */}
+        <Route path="/places" element={<PlaceList />} />
+        <Route path="/add-place" element={<PlaceForm />} />
+        <Route path="/tags" element={<TagForm />} />
+        <Route path="/activities" element={<ActivitiesList />} />
+        <Route path="/itineraries" element={<ItineraryList />} />
+        <Route path="/changepass" element={<ChangePasswordFormTourist />} />
       </Routes>
     </Router>
   );
