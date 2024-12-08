@@ -192,6 +192,7 @@ const {
   cancelOrder,
   viewRefundAmount,
   addTouristAddress,
+  payByCardPro,
 } = require("../src/Routes/touristController");
 
 const {
@@ -550,7 +551,8 @@ app.post("/payWalletAct/:touristId/:activityId", payByWalletAct);
 app.post("/payCardAct/:touristId/:activityId", payByCardAct);
 app.post("/payCardIti/:touristId/:iteniraryId", payByCardIti);
 app.post("/payWalletIti/:touristId/:iteniraryId", payByWalletIti);
-app.post("/payWalletPro/:touristId/:productId", payByWalletProduct);
+app.post("/payWalletPro/:touristId", payByWalletProduct);
+app.post("/payCardPro/:touristId", payByCardPro);
 app.get("/paidUpcoming/:touristId", paidUpcoming);
 app.get("/paidHistory/:touristId", paidHistory);
 app.post("/transportation", createTransportation);
