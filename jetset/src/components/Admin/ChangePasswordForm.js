@@ -4,6 +4,8 @@ import NavAdmin from "./navAdmin";
 import { useParams } from "react-router-dom";
 
 const ChangePasswordForm = () => {
+  const { adminId } = useParams();
+
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -11,7 +13,6 @@ const ChangePasswordForm = () => {
   const [adminUsername, setAdminUsername] = useState("");
   const [email, setEmail] = useState("");
 
-  const { adminId } = useParams();
 
   const fetchAdminData = async () => {
     try {

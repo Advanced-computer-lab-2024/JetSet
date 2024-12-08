@@ -61,7 +61,7 @@ const NavTourist = ({ touristId, username }) => {
   };
 
   const handleGetProfile = () => {
-    //navigate(`/admin/change-password/${touristId}`);
+    navigate(`/admin/change-password/${touristId}`);
   };
 
   const handleLogOut = () => {

@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import { createPlace } from "./placeService";
-
+import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowLeft,
+  faHome,
+  faTag,
+  faList,
+  faClipboardList,
+  faKey,
+} from "@fortawesome/free-solid-svg-icons";
 const PlaceForm = () => {
   const [updatedPlaceData, setUpdatedPlaceData] = useState({
     Name: "",
@@ -19,6 +28,8 @@ const PlaceForm = () => {
     TicketPricesS: "",
     managed_by: "",
   });
+    const navigate = useNavigate();
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -173,6 +184,9 @@ const PlaceForm = () => {
       />
 
       <button type="submit">Submit</button>
+      <button className="back-button" onClick={() => navigate(-1)}>
+      <FontAwesomeIcon icon={faArrowLeft} /> Back
+    </button>
     </form>
   );
 };
