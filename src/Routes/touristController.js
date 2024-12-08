@@ -153,7 +153,8 @@ cron.schedule("17 14 * * *", async () => {
         const notification = new Notification({
           recipient: tourist.username,
           role: "Tourist",
-          message: `You have upcoming events: ${reminders.length} items. Please check your email for details.`,
+          message: `<p>You have the following upcoming events:</p>
+          <ul>${reminders.join("\n")}</ul>`,
         });
 
         // Save the notification
@@ -3402,6 +3403,29 @@ const addTouristAddress = async (req, res) => {
   }
 };
 
+const getAddress = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    // Find the tourist by their ID
+    const tourist = await Tourist.findById(id).select("addresses");
+
+    // Check if tourist exists
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Send the addresses in the response
+    return res.status(200).json({
+      success: true,
+      addresses: tourist.addresses,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
 module.exports = {
   getProducts,
   SortActivities,
@@ -3481,4 +3505,5 @@ module.exports = {
   cancelOrder,
   viewRefundAmount,
   addTouristAddress,
+  getAddress,
 };

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 
-import TouristProfile from "./tourist/TouristProfile";
 import ActivityList from "./Activity/ActivitiesList";
 import ItineraryList from "./Itinerary/ItineraryTourist";
 import HistoricalPlaces from "./Place/HistoricalPlacesList";
@@ -15,12 +14,8 @@ import MyComplaintList from "./tourist/myComplaintsList";
 import RatingForm from "./tourist/RatingForm";
 import RateandcommentActivity from "./tourist/RateandcommentActivity";
 import RateandcommentItinerary from "./tourist/RateandcommentItinerary";
-import UpdatePreferencesForm from "./tourist/Prefrences";
-import ChangePassword from "./tourist/ChangePasswordForm";
 import Book from "./tourist/ActivitiesAndItineraries";
 import Transportations from "./tourist/Transportations";
-import DeleteAccount from "./tourist/DeleteAccount";
-import SetPreferredCurrency from "./tourist/SetPreferredCurrency";
 import ShareItem from "./tourist/ShareItem";
 import ActivityByCategory from "./Activity/ActivitiesByCategory";
 import FlightBooking from "./Booking/FlightBooking";
@@ -31,8 +26,6 @@ import Cart from "./tourist/Cart";
 import PaidItemsView from "./tourist/PaidItemsView";
 import Wishlist from "./tourist/Wishlist";
 import ViewOrders from "./tourist/vieworders";
-import AddAddress from "./tourist/AddAddress";
-
 import ViewOrderDetails from "./tourist/ViewOrderDetails";
 import CancelOrder from "./tourist/CancelOrder";
 import ViewRefundAmount from "./tourist/ViewRefundAmount";
@@ -71,8 +64,6 @@ const Tourist = () => {
 
   const renderPage = () => {
     switch (currentPage) {
-      case "touristProfile":
-        return <TouristProfile touristId={touristId} />;
       case "productList":
         return <ProductList touristId={touristId} />;
       case "activityList":
@@ -89,8 +80,6 @@ const Tourist = () => {
         return <Wishlist touristId={touristId} />;
       case "ActivityByCategory":
         return <ActivityByCategory touristId={touristId} />;
-      case "SetPreferredCurrency":
-        return <SetPreferredCurrency touristId={touristId} />;
       case "ShareItem":
         return <ShareItem />;
       case "loyaltyPoints":
@@ -105,16 +94,10 @@ const Tourist = () => {
         return <RateandcommentActivity touristId={touristId} />;
       case "RateandcommentItinerary":
         return <RateandcommentItinerary touristId={touristId} />;
-      case "updatePreferences":
-        return <UpdatePreferencesForm touristId={touristId} />;
-      case "changepassword":
-        return <ChangePassword touristId={touristId} />;
       case "booking":
         return <Book touristId={touristId} />;
       case "transportation":
         return <Transportations touristId={touristId} />;
-      case "deleteAcc":
-        return <DeleteAccount touristId={touristId} />;
       case "book":
         return <FlightBooking touristId={touristId} />;
       case "bookh":
@@ -135,36 +118,12 @@ const Tourist = () => {
         return <CancelOrder touristId={touristId} />;
       case "viewRefundAmount":
         return <ViewRefundAmount touristId={touristId} />;
-      case "addAddress": // New case for Vacation Guide
-        return <AddAddress touristId={touristId} />;
       default:
         return (
           <section className="tourist-frontend">
             <NavTourist touristId={touristId} username={username} />
 
             <div className="button-groups">
-              <section>
-                <h2>Profile & Preferences</h2>
-                <button onClick={() => setCurrentPage("touristProfile")}>
-                  View Tourist Profile
-                </button>
-                <button onClick={() => setCurrentPage("updatePreferences")}>
-                  Update Preferences
-                </button>
-                <button onClick={() => setCurrentPage("SetPreferredCurrency")}>
-                  Set Preferred Currency
-                </button>
-                <button onClick={() => setCurrentPage("changepassword")}>
-                  Change Password
-                </button>
-                <button onClick={() => setCurrentPage("addAddress")}>
-                  Add New Address
-                </button>
-                <button onClick={() => setCurrentPage("deleteAcc")}>
-                  Delete My Account
-                </button>
-              </section>
-
               <section>
                 <h2>Activities & Itineraries</h2>
                 <button onClick={() => setCurrentPage("activityList")}>
@@ -266,9 +225,7 @@ const Tourist = () => {
 
               <section>
                 <h2>Extras</h2>
-                <button onClick={() => setCurrentPage("loyaltyPoints")}>
-                  Loyalty Points
-                </button>
+
                 <button onClick={() => setCurrentPage("ShareItem")}>
                   Share an Item
                 </button>

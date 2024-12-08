@@ -1,180 +1,106 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
+import { Typography, Button, notification, Card } from "antd";
+
+const { Title, Text } = Typography;
 
 const LoyaltyPointsForm = ({ touristId }) => {
-  const [paymentAmount, setPaymentAmount] = useState("");
-  const [message, setMessage] = useState("");
-  const [loyaltyPoints, setLoyaltyPoints] = useState(null);
-  const [level, setLevel] = useState(null);
-  const [badge, setBadge] = useState(""); // Initialize the badge state
-
   const [redeemMessage, setRedeemMessage] = useState("");
-  // Example function to update the badge
+  const [loyaltyPoints, setLoyaltyPoints] = useState(null);
 
-  //   const [touristId, setTouristId] = useState('');
-
-  // On component mount, get touristId from local storage if it exists
-  //   useEffect(() => {
-  //     const storedTouristId = localStorage.getItem('touristId');
-  //     if (storedTouristId) {
-  //       setTouristId(storedTouristId);
-  //     }
-  //   }, []);
-  //const touristId = "672635325490518dc4cd46cc";
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const parsedPaymentAmount = parseFloat(paymentAmount);
-
-    if (isNaN(parsedPaymentAmount) || parsedPaymentAmount <= 0) {
-      setMessage("Payment amount must be a valid positive number.");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        `http://localhost:3000/addLoyaltyPoints/${touristId}`,
-        {
-          paymentAmount: parsedPaymentAmount,
-        }
-      );
-
-      setMessage(response.data.message);
-      setLoyaltyPoints(response.data.loyaltyPoints);
-      setBadge(response.data.badge);
-
-      setLevel(response.data.level);
-    } catch (error) {
-      console.error(
-        "Error adding loyalty points:",
-        error.response ? error.response.data : error.message
-      );
-      setMessage(
-        "Failed to add loyalty points: " +
-          (error.response ? error.response.data.message : error.message)
-      );
-    }
-  };
-
-  const handleRedeem = async (event) => {
-    event.preventDefault(); // Prevent page reload on submit
-    setMessage("");
-    setRedeemMessage("");
+  const handleRedeem = async () => {
+    setRedeemMessage(""); // Clear previous message
     try {
       const response = await axios.put(
         `http://localhost:3000/redeemMyPoints/${touristId}`
       );
-      const result = await response.data;
+      const result = response.data;
 
       if (response.status === 200) {
         setRedeemMessage(
           "Points redeemed successfully! 100 EGP added to your wallet."
         );
         setLoyaltyPoints(result.tourist.loyaltyPoints);
+
+        notification.success({
+          message: "Points Redeemed",
+          description: "100 EGP has been added to your wallet!",
+        });
       } else {
-        setRedeemMessage(
-          result.error || "Failed to redeem points. Please try again."
-        );
+        setRedeemMessage(result.error || "An unknown error occurred.");
+        notification.warning({
+          message: "Redemption Warning",
+          description: result.error || "Failed to redeem points.",
+        });
       }
     } catch (error) {
-      console.error("Error redeeming points:", error);
-      setRedeemMessage("An error occurred. Please try again later.");
+      const errorMessage =
+        error.response?.data?.error === "Not Enough Points"
+          ? "You do not have enough points to redeem."
+          : "An error occurred while redeeming points. Please try again.";
+
+      setRedeemMessage(errorMessage);
+
+      notification.error({
+        message: "Failed to Redeem Points",
+        description: errorMessage,
+      });
     }
   };
+
   return (
-    <div>
-      <h2>Add Loyalty Points</h2>
-      {/* <form onSubmit={handleSubmit}>
-        
-         
-        <label>
-          Payment Amount:
-          <input
-            type="number"
-            value={paymentAmount}
-            onChange={(e) => setPaymentAmount(e.target.value)}
-            required
-          />
-        </label>
-        <button type="submit">Submit</button>
-      </form> */}
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
+      <Card>
+        <Title level={3} style={{ textAlign: "center", color: "#1d3557" }}>
+          Loyalty Points Management
+        </Title>
 
-      <form onSubmit={handleRedeem}>
-        <label>
-          <h2>Redeem My points:</h2>
-          <h3>Redeem 10,000 loyalty points for 100 EGP.</h3>
-        </label>
-        <button type="submit">Redeem</button>
-      </form>
-      {redeemMessage && <p>{redeemMessage}</p>}
-
-      {message && <p>{message}</p>}
-      {loyaltyPoints !== null && (
         <div>
-          <p> Loyalty Points: {loyaltyPoints}</p>
+          <Text strong style={{ fontSize: "16px" }}>
+            Redeem Loyalty Points
+          </Text>
+          <Text type="secondary" style={{ display: "block", marginTop: "8px" }}>
+            Redeem 10,000 points for 100 EGP.
+          </Text>
+          <Button
+            type="primary"
+            block
+            style={{
+              backgroundColor: "#1d3557",
+              borderColor: "#1d3557",
+              marginTop: "12px",
+            }}
+            onClick={handleRedeem}
+          >
+            Redeem Points
+          </Button>
         </div>
-      )}
+
+        {redeemMessage && (
+          <Text
+            type={redeemMessage.includes("successfully") ? "success" : "danger"}
+            style={{ marginTop: "16px", display: "block" }}
+          >
+            {redeemMessage}
+          </Text>
+        )}
+
+        {loyaltyPoints !== null && (
+          <Text
+            strong
+            style={{
+              display: "block",
+              marginTop: "12px",
+              fontSize: "16px",
+              color: "#1d3557",
+            }}
+          >
+            Remaining Loyalty Points: {loyaltyPoints}
+          </Text>
+        )}
+      </Card>
     </div>
   );
 };
 
 export default LoyaltyPointsForm;
-
-// import React, { useState } from 'react';
-// import axios from 'axios';
-
-// //this should be integrated with req 58
-// // import React, { useState } from 'react';
-// // import axios from 'axios';
-
-// const LoyaltyPointsForm = () => {
-//   const [paymentAmount, setPaymentAmount] = useState('');
-//   const [message, setMessage] = useState('');
-//   const [loyaltyPoints, setLoyaltyPoints] = useState(null);
-//   const [level, setLevel] = useState(null);
-//   const [touristId, setTouristId] = useState('');
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const storedTouristId =localStorage.getItem('touristId');
-//     try {
-//       const response = await axios.post(`http://localhost:3000/addLoyaltyPoints/${storedTouristId}`, {
-//         paymentAmount: parseFloat(paymentAmount),
-//       });
-
-//       setMessage(response.data.message);
-//       setLoyaltyPoints(response.data.loyaltyPoints);
-//       setLevel(response.data.level);
-//     } catch (error) {
-//       console.error('Error adding loyalty points:', error);
-//       setMessage('Failed to add loyalty points');
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2>Add Loyalty Points</h2>
-//       <form onSubmit={handleSubmit}>
-//                <label>
-//           Payment Amount:
-//           <input
-//             type="number"
-//             value={paymentAmount}
-//             onChange={(e) => setPaymentAmount(e.target.value)}
-//             required
-//           />
-//         </label>
-//         <button type="submit">Submit</button>
-//       </form>
-
-//       {message && <p>{message}</p>}
-//       {loyaltyPoints !== null && (
-//         <div>
-//           <p>Loyalty Points: {loyaltyPoints}</p>
-//           <p>Level: {level}</p>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default LoyaltyPointsForm;
