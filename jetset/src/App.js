@@ -26,6 +26,7 @@ import ActivitiesList from "./components/Activity/ActivityListAdv";
 import ItineraryList from "./components/Itinerary/ItineraryList";
 // import ItineraryList from "./components/Itinerary/ItinerariesList";
 import ChangePasswordFormTourist from "./components/Place/ChangePasswordForm";
+import PlaceManagement from "./components/TourismGovernor";
 
 const App = () => {
   return (
@@ -60,6 +61,8 @@ const App = () => {
         <Route path="/activities" element={<ActivitiesList />} />
         <Route path="/itineraries" element={<ItineraryList />} />
         <Route path="/changepass" element={<ChangePasswordFormTourist />} />
+        <Route path="/changemainTourismG" element={<PlaceManagement />} />
+
       </Routes>
     </Router>
   );

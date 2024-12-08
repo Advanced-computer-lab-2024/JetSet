@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import TourismGovernorNav from "../TourismGovernorNav";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -90,8 +91,27 @@ const ItineraryList = () => {
     };
     fetchItineraries();
   };
-
   return (
+    <div className="admin-frontend">
+          {/* <TourismGovernorNav governorUsername={username} governorId={tourismGovernorId} /> */}
+          <TourismGovernorNav  />
+
+      <div className="admin-container">
+        {/* Sidebar */}
+        <aside className="admin-sidebar">
+          <ul>
+            <li onClick={() => navigate("/changemainTourismG")}>🏠 Dashboard</li>
+            <li onClick={() => navigate("/places")}>📍 Places</li>
+            <li onClick={() => navigate("/tags")}>🏷️ Tags</li>
+            <li onClick={() => navigate("/activities")}>🎭 Activities</li>
+            <li onClick={() => navigate("/itineraries")}>📜 Itineraries</li>
+          </ul>
+        </aside>
+
+        <main className="admin-main-content">
+          {/* <div className="tag-form-container">
+            <h2>Create a New Tag</h2>
+            <form onSubmit={handleSubmit}> */}
     <div>
       <h2>Itineraries</h2>
       <input
@@ -179,11 +199,15 @@ const ItineraryList = () => {
           </li>
         ))}
       </ul>
-      <button className="back-button" onClick={() => navigate(-1)}>
+      {/* <button className="back-button" onClick={() => navigate(-1)}>
       <FontAwesomeIcon icon={faArrowLeft} /> Back
-    </button>
+    </button> */}
     </div>
+    </main>
+      </div>
+    </div>
+    // </div>
+
   );
 };
-
 export default ItineraryList;
