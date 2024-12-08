@@ -28,8 +28,10 @@ const TouristProfile = ({ touristId }) => {
     const fetchTourist = async () => {
       if (touristId) {
         try {
-          const response = await axios.get(`/getTourist/${touristId}`);
-          setTourist(response.data);
+          const response = await axios.get(
+            `http://localhost:3000/getTourist/${touristId}`
+          );
+          setTourist(response.data.tourist);
         } catch (error) {
           alert(
             error.response?.data?.message || "Error fetching tourist profile"

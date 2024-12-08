@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowLeft,
+  faHome,
+  faTag,
+  faList,
+  faClipboardList,
+  faKey,
+} from "@fortawesome/free-solid-svg-icons";
 const ItineraryList = () => {
   const [itineraries, setItineraries] = useState([]);
   const [filters, setFilters] = useState({
@@ -12,6 +22,7 @@ const ItineraryList = () => {
   });
   const [sortBy, setSortBy] = useState("budget");
   const [sortOrder, setSortOrder] = useState(1);
+  const navigate = useNavigate();
 
   // Fetch itineraries based on sorting
   useEffect(() => {
@@ -168,6 +179,9 @@ const ItineraryList = () => {
           </li>
         ))}
       </ul>
+      <button className="back-button" onClick={() => navigate(-1)}>
+      <FontAwesomeIcon icon={faArrowLeft} /> Back
+    </button>
     </div>
   );
 };

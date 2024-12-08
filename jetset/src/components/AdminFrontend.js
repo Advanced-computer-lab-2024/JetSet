@@ -333,9 +333,6 @@ import "./AdminFrontend.css";
 import TagList from "./Tag/TagList";
 
 // Import components for Category Management
-import CreateCategory from "./Category/CreateCategory";
-import UpdateCategory from "./Category/UpdateCategory";
-import DeleteCategory from "./Category/DeleteCategory";
 import CategoryList from "./Category/CategoryList";
 
 // Import components for Product Management
@@ -457,6 +454,7 @@ function AdminFrontend() {
       case "dashboard":
         return (
           <div>
+            <GuestList />
             <CreateAdmin />
             <CreateTourismGovernor />
             <DeleteAccount />

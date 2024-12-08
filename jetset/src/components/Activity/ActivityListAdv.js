@@ -11,6 +11,7 @@ const ActivitiesList = () => {
   const [isFetchingActivities, setIsFetchingActivities] = useState(false);
   const [activitiesFetched, setActivitiesFetched] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const navigate = useNavigate();
 
   const getActivities = async () => {
     setIsFetchingActivities(true);
@@ -146,6 +147,7 @@ const ActivitiesList = () => {
         )}
       </Card>
     </div>
+    
   );
 };
 
