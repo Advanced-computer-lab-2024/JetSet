@@ -5,6 +5,7 @@ const ViewCreatedItineraries = ({ id }) => {
   const [itineraries, setItineraries] = useState([]);
   const [touristItineraries, setTouristItineraries] = useState([]);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
   // Fetch itineraries and tourist itineraries when component mounts
@@ -31,12 +32,51 @@ const ViewCreatedItineraries = ({ id }) => {
     return <p>Loading itineraries...</p>;
   }
 
+  const deleteItinerary = async (itineraryId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:3000/deleteItinerary`,
+        {
+          data: { id: itineraryId }, // Sending the ID in the body
+        }
+      );
+      setMessage(response.data.msg || "Itinerary deleted successfully!");
+      setError(""); // Clear any previous error
+      setItineraries((prevItineraries) =>
+        prevItineraries.filter((itinerary) => itinerary._id !== itineraryId)
+      );
+    } catch (err) {
+      setError(
+        err.response?.data?.error ||
+          "An error occurred while deleting the itinerary."
+      );
+      setMessage(""); // Clear success message
+    }
+  };
+
+  const toggleActivationStatus = async (itineraryId, currentStatus) => {
+    try {
+      let response;
+      
+      if (currentStatus === "active") {
+        response = await axios.post(`http://localhost:3000/deactivateItinerary/${itineraryId}`);
+      } else {
+        response = await axios.post(`http://localhost:3000/activateItinerary/${itineraryId}`);
+      }
+        setMessage(response.data.message);
+        setError("");
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to toggle itinerary status.');
+      setMessage("");
+    }
+  };
+
   return (
     <div>
       <h2>Created Itineraries</h2>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-
+      {message && <p>{message}</p>}
       <h3>Regular Itineraries</h3>
       <ul>
         {itineraries.length > 0 ? (
@@ -71,6 +111,29 @@ const ViewCreatedItineraries = ({ id }) => {
                 {itinerary.tag?.map((tag) => tag.name).join(", ") ||
                   "No tags available"}
               </p>
+              <button
+                onClick={() =>
+                  toggleActivationStatus(itinerary._id, itinerary.status)
+                }
+                style={{
+                  backgroundColor: itinerary.status ==="active" ? "gray" : "green",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                {itinerary.status ==="active" ? "Deactivate" : "Activate"}
+              </button>
+              <button
+                onClick={() => deleteItinerary(itinerary._id)}
+                style={{
+                  backgroundColor: "#b30000",
+                  color: "white",
+                  cursor: "pointer",
+                  marginLeft: "10px",
+                }}
+              >
+                Delete
+              </button>
             </li>
           ))
         ) : (
