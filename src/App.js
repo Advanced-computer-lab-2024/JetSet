@@ -193,6 +193,7 @@ const {
   viewRefundAmount,
   addTouristAddress,
   payByCardPro,
+  getActivitiesBasedOnPreferences,
 } = require("../src/Routes/touristController");
 
 const {
@@ -774,3 +775,5 @@ app.get("/historical/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+app.get("/preferences/:touristId",getActivitiesBasedOnPreferences);
