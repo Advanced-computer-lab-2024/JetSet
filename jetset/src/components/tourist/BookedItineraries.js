@@ -1,16 +1,73 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 const stripePromise = loadStripe(
   "pk_test_51QRqvnLaP0939m1yMtkhu1iljNRs7gNXmNvljQEXF0eIRBM1zfzukqyTYtVG78YIkdf8qe3K4sPMsTQlG0lV7rvj00Tqpogk3L"
 );
+
+const PaymentForm = ({ touristId, item, itemType, onSuccess, onClose }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setIsProcessing(true);
+    try {
+      // Determine the endpoint based on itemType
+      const endpoint =
+        itemType === "activity"
+          ? `/payCardAct/${touristId}/${item._id}`
+          : `/payCardIti/${touristId}/${item._id}`;
+  
+      const response = await axios.post(endpoint, {
+        isApplied: false, // Adjust this based on your promo code logic
+        promoCode: "", // Replace with the actual promo code if applicable
+      });
+
+      const { clientSecret } = response.data;
+
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      });
+
+      if (result.error) {
+        setErrorMessage(result.error.message);
+      } else if (result.paymentIntent.status === "succeeded") {
+        onSuccess();
+      }
+    } catch (error) {
+      setErrorMessage("Payment failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={formStyle}>
+      <h3>Pay with Credit Card</h3>
+      <CardElement options={cardElementOptions}  />
+      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+      <button
+        type="submit"
+        style={buttonStyle}
+        disabled={isProcessing || !stripe || !elements}
+      >
+        {isProcessing ? "Processing..." : "Pay Now"}
+      </button>
+      <button type="button" onClick={onClose} style={cancelButtonStyle}>
+        Cancel
+      </button>
+    </form>
+  );
+};
 
 const BookedItems = ({ touristId }) => {
   const [bookedItineraries, setBookedItineraries] = useState([]);
@@ -30,6 +87,7 @@ const BookedItems = ({ touristId }) => {
   const [cancelStatus, setCancelStatus] = useState(""); // New state for cancellation status
   const [showCancelModal, setShowCancelModal] = useState(false); // Modal visibility
   const [cancelMessage, setCancelMessage] = useState(""); // Message for modal
+  const [showStripeForm, setShowStripeForm] = useState(false);
 
   // Fetch conversion rate and currency info
   const fetchConversionRate = async () => {
@@ -138,6 +196,10 @@ const BookedItems = ({ touristId }) => {
       setPaymentType(type);
       setShowPaymentModal(false);
       setShowConfirmModal(true); // Show confirmation modal for wallet payment
+    } else if (type === "Card") {
+      setPaymentType(type);
+      setShowPaymentModal(false);
+      setShowStripeForm(true); // Show Stripe payment form
     } else {
       alert(`You chose to pay with: ${type}`);
       setShowPaymentModal(false);
@@ -251,6 +313,29 @@ const BookedItems = ({ touristId }) => {
           </div>
         </div>
       )}
+
+    {/* Stripe Payment Form in Modal */}
+{showStripeForm && currentItem && (
+  <div style={backdropStyle}>
+    <div style={modalStyle}>
+      <h2>Credit Card Payment</h2>
+      <Elements stripe={stripePromise}>
+        <PaymentForm
+          touristId={touristId}
+          item={currentItem}
+          itemType={itemType}
+          onSuccess={() => {
+            setShowStripeForm(false);
+            setPaymentStatus("success");
+          }}
+          onClose={() => setShowStripeForm(false)}
+        />
+      </Elements>
+    </div>
+  </div>
+)}
+
+
 
       {showConfirmModal && (
         <div style={backdropStyle}>
@@ -421,6 +506,41 @@ const closeButtonStyle = {
   borderRadius: "5px",
   cursor: "pointer",
   fontSize: "1em",
+};
+
+// Styles for the payment form
+const formStyle = {
+  padding: "20px",
+  borderRadius: "10px",
+  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+  backgroundColor: "#fff",
+  maxWidth: "400px",
+  margin: "auto",
+};
+
+const buttonStyle = {
+  marginTop: "10px",
+  backgroundColor: "#4CAF50",
+  color: "#fff",
+  padding: "10px 20px",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+};
+
+const cardElementOptions = {
+  style: {
+    base: {
+      fontSize: "16px",
+      color: "#424770",
+      "::placeholder": {
+        color: "#aab7c4",
+      },
+    },
+    invalid: {
+      color: "#9e2146",
+    },
+  },
 };
 
 export default BookedItems;
