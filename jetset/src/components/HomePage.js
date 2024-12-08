@@ -1,9 +1,13 @@
 import React from "react";
 import Guest from "./Guest";
+import Navbar from "./Navbar";
 
 const Home = () => {
   return (
     <div style={styles.container}>
+
+      <Navbar />
+
       <h2 style={styles.title}>Welcome to Jetset</h2>
       <p style={styles.subHeading}>Your adventure starts here!</p>
       <Guest />

@@ -19,7 +19,6 @@ const NavTourist = ({ touristId, username }) => {
   const [error, setError] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (username) {
@@ -34,34 +33,12 @@ const NavTourist = ({ touristId, username }) => {
     }
   }, [username]);
 
-  useEffect(() => {
-    if (username) {
-      const fetchNotifications = async () => {
-        setLoading(true);
-        try {
-          const response = await axios.get(
-            `http://localhost:3000/notification?recipient=${username}&role=Tourist`
-          );
-          setNotifications(response.data.notifications);
-        } catch (err) {
-          setError(
-            err.response?.data?.message || "Error fetching notifications"
-          );
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchNotifications();
-    }
-  }, [username]);
-
   const toggleProfileMenu = () => {
     setProfileMenuVisible((prev) => !prev);
   };
 
   const handleGetProfile = () => {
-    navigate(`/admin/change-password/${touristId}`);
+    navigate(`/touristprofile/${touristId}`);
   };
 
   const handleLogOut = () => {
@@ -70,7 +47,7 @@ const NavTourist = ({ touristId, username }) => {
   };
 
   const toggleNotifications = () => {
-    setShowNotifications((prev) => !prev);
+    navigate(`/notifications/${touristId}`);
   };
 
   const handleBack = () => {
@@ -120,31 +97,6 @@ const NavTourist = ({ touristId, username }) => {
           </div>
         </nav>
       </header>
-
-      {showNotifications && (
-        <div className="notification-dropdown">
-          <h3>Notifications</h3>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          {loading && <p>Loading notifications...</p>}
-          {!loading && !error && notifications.length === 0 && (
-            <p>No notifications found.</p>
-          )}
-          {!loading && !error && notifications.length > 0 && (
-            <ul>
-              {notifications.map((notification, index) => (
-                <li key={index} className="notification-item">
-                  <p>{notification.message}</p>
-                  <p>
-                    <small>
-                      {new Date(notification.createdAt).toLocaleString()}
-                    </small>
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   );
 };
