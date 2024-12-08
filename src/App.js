@@ -192,7 +192,12 @@ const {
   cancelOrder,
   viewRefundAmount,
   addTouristAddress,
+
   getAddress,
+
+  payByCardPro,
+  getActivitiesBasedOnPreferences,
+
 } = require("../src/Routes/touristController");
 
 const {
@@ -551,7 +556,8 @@ app.post("/payWalletAct/:touristId/:activityId", payByWalletAct);
 app.post("/payCardAct/:touristId/:activityId", payByCardAct);
 app.post("/payCardIti/:touristId/:iteniraryId", payByCardIti);
 app.post("/payWalletIti/:touristId/:iteniraryId", payByWalletIti);
-app.post("/payWalletPro/:touristId/:productId", payByWalletProduct);
+app.post("/payWalletPro/:touristId", payByWalletProduct);
+app.post("/payCardPro/:touristId", payByCardPro);
 app.get("/paidUpcoming/:touristId", paidUpcoming);
 app.get("/paidHistory/:touristId", paidHistory);
 app.post("/transportation", createTransportation);
@@ -803,3 +809,5 @@ app.get("/historical/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+app.get("/preferences/:touristId",getActivitiesBasedOnPreferences);

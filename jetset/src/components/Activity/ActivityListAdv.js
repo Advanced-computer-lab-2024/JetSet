@@ -1,15 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowLeft,
-  faHome,
-  faTag,
-  faList,
-  faClipboardList,
-  faKey,
-} from "@fortawesome/free-solid-svg-icons";
+import { Button, Table, Spin, Alert, Card, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
+const { Title, Text } = Typography;
+
 const ActivitiesList = () => {
   const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
 
@@ -34,14 +28,75 @@ const ActivitiesList = () => {
     }
   };
 
+  // Define columns for Ant Design's Table component
+  const columns = [
+    {
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Budget",
+      dataIndex: "budget",
+      key: "budget",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Time",
+      dataIndex: "time",
+      key: "time",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Latitude",
+      dataIndex: "location",
+      key: "latitude",
+      render: (location) => location?.coordinates?.lat || "N/A",
+    },
+    {
+      title: "Longitude",
+      dataIndex: "location",
+      key: "longitude",
+      render: (location) => location?.coordinates?.lng || "N/A",
+    },
+    {
+      title: "Category",
+      dataIndex: "category",
+      key: "category",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Special Discount",
+      dataIndex: "specialDiscount",
+      key: "specialDiscount",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Booking Open",
+      dataIndex: "bookingOpen",
+      key: "bookingOpen",
+      render: (text) => (text ? "Yes" : "No"),
+    },
+    {
+      title: "Tags",
+      dataIndex: "tags",
+      key: "tags",
+      render: (tags) => (tags && tags.length > 0 ? tags.join(", ") : "N/A"),
+    },
+  ];
+
   return (
     <div>
       <h3>Activities List</h3>
-      
       <button onClick={getActivities}>Get Activities</button>
-      <button className="back-button" onClick={() => navigate(-1)}>
-      <FontAwesomeIcon icon={faArrowLeft} /> Back
-    </button>
+
       {isFetchingActivities ? (
         <p>Loading activities...</p>
       ) : activitiesFetched && activities.length > 0 ? (
@@ -75,14 +130,12 @@ const ActivitiesList = () => {
                 <td>{activity.tags?.join(", ") || "N/A"}</td>
               </tr>
             ))}
-            
           </tbody>
         </table>
       ) : (
         activitiesFetched && <p>No activities available.</p>
       )}
       {statusMessage && <p>{statusMessage}</p>}
-      
     </div>
     
   );
