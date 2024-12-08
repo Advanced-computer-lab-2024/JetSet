@@ -212,11 +212,19 @@ const BookedItems = ({ touristId }) => {
 
       if (itemType === "activity") {
         response = await axios.post(
-          `/payWalletAct/${touristId}/${currentItem._id}`
+          `/payWalletAct/${touristId}/${currentItem._id}`,
+          {
+            isApplied: false, // Adjust this based on your promo code logic
+            promoCode: "", // Replace with the actual promo code if applicable
+          }
         );
       } else if (itemType === "itinerary") {
         response = await axios.post(
-          `/payWalletIti/${touristId}/${currentItem._id}`
+          `/payWalletIti/${touristId}/${currentItem._id}`,
+          {
+            isApplied: false, // Adjust this based on your promo code logic
+            promoCode: "", // Replace with the actual promo code if applicable
+          }
         );
       } else {
         throw new Error("Invalid payment type");
