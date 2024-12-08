@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Button, Table, Spin, Alert, Card, Typography } from "antd";
-
+import { useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
 const ActivitiesList = () => {
@@ -93,59 +93,49 @@ const ActivitiesList = () => {
   ];
 
   return (
-    <div style={{ padding: "30px", fontFamily: "Arial, sans-serif", fontSize: "16px" }}>
-      <Card
-        title={<Title level={2}>Activities List</Title>}
-        style={{
-          marginBottom: "30px",
-          padding: "30px",
-          borderRadius: "10px",
-          boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)",
-          width: "100%",
-          maxWidth: "1200px",
-        }}
-      >
-        <Button
-          type="primary"
-          onClick={getActivities}
-          loading={isFetchingActivities}
-          style={{ marginBottom: "20px", fontSize: "16px" }}
-        >
-          Get Activities
-        </Button>
+    <div>
+      <h3>Activities List</h3>
+      <button onClick={getActivities}>Get Activities</button>
 
-        {isFetchingActivities ? (
-          <Spin tip="Loading activities..." />
-        ) : activitiesFetched && activities.length > 0 ? (
-          <Table
-            columns={columns}
-            dataSource={activities}
-            rowKey={(record) => record._id}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              pageSizeOptions: ["5", "10", "20", "50"],
-            }}
-            style={{ marginTop: "20px" }}
-          />
-        ) : (
-          activitiesFetched && (
-            <Alert
-              message="No activities available"
-              type="info"
-              style={{ marginTop: "20px" }}
-            />
-          )
-        )}
-
-        {statusMessage && (
-          <Alert
-            message={statusMessage}
-            type={statusMessage.includes("Error") ? "error" : "success"}
-            style={{ marginTop: "20px" }}
-          />
-        )}
-      </Card>
+      {isFetchingActivities ? (
+        <p>Loading activities...</p>
+      ) : activitiesFetched && activities.length > 0 ? (
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Budget</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Category</th>
+              <th>Special Discount</th>
+              <th>Booking Open</th>
+              <th>Tags</th>
+            </tr>
+          </thead>
+          <tbody>
+            {activities.map((activity) => (
+              <tr key={activity._id}>
+                <td>{activity.title || "N/A"}</td>
+                <td>{activity.budget || "N/A"}</td>
+                <td>{activity.date || "N/A"}</td>
+                <td>{activity.time || "N/A"}</td>
+                <td>{activity.location?.coordinates?.lat || "N/A"}</td>
+                <td>{activity.location?.coordinates?.lng || "N/A"}</td>
+                <td>{activity.category || "N/A"}</td>
+                <td>{activity.specialDiscount || "N/A"}</td>
+                <td>{activity.bookingOpen ? "Yes" : "No"}</td>
+                <td>{activity.tags?.join(", ") || "N/A"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        activitiesFetched && <p>No activities available.</p>
+      )}
+      {statusMessage && <p>{statusMessage}</p>}
     </div>
     
   );
