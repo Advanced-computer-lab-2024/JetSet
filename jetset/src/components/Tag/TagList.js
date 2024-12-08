@@ -183,7 +183,7 @@ const TagList = () => {
                     <a
                       href="#"
                       style={{
-                        color: "#007BFF",
+                        color: "red",
                         cursor: "pointer",
                         textDecoration: "underline",
                       }}

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useLocation } from "react-router-dom";
 
 import TouristProfile from "./tourist/TouristProfile";
@@ -36,11 +37,37 @@ import ViewOrderDetails from "./tourist/ViewOrderDetails";
 import CancelOrder from "./tourist/CancelOrder";
 import ViewRefundAmount from "./tourist/ViewRefundAmount";
 
+import NavTourist from "./tourist/navTourist";
+
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
   const touristId = location.state?.touristId;
-  const [showPurchasedProducts, setShowPurchasedProducts] = useState(false);
+  const [username, setUsername] = useState("");
+  const [showPurchasedProducts, setShowPurchasedProducts] = useState();
+
+  useEffect(() => {
+    const fetchTourist = async () => {
+      if (touristId) {
+        try {
+          console.log("Fetching tourist profile for ID:", touristId);
+          const response = await axios.get(
+            `http://localhost:3000/getTourist/${touristId}`
+          );
+          console.log("Tourist data:", response.data);
+          setUsername(response.data.username);
+        } catch (error) {
+          console.error("Error during fetch:", error);
+          alert(
+            error.response?.data?.message || "Error fetching tourist profile"
+          );
+        }
+      } else {
+        console.log("touristId is undefined");
+      }
+    };
+    fetchTourist();
+  }, [touristId]);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -113,7 +140,7 @@ const Tourist = () => {
       default:
         return (
           <section className="tourist-frontend">
-            <h1>Welcome to JetSet</h1>
+            <NavTourist touristId={touristId} username={username} />
 
             <div className="button-groups">
               <section>

@@ -22,6 +22,7 @@ dotenv.config();
 
 //const { default: mongoose } = require("mongoose");
 const FlightBooking = require("../Models/flightBookingSchema.js");
+const HotelBooking = require("../Models/hotelBookingSchema.js");
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -34,13 +35,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-cron.schedule("45 08 * * *", async () => {
+cron.schedule("17 14 * * *", async () => {
   try {
     const now = new Date();
-    const nextDay = new Date();
-    nextDay.setDate(now.getDate() + 1);
 
-    // Fetch tourists and their upcoming bookings
+    // Fetch tourists with any kind of bookings
     const tourists = await Tourist.find({
       $or: [
         { bookedActivities: { $exists: true, $not: { $size: 0 } } },
@@ -62,55 +61,102 @@ cron.schedule("45 08 * * *", async () => {
       },
     ]);
 
+    // Loop through each tourist
     for (const tourist of tourists) {
       const reminders = [];
 
       // Add activities
       tourist.bookedActivities?.forEach((activity) =>
-        reminders.push(`Activity: ${activity.title} on ${activity.date}`)
+        reminders.push(
+          `<li><strong>Activity:</strong> ${
+            activity.title
+          } on ${activity.date.toDateString()}</li>`
+        )
       );
 
       // Add itineraries
-      tourist.bookedItineraries?.forEach((itinerary) =>
+      tourist.bookedItineraries?.forEach((itinerary) => {
+        const availabilityStrings = itinerary.availability_dates.map((date) => {
+          if (date instanceof Date) {
+            return date.toDateString();
+          }
+          return date;
+        });
+
         reminders.push(
-          `Itinerary: ${itinerary.name} on ${itinerary.availability_dates}`
-        )
-      );
+          `<li><strong>Itinerary:</strong> ${
+            itinerary.name
+          } on ${availabilityStrings.join(", ")}</li>`
+        );
+      });
 
       // Add transportations
       tourist.bookedTransportations?.forEach((transport) =>
         reminders.push(
-          `Transportation from ${transport.pickup_location} to ${transport.dropoff_location} on ${transport.availability}`
+          `<li><strong>Transportation:</strong> From ${
+            transport.pickup_location
+          } to ${
+            transport.dropoff_location
+          } on ${transport.availability.toDateString()}</li>`
         )
       );
 
+      // Fetch Hotel Bookings
+      const hotelBookings = await HotelBooking.find({
+        booked_by: tourist._id,
+        checkIn: { $gte: now },
+      });
+      hotelBookings.forEach((hotel) =>
+        reminders.push(
+          `<li><strong>Hotel:</strong> ${
+            hotel.destinationCode
+          } from ${hotel.checkIn.toDateString()} to ${hotel.checkOut.toDateString()}</li>`
+        )
+      );
+
+      // Fetch Flight Bookings
+      const flightBookings = await FlightBooking.find({
+        booked_by: tourist._id,
+        departureDate: { $gte: now },
+      });
+      flightBookings.forEach((flight) =>
+        reminders.push(
+          `<li><strong>Flight:</strong> From ${flight.origin} to ${
+            flight.destination
+          } on ${flight.departureDate.toDateString()}</li>`
+        )
+      );
+
+      // Send Email if reminders exist
       if (reminders.length > 0) {
+        const emailBody = `
+          <p>Hello ${tourist.username},</p>
+          <p>You have the following upcoming events:</p>
+          <ul>${reminders.join("\n")}</ul>
+          <p>We wish you a wonderful experience!</p>
+          <p>Best regards,</p>
+          <p><strong>JetSet Team</strong></p>
+        `;
+
         await transporter.sendMail({
           from: {
             name: "JetSet",
-            address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+            address: process.env.EMAIL_USER,
           },
           to: tourist.email,
-          subject: "Upcoming Event Reminder",
-          text: `Hello ${
-            tourist.username
-          },\n\nYou have the following events coming up:\n\n${reminders.join(
-            "\n"
-          )}\n\nThank you!`,
+          subject: "Upcoming Events Reminder",
+          html: emailBody,
         });
+
         console.log(`Reminder sent to ${tourist.email}`);
 
         const notification = new Notification({
           recipient: tourist.username,
-          role: "Tourist", // Assuming the role is Tour Guide
-          message: `Hello ${
-            tourist.username
-          },\n\nYou have the following events coming up:\n\n${reminders.join(
-            "\n"
-          )}\n\nThank you!`,
+          role: "Tourist",
+          message: `You have upcoming events: ${reminders.length} items. Please check your email for details.`,
         });
 
-        // Save the notification to the database
+        // Save the notification
         await notification.save();
       }
     }
@@ -261,7 +307,7 @@ const getTouristProfile = async (req, res) => {
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
-    res.status(200).json(tourist);
+    res.status(200).json({ tourist, username: tourist.username });
   } catch (error) {
     res
       .status(400)
@@ -1899,7 +1945,6 @@ const searchHotels = async (req, res) => {
   }
 };
 
-const HotelBooking = require("../Models/hotelBookingSchema"); // Import the HotelBooking model
 const TouristItinerary = require("../Models/TouristsItinerary.js");
 
 const bookHotel = async (req, res) => {
@@ -3347,12 +3392,10 @@ const addTouristAddress = async (req, res) => {
       return res.status(404).json({ error: "Tourist not found." });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Addresses added successfully.",
-        tourist: updatedTourist,
-      });
+    res.status(200).json({
+      message: "Addresses added successfully.",
+      tourist: updatedTourist,
+    });
   } catch (error) {
     console.error("Error adding addresses:", error.message);
     res.status(500).json({ error: "Internal server error." });

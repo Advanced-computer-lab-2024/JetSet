@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./navLogin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,9 +11,8 @@ import {
   faKey,
 } from "@fortawesome/free-solid-svg-icons";
 
-const Admin = ({ adminUsername }) => {
+const NavTourist = ({ touristId, username }) => {
   const navigate = useNavigate();
-  const { adminId } = useParams();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -23,25 +22,25 @@ const Admin = ({ adminUsername }) => {
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
-    if (adminUsername) {
+    if (username) {
       const fetchData = async () => {
         const notifications = await axios.get(
-          `http://localhost:3000/unread?recipient=${adminUsername}&role=Admin`
+          `http://localhost:3000/unread?recipient=${username}&role=Tourist`
         );
         setUnreadCount(notifications.data.unreadCount);
       };
 
       fetchData();
     }
-  }, [adminUsername]);
+  }, [username]);
 
   useEffect(() => {
-    if (adminUsername) {
+    if (username) {
       const fetchNotifications = async () => {
         setLoading(true);
         try {
           const response = await axios.get(
-            `http://localhost:3000/notification?recipient=${adminUsername}&role=Admin`
+            `http://localhost:3000/notification?recipient=${username}&role=Tourist`
           );
           setNotifications(response.data.notifications);
         } catch (err) {
@@ -55,14 +54,14 @@ const Admin = ({ adminUsername }) => {
 
       fetchNotifications();
     }
-  }, [adminUsername]);
+  }, [username]);
 
   const toggleProfileMenu = () => {
     setProfileMenuVisible((prev) => !prev);
   };
 
   const handleGetProfile = () => {
-    navigate(`/admin/change-password/${adminId}`);
+    //navigate(`/admin/change-password/${touristId}`);
   };
 
   const handleLogOut = () => {
@@ -86,7 +85,7 @@ const Admin = ({ adminUsername }) => {
             <FontAwesomeIcon icon={faChevronLeft} className="back-icon" />
           </div>
           <div className="navbar-center">
-            <span className="app-title">Admin Dashboard</span>
+            <span className="app-title">JetSet</span>
           </div>
           <div className="navbar-right">
             <div className="notifications" onClick={toggleNotifications}>
@@ -96,7 +95,7 @@ const Admin = ({ adminUsername }) => {
               )}
             </div>
             <div className="admin-info">
-              <span className="username">Hi, {adminUsername}</span>
+              <span className="username">Hi, {username}</span>
               <FontAwesomeIcon
                 icon={faUser}
                 className="profile-icon"
@@ -150,4 +149,4 @@ const Admin = ({ adminUsername }) => {
   );
 };
 
-export default Admin;
+export default NavTourist;
