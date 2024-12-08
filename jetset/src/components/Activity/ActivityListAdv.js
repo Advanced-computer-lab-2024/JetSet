@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,6 +12,11 @@ import {
   faKey,
 } from "@fortawesome/free-solid-svg-icons";
 import TourismGovernorNav from "../TourismGovernorNav";
+
+import { Button, Table, Spin, Alert, Card, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
+const { Title, Text } = Typography;
+
 
 const ActivitiesList = () => {
   const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
@@ -35,6 +41,70 @@ const ActivitiesList = () => {
       setIsFetchingActivities(false);
     }
   };
+
+  // Define columns for Ant Design's Table component
+  const columns = [
+    {
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Budget",
+      dataIndex: "budget",
+      key: "budget",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Time",
+      dataIndex: "time",
+      key: "time",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Latitude",
+      dataIndex: "location",
+      key: "latitude",
+      render: (location) => location?.coordinates?.lat || "N/A",
+    },
+    {
+      title: "Longitude",
+      dataIndex: "location",
+      key: "longitude",
+      render: (location) => location?.coordinates?.lng || "N/A",
+    },
+    {
+      title: "Category",
+      dataIndex: "category",
+      key: "category",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Special Discount",
+      dataIndex: "specialDiscount",
+      key: "specialDiscount",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Booking Open",
+      dataIndex: "bookingOpen",
+      key: "bookingOpen",
+      render: (text) => (text ? "Yes" : "No"),
+    },
+    {
+      title: "Tags",
+      dataIndex: "tags",
+      key: "tags",
+      render: (tags) => (tags && tags.length > 0 ? tags.join(", ") : "N/A"),
+    },
+  ];
 
   return (
     <div className="admin-frontend">
@@ -105,6 +175,7 @@ const ActivitiesList = () => {
           </div>
         </main>
       </div>
+
     </div>
   );
 };

@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
+import { Card, Button, notification, Spin, Avatar, Typography, List, message } from "antd";
+import { EditOutlined, UserOutlined } from "@ant-design/icons";
+
 import ActivityForm from "../Activity/ActivityProfileAdv";
 import ChangePasswordForm from "./ChangePasswordForm";
 import DeleteAccount from "./DeleteAccount";
-import { useParams } from "react-router-dom";
+import "./Adv.css";
+
+const { Title, Text } = Typography;
 
 const ProfileForm = ({ onProfileCreated }) => {
   const { id } = useParams();
@@ -19,14 +25,13 @@ const ProfileForm = ({ onProfileCreated }) => {
     image: null,
   });
 
-  //const id = "6701a52d077eb6e57b568035";
   const [advertiser, setAdvertiser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
-  const [showChangePassword, setShowChangePassword] = useState(false); // State to toggle ChangePasswordForm
-  const [notifications, setNotifications] = useState([]);
-  const [username, setUsername] = useState("");
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const handleChange = (e) => {
     if (e.target.name === "image") {
@@ -36,53 +41,14 @@ const ProfileForm = ({ onProfileCreated }) => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
-      formDataToSend.append(key, formData[key]);
-    });
-
-    try {
-      const response = await axios.post(
-        `${BASE_URL}/addprofiles`,
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      if (response.status === 201) {
-        onProfileCreated(response.data);
-        setStatusMessage("Profile created successfully!");
-        resetForm();
-      } else {
-        throw new Error("Unexpected response status: " + response.status);
+      if (formData[key]) {
+        formDataToSend.append(key, formData[key]);
       }
-    } catch (error) {
-      console.error("Submit error:", error);
-      setStatusMessage("Error creating profile.");
-    }
-  };
-
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-
-    // Create a FormData object to hold the updated fields and image
-    const formDataToSend = new FormData();
-
-    // Only append fields that have been changed and are not empty
-    if (formData.email) formDataToSend.append("email", formData.email);
-    if (formData.username) formDataToSend.append("username", formData.username);
-    if (formData.password) formDataToSend.append("password", formData.password);
-    if (formData.company_name)
-      formDataToSend.append("company_name", formData.company_name);
-    if (formData.website) formDataToSend.append("website", formData.website);
-    if (formData.hotline) formDataToSend.append("hotline", formData.hotline);
-    if (formData.companyDescription)
-      formDataToSend.append("companyDescription", formData.companyDescription);
-    if (formData.image) formDataToSend.append("image", formData.image); // Append the image if it exists
+    });
 
     try {
       const response = await axios.put(
@@ -94,26 +60,14 @@ const ProfileForm = ({ onProfileCreated }) => {
           },
         }
       );
-      console.log(response.data); // Log response data for debugging
       setStatusMessage("Profile updated successfully!");
-      setAdvertiser(response.data); // Update advertiser with the response data
+      setAdvertiser(response.data);
+      message.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
       setStatusMessage("Error updating profile.");
+      message.error("Error updating profile.");
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      email: "",
-      username: "",
-      password: "",
-      company_name: "",
-      website: "",
-      hotline: "",
-      companyDescription: "",
-      image: null,
-    });
   };
 
   useEffect(() => {
@@ -124,9 +78,7 @@ const ProfileForm = ({ onProfileCreated }) => {
         setUsername(response.data.username);
       } catch (err) {
         setError(
-          err.response
-            ? err.response.data.message
-            : "Error fetching advertiser profile."
+          err.response ? err.response.data.message : "Error fetching advertiser profile."
         );
       } finally {
         setLoading(false);
@@ -138,22 +90,16 @@ const ProfileForm = ({ onProfileCreated }) => {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (!username) return; // Wait until username is set
+      if (!username) return;
       setLoading(true);
-      setError(null); // Reset error before fetching
+      setError(null);
       try {
         const response = await axios.get(
-          `http://localhost:3000/notification?recipient=${username}&role=Advertiser`
+          `${BASE_URL}/notification?recipient=${username}&role=Advertiser`
         );
         setNotifications(response.data.notifications);
       } catch (err) {
-        console.error("Error fetching notifications:", err);
-        // Only set error if it's an unexpected error
-        if (err.response?.status !== 404) {
-          setError(
-            err.response?.data?.message || "Error fetching notifications"
-          );
-        }
+        setError(err.response?.data?.message || "Error fetching notifications");
       } finally {
         setLoading(false);
       }
@@ -162,85 +108,92 @@ const ProfileForm = ({ onProfileCreated }) => {
     fetchNotifications();
   }, [username]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return <Spin tip="Loading..." />;
 
   return (
-    <div>
-      <div>
-        <h1>Advertiser Profile</h1>
-        {advertiser ? (
-          <div>
-            {advertiser.images && advertiser.images.length > 0 && (
-              <img
-                src={`http://localhost:3000/uploads/${advertiser.images}`}
-                alt={`${advertiser.username} Profile`}
-                style={{ width: "100px", height: "100px", objectFit: "cover" }}
-              />
-            )}
-            <h2>{advertiser.username}</h2>
-            <p>Email: {advertiser.email}</p>
-            <p>Company Name: {advertiser.company_name}</p>
-            <p>
-              Website:{" "}
-              <a
-                href={advertiser.website}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {advertiser.website}
-              </a>
-            </p>
-            <p>Hotline: {advertiser.hotline}</p>
-            <p>Company Description: {advertiser.companyDescription}</p>
-          </div>
-        ) : (
-          <div>No advertiser found.</div>
-        )}
-      </div>
-
-      <div>
-        <h2>Notifications</h2>
-        {/* Show error if it's present */}
-        {error && <p style={{ color: "red" }}>{error}</p>}
-
-        {/* Show loading spinner/message */}
-        {loading && <p>Loading notifications...</p>}
-
-        {/* Show no notifications message when no notifications exist */}
-        {!loading && !error && notifications.length === 0 && (
-          <p>No notifications found.</p>
-        )}
-
-        {/* Render notifications if they exist */}
-        {!loading && !error && notifications.length > 0 && (
-          <ul>
-            {notifications.map((notification, index) => (
-              <li key={index}>
-                <p>{notification.message}</p>
-                <p>
-                  <small>
-                    {new Date(notification.createdAt).toLocaleString()}
-                  </small>
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <ActivityForm
-        onActivityCreated={(activity) =>
-          console.log("Activity created:", activity)
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+      <Card
+        style={{
+          marginBottom: "20px",
+          padding: "20px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        }}
+        title={
+          <Title level={3} style={{ fontSize: "24px" }}>
+            Advertiser Profile
+          </Title>
         }
-      />
+        extra={
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => setShowChangePassword(!showChangePassword)}
+          >
+            Change Password
+          </Button>
+        }
+      >
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+          {advertiser && advertiser.images ? (
+            <Avatar
+              size={100}
+              src={`http://localhost:3000/uploads/${advertiser.images}`}
+              icon={<UserOutlined />}
+            />
+          ) : (
+            <Avatar size={100} icon={<UserOutlined />} />
+          )}
+        </div>
+        <Title level={4} style={{ fontSize: "22px" }}>
+          {advertiser ? advertiser.username : "No advertiser found"}
+        </Title>
+        <Text style={{ fontSize: "18px" }}>Email: {advertiser?.email || "N/A"}</Text>
+        <br />
+        <Text style={{ fontSize: "18px" }}>Company: {advertiser?.company_name || "N/A"}</Text>
+        <br />
+        <Text style={{ fontSize: "18px" }}>
+          Website:{" "}
+          <a href={advertiser?.website} target="_blank" rel="noopener noreferrer">
+            {advertiser?.website || "N/A"}
+          </a>
+        </Text>
+        <br />
+        <Text style={{ fontSize: "18px" }}>Hotline: {advertiser?.hotline || "N/A"}</Text>
+        <br />
+        <Text style={{ fontSize: "18px" }}>Description: {advertiser?.companyDescription || "N/A"}</Text>
+      </Card>
 
-      {/* Button to toggle ChangePasswordForm */}
-      <button onClick={() => setShowChangePassword(!showChangePassword)}>
-        {showChangePassword ? "Hide Change Password" : "Change Password"}
-      </button>
+      <Card
+        title={<Title level={4} style={{ fontSize: "22px" }}>Notifications</Title>}
+        style={{
+          marginBottom: "20px",
+          padding: "20px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        {error && <Text type="danger" style={{ fontSize: "18px" }}>{error}</Text>}
+        {notifications.length === 0 ? (
+          <Text style={{ fontSize: "18px" }}>No notifications found.</Text>
+        ) : (
+          <List
+            itemLayout="horizontal"
+            dataSource={notifications}
+            renderItem={(notification) => (
+              <List.Item>
+                <List.Item.Meta
+                  title={<Text style={{ fontSize: "18px" }}>{notification.message}</Text>}
+                  description={<Text style={{ fontSize: "16px" }}>{new Date(notification.createdAt).toLocaleString()}</Text>}
+                />
+              </List.Item>
+            )}
+          />
+        )}
+      </Card>
 
-      {/* Conditionally render the ChangePasswordForm */}
+      <ActivityForm onActivityCreated={(activity) => console.log("Activity created:", activity)} />
+
       {showChangePassword && <ChangePasswordForm id={id} />}
 
       <DeleteAccount advertiserId={id} />

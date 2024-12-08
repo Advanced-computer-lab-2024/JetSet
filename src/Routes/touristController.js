@@ -5,6 +5,7 @@ const Historical = require("../Models/Historical");
 const Tourist = require("../Models/Tourist.js");
 const TourGuide = require("../Models/TourGuide.js");
 const Complaint = require("../Models/Complaint.js");
+const Category = require("../Models/Category.js"); // Import the Category model
 const Transportation = require("../Models/Transportation");
 const nodemailer = require("nodemailer");
 const cron = require("node-cron");
@@ -153,7 +154,8 @@ cron.schedule("17 14 * * *", async () => {
         const notification = new Notification({
           recipient: tourist.username,
           role: "Tourist",
-          message: `You have upcoming events: ${reminders.length} items. Please check your email for details.`,
+          message: `<p>You have the following upcoming events:</p>
+          <ul>${reminders.join("\n")}</ul>`,
         });
 
         // Save the notification
@@ -2944,44 +2946,64 @@ const payByWalletIti = async (req, res) => {
 };
 
 const payByWalletProduct = async (req, res) => {
-  const { touristId, productId } = req.params;
+  const { touristId } = req.params;
+  const { products, isApplied, promoCode } = req.body;
 
   try {
-    let amount = 0;
+    let totalAmount = 0;
+    const updatedProducts = [];
+
     // Find the tourist
     const tourist = await Tourist.findById(touristId);
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    // Find the product
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+    // Validate products and calculate total amount
+    for (const { productId, quantity } of products) {
+      if (quantity <= 0) {
+        return res.status(400).json({
+          message: `Invalid quantity for product ID: ${productId}`,
+        });
+      }
+
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res
+          .status(404)
+          .json({ message: `Product with ID ${productId} not found` });
+      }
+
+      const cost = product.price * quantity;
+
+      // Check if the product has already been purchased
+      // if (tourist.payedProducts.includes(product._id.toString())) {
+      //   return res
+      //     .status(400)
+      //     .json({ message: `Product ${product.name} is already paid for.` });
+      // }
+
+      // Update total amount and store the product details for processing
+      totalAmount += cost;
+      updatedProducts.push({ product, quantity, cost });
     }
 
-    // Check if wallet balance is sufficient
-    if (tourist.wallet < product.price) {
-      return res.status(400).json({ message: "Insufficient wallet balance" });
-    }
-    amount = product.price;
-
+    // Apply promo code if provided
     if (isApplied) {
       const promo = await PromoCode.findOne({ code: promoCode });
 
       if (!promo) {
-        return res
-          .status(400)
-          .json({ message: "Promo code not assigned to you" });
+        return res.status(400).json({ message: "Promo code not assigned to you" });
       }
       if (!promo.isActive || new Date() > promo.expirationDate) {
-        return res
-          .status(400)
-          .json({ message: "Invalid or expired promo code" });
+        return res.status(400).json({ message: "Invalid or expired promo code" });
       }
 
-      amount -= (promo.discount / 100) * amount;
+      // Calculate the discount and adjust the total amount
+      const discount = (promo.discount / 100) * totalAmount;
+      totalAmount -= discount;
 
+      // Remove the promo code from the tourist's list
       tourist.promoCodes = tourist.promoCodes.filter(
         (assignedPromo) => !assignedPromo.equals(promo._id)
       );
@@ -2989,37 +3011,55 @@ const payByWalletProduct = async (req, res) => {
       await tourist.save(); // Persist changes
     }
 
-    // Deduct product price from wallet
-    tourist.wallet -= amount;
-
-    // Add the product ID to the payedProducts array
-    if (!tourist.payedProducts.includes(productId)) {
-      tourist.payedProducts.push(productId);
+    // Check if wallet balance is sufficient
+    if (tourist.wallet < totalAmount) {
+      return res.status(400).json({ message: "Insufficient wallet balance" });
     }
 
-    // Increment product sales count
-    product.sales += 1;
+    // Deduct total amount from wallet
+    tourist.wallet -= totalAmount;
 
-    // Save the updated data
+    // Process each product
+    for (const { product, quantity } of updatedProducts) {
+      // Add the product ID to the payedProducts array
+      tourist.payedProducts.push(product._id);
+
+      // Increment product sales count
+      product.sales += quantity;
+      product.quantity -= quantity;
+
+      // Save the product updates
+      await product.save();
+    }
+
+    // Save the tourist updates
     await tourist.save();
-    await product.save();
 
     // Optionally: Add loyalty points for the purchase
-    const loyaltyUpdate = await addLoyaltyPoints(product.price, touristId);
+    const loyaltyUpdate = await addLoyaltyPoints(totalAmount, touristId);
 
+    // Send email confirmation
     const mailOptions = {
       from: {
         name: "JetSet",
-        address: process.env.EMAIL_USER, // Corrected to reference the environment variable
+        address: process.env.EMAIL_USER,
       },
       to: tourist.email,
-      subject: "Payment Confirmation for Your Product",
+      subject: "Payment Confirmation for Your Products",
       html: `
         <p>Hello ${tourist.username},</p>
-        <p>Thank you for buying Product with JetSet!</p>
-        <p>We are pleased to confirm your payment of <strong>${amount}</strong> has been successfully processed using your Wallet</p>
-        <p>Product: ${product.name}</p>
-        <p>Enjoy your Product, and thank you for choosing JetSet!</p>
+        <p>Thank you for your purchase with JetSet!</p>
+        <p>We are pleased to confirm your payment of <strong>${totalAmount}</strong> has been successfully processed using your Wallet.</p>
+        <p>Products:</p>
+        <ul>
+          ${updatedProducts
+            .map(
+              ({ product, quantity }) =>
+                `<li>${product.name} (Quantity: ${quantity})</li>`
+            )
+            .join("")}
+        </ul>
+        <p>Enjoy your products, and thank you for choosing JetSet!</p>
         <p>Warm regards,</p>
         <p>JetSet Team</p>
       `,
@@ -3037,6 +3077,136 @@ const payByWalletProduct = async (req, res) => {
     });
   } catch (error) {
     // Return error response
+    return res.status(500).json({
+      message: "Error processing payment",
+      error: error.message,
+    });
+  }
+};
+
+const payByCardPro = async (req, res) => {
+  const { touristId } = req.params;
+  const { products, isApplied, promoCode } = req.body;
+
+  try {
+    let totalAmount = 0;
+    const updatedProducts = [];
+
+    // Find the tourist
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Validate products and calculate total amount
+    for (const { productId, quantity } of products) {
+      if (quantity <= 0) {
+        return res.status(400).json({
+          message: `Invalid quantity for product ID: ${productId}`,
+        });
+      }
+
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res
+          .status(404)
+          .json({ message: `Product with ID ${productId} not found` });
+      }
+
+      const cost = product.price * quantity;
+
+      // Update total amount and store the product details for processing
+      totalAmount += cost;
+      updatedProducts.push({ product, quantity, cost });
+
+      // Increment product sales count
+      product.sales += quantity;
+
+      // Add the product ID to the payedProducts array if not already paid for
+      // if (!tourist.payedProducts.includes(product._id.toString())) {
+      //   tourist.payedProducts.push(product._id);
+      // }
+    }
+
+    // Apply promo code if provided
+    if (isApplied) {
+      const promo = await PromoCode.findOne({ code: promoCode });
+
+      if (!promo) {
+        return res.status(400).json({ message: "Promo code not assigned to you" });
+      }
+      if (!promo.isActive || new Date() > promo.expirationDate) {
+        return res.status(400).json({ message: "Invalid or expired promo code" });
+      }
+
+      // Calculate the discount and adjust the total amount
+      const discount = (promo.discount / 100) * totalAmount;
+      totalAmount -= discount;
+
+      // Remove the promo code from the tourist's list
+      tourist.promoCodes = tourist.promoCodes.filter(
+        (assignedPromo) => !assignedPromo.equals(promo._id)
+      );
+
+      await tourist.save(); // Persist changes
+    }
+
+    // Create a payment intent with the total amount
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: totalAmount * 100, // Stripe expects the amount in cents
+      currency: "usd",
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never",
+      },
+    });
+
+    // Add loyalty points based on the total amount
+    const loyaltyUpdate = await addLoyaltyPoints(totalAmount, touristId);
+
+    // Send email confirmation
+    const mailOptions = {
+      from: {
+        name: "JetSet",
+        address: process.env.EMAIL_USER,
+      },
+      to: tourist.email,
+      subject: "Payment Confirmation for Your Products",
+      html: `
+        <p>Hello ${tourist.username},</p>
+        <p>Thank you for your purchase with JetSet!</p>
+        <p>We are pleased to confirm your payment of <strong>${totalAmount}</strong> has been successfully processed using your Card.</p>
+        <p>Products:</p>
+        <ul>
+          ${updatedProducts
+            .map(
+              ({ product, quantity }) =>
+                `<li>${product.name} (Quantity: ${quantity})</li>`
+            )
+            .join("")}
+        </ul>
+        <p>Enjoy your products, and thank you for choosing JetSet!</p>
+        <p>Warm regards,</p>
+        <p>JetSet Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    // Save the updated data for tourist and product
+    await tourist.save();
+   // await Promise.all(updatedProducts.map(({ product }) => product.save()));
+
+    // Return success response
+    return res.status(200).json({
+      message: "Payment successful",
+      paymentIntentId: paymentIntent.id,
+      loyaltyPoints: loyaltyUpdate.loyaltyPoints,
+      level: loyaltyUpdate.level,
+      badge: loyaltyUpdate.badge,
+    });
+  } catch (error) {
+    // Handle errors
     return res.status(500).json({
       message: "Error processing payment",
       error: error.message,
@@ -3402,6 +3572,87 @@ const addTouristAddress = async (req, res) => {
   }
 };
 
+
+const getAddress = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    // Find the tourist by their ID
+    const tourist = await Tourist.findById(id).select("addresses");
+
+    // Check if tourist exists
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Send the addresses in the response
+    return res.status(200).json({
+      success: true,
+      addresses: tourist.addresses,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+const getActivitiesBasedOnPreferences = async (req, res) => {
+  const { touristId } = req.params; // Destructure touristId from req.params
+  try {
+    // Find the tourist by ID
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found." });
+    }
+
+    // Extract preferences
+    const { preferences } = tourist;
+
+    // Map preferences to a list of category names
+    const preferredCategories = [];
+    if (preferences.historicAreas) preferredCategories.push("historicAreas");
+    if (preferences.beaches) preferredCategories.push("beaches");
+    if (preferences.familyFriendly) preferredCategories.push("familyFriendly");
+    if (preferences.shopping) preferredCategories.push("shopping");
+
+    // Find matching categories in the database
+    const categories = await Category.find({ name: { $in: preferredCategories } });
+    if (!categories.length) {
+      console.log("No matching categories found.");
+      return res.status(200).json([]); // Return empty array if no categories match
+    }
+
+    const categoryIds = categories.map((category) => category._id);
+
+    // Get all activities matching the preferred categories
+    const activities = await Activity.find({
+      category: { $in: categoryIds },
+    })
+      .populate("category") // Populate category details if needed
+      .populate("creator") // Optional: Populate creator details
+      .exec();
+
+    // Extract max budget from preferences
+    const maxBudget = preferences.budget || Number.MAX_SAFE_INTEGER;
+
+    // Filter activities by budget
+    const filteredActivities = activities.filter(
+      (activity) => activity.budget <= maxBudget
+    );
+
+    // Return the filtered activities
+    return res.status(200).json(filteredActivities);
+  } catch (error) {
+    console.error("Error fetching activities:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
 module.exports = {
   getProducts,
   SortActivities,
@@ -3481,4 +3732,9 @@ module.exports = {
   cancelOrder,
   viewRefundAmount,
   addTouristAddress,
+  getAddress,
+
+  payByCardPro,
+  getActivitiesBasedOnPreferences,
+
 };

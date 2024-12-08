@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+// src/AddAddress.js
+import React, { useState } from "react";
 import axios from "axios";
+import { Input, Button, notification, Spin } from "antd"; // Importing Ant Design components
 
 const AddAddress = ({ touristId }) => {
   const [addresses, setAddresses] = useState([""]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   const handleAddressChange = (index, value) => {
     const updatedAddresses = [...addresses];
@@ -19,57 +19,73 @@ const AddAddress = ({ touristId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-    setError("");
 
     if (addresses.some((address) => !address.trim())) {
-      setError("All address fields must be filled.");
+      notification.error({
+        message: "Validation Error",
+        description: "All address fields must be filled.",
+      });
       return;
     }
+
     try {
       setLoading(true);
-      const response = await axios.post(
-        `/addTouristAddress/${touristId}`,
-        { addresses }
-      );
-      setMessage(response.data.message);
-      setAddresses([""]);
+      const response = await axios.post(`/addTouristAddress/${touristId}`, {
+        addresses,
+      });
+      notification.success({
+        message: "Success",
+        description: response.data.message,
+      });
+      setAddresses([""]); // Reset the address fields
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to add addresses.");
+      notification.error({
+        message: "Error",
+        description: err.response?.data?.error || "Failed to add addresses.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h2>Add New Addresses</h2>
 
       {loading ? (
-        <p>Loading addresses...</p>
+        <Spin size="large" />
       ) : (
         <form onSubmit={handleSubmit}>
           {addresses.map((address, index) => (
-            <div key={index}>
-              <input
-                type="text"
+            <div key={index} style={{ marginBottom: "10px" }}>
+              <Input
                 placeholder={`Address ${index + 1}`}
                 value={address}
                 onChange={(e) => handleAddressChange(index, e.target.value)}
               />
             </div>
           ))}
-          <button type="button" onClick={addNewAddressField}>
+          <Button
+            type="default"
+            onClick={addNewAddressField}
+            style={{ marginBottom: "20px", marginRight: "10px" }}
+          >
             Add Another Address
-          </button>
-          <button type="submit" disabled={loading}>
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            style={{
+              backgroundColor: "#1d3557", // Apply specified color
+              borderColor: "#1d3557", // Match the border color
+              color: "white", // White text color
+            }}
+            disabled={loading}
+          >
             Submit Addresses
-          </button>
+          </Button>
         </form>
       )}
-
-      {message && <p>{message}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };

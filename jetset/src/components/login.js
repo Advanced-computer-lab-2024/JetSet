@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./login.css";
+import { Input, Button, Modal, Select, Typography } from "antd";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 const Register = () => {
   const [role, setRole] = useState("");
@@ -86,89 +89,167 @@ const Register = () => {
     }
   };
 
+  const customBlue = "#1d3557"; // Custom blue shade
+
   return (
-    <div className="register-container">
-      <div className="login-form">
-        <h2 className="form-header">Login</h2>
-        <input
-          type="text"
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", backgroundColor: "#f4f4f9" }}>
+      <div style={{ backgroundColor: "white", padding: "30px", borderRadius: "8px", boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)", width: "100%", maxWidth: "450px" }}>
+        <Title level={2} style={{ textAlign: "center", fontSize: "30px", color: customBlue, fontWeight: "bold" }}>Login</Title>
+
+        {/* Username Input */}
+        <Input
+          prefix={<UserOutlined />}
           placeholder="Enter username"
-          className="input-field"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          style={{
+            marginBottom: "15px",
+            fontSize: "18px",
+            borderColor: customBlue,
+            borderRadius: "8px",
+            padding: "10px 12px",
+          }}
         />
-        <input
-          type="password"
+
+        {/* Password Input */}
+        <Input.Password
+          prefix={<LockOutlined />}
           placeholder="Enter password"
-          className="input-field"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          style={{
+            marginBottom: "15px",
+            fontSize: "18px",
+            borderColor: customBlue,
+            borderRadius: "8px",
+            padding: "10px 12px",
+          }}
         />
-        <h3>Select Your Role</h3>
-        <div className="role-selection">
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="role-dropdown"
-          >
-            <option value="">Select a role</option>
-            <option value="tourist">Tourist</option>
-            <option value="admin">Admin</option>
-            <option value="seller">Seller</option>
-            <option value="tourguide">Tour Guide</option>
-            <option value="advertisor">Advertisor</option>
-            <option value="tourismgovernor">Tourism Governor</option>
-          </select>
-        </div>
-        <button onClick={handleLogin} className="primary-btn">
+
+        {/* Role Selection */}
+        <Select
+          value={role}
+          onChange={setRole}
+          placeholder="Select your role"
+          style={{
+            marginBottom: "15px",
+            width: "100%",
+            fontSize: "18px",
+            borderColor: customBlue,
+            borderRadius: "8px",
+            padding: "12px 12px",
+            height: "50px", // Increased height for the selection
+          }}
+        >
+          <Select.Option value="tourist">Tourist</Select.Option>
+          <Select.Option value="admin">Admin</Select.Option>
+          <Select.Option value="seller">Seller</Select.Option>
+          <Select.Option value="tourguide">Tour Guide</Select.Option>
+          <Select.Option value="advertisor">Advertisor</Select.Option>
+          <Select.Option value="tourismgovernor">Tourism Governor</Select.Option>
+        </Select>
+
+        {/* Login Button */}
+        <Button
+          type="primary"
+          block
+          onClick={handleLogin}
+          style={{
+            marginBottom: "15px",
+            fontSize: "18px",
+            backgroundColor: customBlue,
+            borderColor: customBlue,
+            borderRadius: "8px",
+            padding: "12px 0",
+          }}
+        >
           Login
-        </button>
-        <button
-          className="secondary-btn"
+        </Button>
+
+        {/* Forgot Password Button */}
+        <Button
+          type="link"
+          block
           onClick={() => setShowForgetPassword(true)}
+          style={{ fontSize: "16px", color: customBlue }}
         >
           Forgot Password?
-        </button>
-        {message && <p className="message">{message}</p>}
+        </Button>
+
+        {/* Error Message */}
+        {message && <Text type="danger" style={{ display: "block", textAlign: "center", marginTop: "15px", fontSize: "16px" }}>{message}</Text>}
       </div>
 
+      {/* Modal for Forgot Password */}
       {showForgetPassword && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Forgot Password</h3>
-            <input
-              type="text"
-              placeholder="Enter username"
-              value={forgetPasswordUsername}
-              onChange={(e) => setForgetPasswordUsername(e.target.value)}
-              className="input-field"
-            />
-            <select
-              value={forgetPasswordRole}
-              onChange={(e) => setForgetPasswordRole(e.target.value)}
-              className="role-dropdown"
+        <Modal
+          title="Forgot Password"
+          visible={showForgetPassword}
+          onCancel={() => setShowForgetPassword(false)}
+          footer={null}
+          style={{ fontSize: "16px", padding: "20px" }}
+        >
+          <Input
+            placeholder="Enter username"
+            value={forgetPasswordUsername}
+            onChange={(e) => setForgetPasswordUsername(e.target.value)}
+            style={{
+              marginBottom: "15px",
+              fontSize: "18px",
+              borderColor: customBlue,
+              borderRadius: "8px",
+              padding: "10px 12px",
+            }}
+          />
+          <Select
+            value={forgetPasswordRole}
+            onChange={setForgetPasswordRole}
+            placeholder="Select your role"
+            style={{
+              marginBottom: "15px",
+              width: "100%",
+              fontSize: "18px",
+              borderColor: customBlue,
+              borderRadius: "8px",
+              padding: "12px 12px",
+              height: "50px", // Increased height for the selection
+            }}
+          >
+            <Select.Option value="tourist">Tourist</Select.Option>
+            <Select.Option value="admin">Admin</Select.Option>
+            <Select.Option value="seller">Seller</Select.Option>
+            <Select.Option value="tourguide">Tour Guide</Select.Option>
+            <Select.Option value="advertisor">Advertisor</Select.Option>
+            <Select.Option value="tourismgovernor">Tourism Governor</Select.Option>
+          </Select>
+          <Button
+            type="primary"
+            block
+            onClick={handleForgetPassword}
+            style={{
+              marginBottom: "15px",
+              fontSize: "18px",
+              backgroundColor: customBlue,
+              borderColor: customBlue,
+              borderRadius: "8px",
+              padding: "12px 0",
+            }}
+          >
+            Send Reset Link
+          </Button>
+          {resetMessage && (
+            <Text
+              type={resetMessage.includes("Error") ? "danger" : "success"}
+              style={{
+                display: "block",
+                textAlign: "center",
+                fontSize: "16px",
+              }}
             >
-              <option value="">Select a role</option>
-              <option value="tourist">Tourist</option>
-              <option value="admin">Admin</option>
-              <option value="seller">Seller</option>
-              <option value="tourguide">Tour Guide</option>
-              <option value="advertisor">Advertisor</option>
-              <option value="tourismgovernor">Tourism Governor</option>
-            </select>
-            <button onClick={handleForgetPassword} className="primary-btn">
-              Send Reset Link
-            </button>
-            <button
-              onClick={() => setShowForgetPassword(false)}
-              className="secondary-btn"
-            >
-              Cancel
-            </button>
-            {/* Render reset message */}
-            {resetMessage && <p className="message">{resetMessage}</p>}
-          </div>
-        </div>
+              {resetMessage}
+            </Text>
+          )}
+        </Modal>
       )}
     </div>
   );
