@@ -126,7 +126,7 @@ const CreateItineraryForm = ({ tourguideId }) => {
         <div>
           <label>Availability Dates:</label>
           <input
-            type="text"
+            type="date"
             name="availability_dates"
             value={formData.availability_dates}
             onChange={handleChange}

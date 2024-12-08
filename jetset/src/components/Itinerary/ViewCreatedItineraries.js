@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import UpdateItineraryForm from "./UpdateItineraryForm.js";
 import axios from "axios";
 
-const ViewCreatedItineraries = ({ id }) => {
+
+const ViewCreatedItineraries = ({ id, onEdit  }) => {
   const [itineraries, setItineraries] = useState([]);
   const [touristItineraries, setTouristItineraries] = useState([]);
   const [error, setError] = useState("");
@@ -33,25 +35,35 @@ const ViewCreatedItineraries = ({ id }) => {
   }
 
   const deleteItinerary = async (itineraryId) => {
-    try {
-      const response = await axios.delete(
-        `http://localhost:3000/deleteItinerary`,
-        {
-          data: { id: itineraryId }, // Sending the ID in the body
-        }
-      );
-      setMessage(response.data.msg || "Itinerary deleted successfully!");
-      setError(""); // Clear any previous error
-      setItineraries((prevItineraries) =>
-        prevItineraries.filter((itinerary) => itinerary._id !== itineraryId)
-      );
-    } catch (err) {
-      setError(
-        err.response?.data?.error ||
-          "An error occurred while deleting the itinerary."
-      );
-      setMessage(""); // Clear success message
+    // Show confirmation dialog
+    const confirmed = window.confirm("Are you sure you want to delete this itinerary?");
+    
+    if (confirmed) {
+      try {
+        const response = await axios.delete(
+          `http://localhost:3000/deleteItinerary`,
+          {
+            data: { id: itineraryId }, // Sending the ID in the body
+          }
+        );
+        setMessage(response.data.msg || "Itinerary deleted successfully!");
+        setError(""); // Clear any previous error
+        setItineraries((prevItineraries) =>
+          prevItineraries.filter((itinerary) => itinerary._id !== itineraryId)
+        );
+      } catch (err) {
+        setError(
+          err.response?.data?.error ||
+            "An error occurred while deleting the itinerary."
+        );
+        setMessage(""); // Clear success message
+      }
     }
+  };
+  
+
+  const editItinerary = async (itineraryId) => {
+    <UpdateItineraryForm itineraryID={itineraryId} />
   };
 
   const toggleActivationStatus = async (itineraryId, currentStatus) => {
@@ -85,9 +97,11 @@ const ViewCreatedItineraries = ({ id }) => {
               <p>Name: {itinerary.name}</p>
               <h4>
                 Activities:{" "}
-                {itinerary.activities
-                  ?.map((activity) => activity.name)
-                  .join(", ") || "No activities listed"}
+                {itinerary.activities && itinerary.activities.length > 0
+                  ? itinerary.activities
+                      .map((activity) => activity?.title || "Unnamed Activity")
+                      .join(", ")
+                  : "No activities listed"}
               </h4>
               <p>
                 Locations:{" "}
@@ -111,72 +125,47 @@ const ViewCreatedItineraries = ({ id }) => {
                 {itinerary.tag?.map((tag) => tag.name).join(", ") ||
                   "No tags available"}
               </p>
-              <button
+              <div style={{ display: "flex", gap: "10px" }}>
+              <a
+                href="#"
+                style={{
+                  color: "green",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
                 onClick={() =>
                   toggleActivationStatus(itinerary._id, itinerary.status)
                 }
-                style={{
-                  backgroundColor: itinerary.status ==="active" ? "gray" : "green",
-                  color: "white",
-                  cursor: "pointer",
-                }}
               >
                 {itinerary.status ==="active" ? "Deactivate" : "Activate"}
-              </button>
-              <button
-                onClick={() => deleteItinerary(itinerary._id)}
+              </a>
+              <a
+                href="#"
                 style={{
-                  backgroundColor: "#b30000",
-                  color: "white",
+                  color: "red",
                   cursor: "pointer",
-                  marginLeft: "10px",
+                  textDecoration: "underline",
                 }}
+                onClick={() => deleteItinerary(itinerary._id)}
               >
                 Delete
-              </button>
+              </a>
+              <a
+                href="#"
+                style={{
+                  color: "#007BFF",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
+                onClick={() => onEdit(itinerary._id)}
+              >
+                Edit
+              </a>
+              </div>
             </li>
           ))
         ) : (
           <p>No itineraries found.</p>
-        )}
-      </ul>
-
-      <h3>Tourist Itineraries</h3>
-      <ul>
-        {touristItineraries.length > 0 ? (
-          touristItineraries.map((itinerary) => (
-            <li key={itinerary._id}>
-              <h4>
-                Activities:{" "}
-                {itinerary.activities
-                  ?.map((activity) => activity.name)
-                  .join(", ") || "No activities listed"}
-              </h4>
-              <p>
-                Locations:{" "}
-                {itinerary.locations
-                  ?.map((location) => location.address)
-                  .join(", ") || "No locations listed"}
-              </p>
-              <p>
-                Date Range:{" "}
-                {itinerary.dateRange?.startDate
-                  ? new Date(itinerary.dateRange.startDate).toLocaleDateString()
-                  : "N/A"}{" "}
-                to{" "}
-                {itinerary.dateRange?.endDate
-                  ? new Date(itinerary.dateRange.endDate).toLocaleDateString()
-                  : "N/A"}
-              </p>
-              <p>
-                Tags:{" "}
-                {itinerary.tags?.map((tag) => tag.name).join(", ") ||
-                  "No tags available"}
-              </p>
-            </li>
-          ))
-        ) : (
-          <p>No tourist itineraries found.</p>
         )}
       </ul>
     </div>
