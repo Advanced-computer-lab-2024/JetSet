@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import UpdateItineraryForm from "./UpdateItineraryForm.js";
 import axios from "axios";
 
-
 const ViewCreatedItineraries = ({ id, onEdit }) => {
   const [itineraries, setItineraries] = useState([]);
   const [touristItineraries, setTouristItineraries] = useState([]);
@@ -36,8 +35,10 @@ const ViewCreatedItineraries = ({ id, onEdit }) => {
 
   const deleteItinerary = async (itineraryId) => {
     // Show confirmation dialog
-    const confirmed = window.confirm("Are you sure you want to delete this itinerary?");
-    
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this itinerary?"
+    );
+
     if (confirmed) {
       try {
         const response = await axios.delete(
@@ -61,22 +62,27 @@ const ViewCreatedItineraries = ({ id, onEdit }) => {
       }
     }
   };
-  
 
   const toggleActivationStatus = async (itineraryId, currentStatus) => {
     try {
       let response;
-      
+
       if (currentStatus === "active") {
-        response = await axios.post(`http://localhost:3000/deactivateItinerary/${itineraryId}`);
+        response = await axios.post(
+          `http://localhost:3000/deactivateItinerary/${itineraryId}`
+        );
       } else {
-        response = await axios.post(`http://localhost:3000/activateItinerary/${itineraryId}`);
+        response = await axios.post(
+          `http://localhost:3000/activateItinerary/${itineraryId}`
+        );
       }
-        ` window.location.reload();`
-        setMessage(response.data.message);
-        setError("");
+      window.location.reload();
+      setMessage(response.data.message);
+      setError("");
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to toggle itinerary status.');
+      setError(
+        err.response?.data?.error || "Failed to toggle itinerary status."
+      );
       setMessage("");
     }
   };
@@ -124,41 +130,41 @@ const ViewCreatedItineraries = ({ id, onEdit }) => {
                   "No tags available"}
               </p>
               <div style={{ display: "flex", gap: "10px" }}>
-              <a
-                href="#"
-                style={{
-                  color: "green",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-                onClick={() =>
-                  toggleActivationStatus(itinerary._id, itinerary.status)
-                }
-              >
-                {itinerary.status ==="active" ? "Deactivate" : "Activate"}
-              </a>
-              <a
-                href="#"
-                style={{
-                  color: "red",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-                onClick={() => deleteItinerary(itinerary._id)}
-              >
-                Delete
-              </a>
-              <a
-                href="#"
-                style={{
-                  color: "#007BFF",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-                onClick={() => onEdit(itinerary._id)}
-              >
-                Edit
-              </a>
+                <a
+                  href="#"
+                  style={{
+                    color: "green",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                  onClick={() =>
+                    toggleActivationStatus(itinerary._id, itinerary.status)
+                  }
+                >
+                  {itinerary.status === "active" ? "Deactivate" : "Activate"}
+                </a>
+                <a
+                  href="#"
+                  style={{
+                    color: "red",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                  onClick={() => deleteItinerary(itinerary._id)}
+                >
+                  Delete
+                </a>
+                <a
+                  href="#"
+                  style={{
+                    color: "#007BFF",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                  onClick={() => onEdit(itinerary._id)}
+                >
+                  Edit
+                </a>
               </div>
             </li>
           ))
