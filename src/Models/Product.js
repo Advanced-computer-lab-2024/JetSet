@@ -15,11 +15,7 @@ const productSchema = new Schema(
     seller_id: {
       type: Schema.Types.ObjectId,
       ref: "Seller",
-    },
-    admin_id: {
-      type: Schema.Types.ObjectId,
-      ref: "Admin",
-    },
+    }, // added
     ratings: {
       type: Number,
       min: 0,
@@ -45,6 +41,23 @@ const productSchema = new Schema(
       type: Boolean,
       default: false, // Default to false if not specified
     },
+    purchaseRecords: [
+      {
+        tourist: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Tourist",
+          required: true,
+        },
+        purchaseDate: {
+          type: Date,
+          default: Date.now,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
 
     images: [String],
   },

@@ -44,6 +44,10 @@ const {
   updateActivityCreator,
   deleteAdvertiserAccount,
   loginAdv,
+  getAdvertiserSalesReport,
+  getAdvertiserTouristReport,
+  filterAdvertiserTouristReportByMonth,
+  filterAdvertiserSalesReport
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const {
@@ -80,6 +84,8 @@ const {
   changePasswordSeller,
   deleteSellerAccount,
   loginSeller,
+  getSellerSalesReport,
+  filterSellerSalesReport
 } = require("./Routes/sellerController");
 const {
   createPrefTag,
@@ -118,6 +124,9 @@ const {
   forgetPass,
   restPass,
   createPromoCode,
+  getAllUserStatistics,
+  getSalesReport,
+  getFilteredSalesReport
 } = require("./Routes/adminController");
 
 const {
@@ -217,6 +226,10 @@ const {
   changePasswordTourGuide,
   deleteTourGuideAccount,
   loginTourGuide,
+  getTourGuideSalesReport,
+  getTourGuideTouristReport,
+  filterTourGuideTouristReportByMonth,
+  filterTourGuideSalesReport
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -811,3 +824,16 @@ app.get("/historical/:id", async (req, res) => {
 });
 
 app.get("/preferences/:touristId",getActivitiesBasedOnPreferences);
+app.get("/tour-guide-sales-report", getTourGuideSalesReport);
+app.get("/advertiser-sales-report", getAdvertiserSalesReport);
+app.get("/seller-sales-report", getSellerSalesReport);
+app.get("/tour-guide-tourist-report", getTourGuideTouristReport);
+app.get("/advertiser-tourist-report", getAdvertiserTouristReport);
+app.get("/admin-user-statistics", getAllUserStatistics);
+app.get("/admin-sales-report",getSalesReport);
+app.get("/filter-tour-guide-sales-report", filterTourGuideSalesReport);
+app.get("/filter-tour-guide-tourist-report", filterTourGuideTouristReportByMonth); 
+app.get("/filter-advertiser-sales-report", filterAdvertiserSalesReport);
+app.get("/filter-advertiser-tourist-report", filterAdvertiserTouristReportByMonth);
+app.get("/filter-sales-report", filterSellerSalesReport);
+app.get("/filter-admin-report", getFilteredSalesReport); 

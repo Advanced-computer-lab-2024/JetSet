@@ -366,6 +366,208 @@ const deleteSellerAccount = async (req, res) => {
     });
   }
 };
+const getSellerSalesReport = async (req, res) => {
+  const { id } = req.query; // Accessing id directly from the query parameter
+
+  // Validate id
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      message: "Invalid ID format",
+    });
+  }
+
+  try {
+    // Fetch the seller by ID
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).json({
+        message: "Seller not found",
+      });
+    }
+
+    // Fetch all products associated with the seller
+    const products = await Product.find({ seller_id: id })
+      .populate({
+        path: 'purchaseRecords.tourist',  // Ensure we populate the tourist within purchaseRecords
+        select: 'username email',
+      })
+      .exec();  // Make sure the query executes properly
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({
+        message: "No products found for this seller",
+      });
+    }
+
+    // Initialize total revenue and product details
+    let totalRevenue = 0;
+    const productDetails = products.map((product) => {
+      // Calculate revenue based on purchaseRecords quantity
+      const productRevenue = product.purchaseRecords.reduce((total, record) => {
+        return total + (record.quantity * product.price);  // Multiply quantity by price
+      }, 0);
+
+      totalRevenue += productRevenue;
+
+      return {
+        productId: product._id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        quantity: product.quantity, // Remaining stock
+        ratings: product.ratings,
+        reviews: product.reviews.map((review) => ({
+          touristId: review.touristId,
+          reviewText: review.reviewText,
+          createdAt: review.createdAt,
+        })),
+        sales: product.sales || 0,
+        revenue: productRevenue,
+        images: product.images,
+        purchaseRecords: product.purchaseRecords.map((record) => ({
+          touristId: record.tourist?._id,
+          touristUsername: record.tourist?.username,
+          touristEmail: record.tourist?.email,
+          purchaseDate: record.purchaseDate,
+          quantity: record.quantity,
+        })),
+      };
+    });
+
+    // Send the response
+    res.status(200).json({
+      message: `Sales report for seller: ${seller.seller_name}`,
+      sellerDetails: {
+        id: seller._id,
+        name: seller.seller_name,
+        description: seller.seller_description,
+        email: seller.email,
+        username: seller.username,
+        images: seller.images,
+      },
+      totalRevenue,
+      products: productDetails,
+    });
+  } catch (error) {
+    console.error("Error generating seller sales report:", error);
+    res.status(500).json({
+      message: "Error generating sales report",
+      error: error.message || error,
+    });
+  }
+};
+const filterSellerSalesReport = async (req, res) => {
+  const { id, product, date, month } = req.query; // Extract filters from query
+
+  // Validate seller ID
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      message: "Invalid ID format",
+    });
+  }
+
+  try {
+    // Fetch seller by ID
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).json({
+        message: "Seller not found",
+      });
+    }
+
+    // Build the product filter based on product name
+    const productFilter = { seller_id: id };
+    if (product) {
+      productFilter.name = { $regex: new RegExp(product, 'i') }; // Filter by product name using regex (case-insensitive)
+    }
+
+    // Fetch products based on filters
+    const products = await Product.find(productFilter)
+      .populate({
+        path: 'purchaseRecords.tourist',
+        select: 'username email',
+      })
+      .exec();
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({
+        message: "No products found for the specified criteria",
+      });
+    }
+
+    // Initialize total revenue and filtered product details
+    let totalRevenue = 0;
+    const filteredProductDetails = products
+      .map((product) => {
+        // Filter purchase records only if date or month filters are provided
+        const filteredPurchaseRecords = product.purchaseRecords.filter((record) => {
+          const purchaseDate = new Date(record.purchaseDate);
+
+          // Apply date and month filters
+          const isDateMatch = date ? purchaseDate.toISOString().split('T')[0] === date : true;
+          const isMonthMatch = month
+            ? purchaseDate.getMonth() + 1 === parseInt(month) // Months are 0-indexed
+            : true;
+
+          // Include records matching both filters or all records if no filters
+          return isDateMatch && isMonthMatch;
+        });
+
+        // Calculate revenue for filtered purchase records
+        const productRevenue = filteredPurchaseRecords.reduce((total, record) => {
+          return total + record.quantity * product.price;
+        }, 0);
+
+        totalRevenue += productRevenue;
+
+        return {
+          productId: product._id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          quantity: product.quantity, // Remaining stock
+          ratings: product.ratings,
+          reviews: product.reviews.map((review) => ({
+            touristId: review.touristId,
+            reviewText: review.reviewText,
+            createdAt: review.createdAt,
+          })),
+          sales: product.sales || 0,
+          revenue: productRevenue,
+          images: product.images,
+          purchaseRecords: filteredPurchaseRecords.map((record) => ({
+            touristId: record.tourist?._id,
+            touristUsername: record.tourist?.username,
+            touristEmail: record.tourist?.email,
+            purchaseDate: record.purchaseDate,
+            quantity: record.quantity,
+          })),
+        };
+      })
+      .filter((product) => product.purchaseRecords.length > 0 || (!date && !month)); // Only include products with matching records or all if no filters
+
+    // Send response with filtered details
+    res.status(200).json({
+      message: `Filtered sales report for seller: ${seller.seller_name}`,
+      sellerDetails: {
+        id: seller._id,
+        name: seller.seller_name,
+        description: seller.seller_description,
+        email: seller.email,
+        username: seller.username,
+        images: seller.images,
+      },
+      totalRevenue,
+      products: filteredProductDetails,
+    });
+  } catch (error) {
+    console.error("Error filtering sales report:", error);
+    res.status(500).json({
+      message: "Error filtering sales report",
+      error: error.message || error,
+    });
+  }
+};
 
 module.exports = {
   createSeller,
@@ -383,4 +585,6 @@ module.exports = {
   changePasswordSeller,
   deleteSellerAccount,
   loginSeller,
+  getSellerSalesReport,
+  filterSellerSalesReport
 };
