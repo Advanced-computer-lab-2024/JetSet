@@ -11,6 +11,8 @@ import Activate from "./Tourguide/Activate";
 import Deactivate from "./Tourguide/Deactivate";
 import ChangePasswordForm from "./Tourguide/ChangePasswordForm.js";
 import DeleteAccount from "./Tourguide/DeleteAccount.js";
+import TourGuideSalesReport from "./Reports/TourGuideSalesReport.js";
+import TourGuideReport from "./Reports/TourGuideTouristReport.js";
 import { useParams } from "react-router-dom";
 
 function TourGuide() {
@@ -89,8 +91,11 @@ function TourGuide() {
             <h1>Welcome, {username || "Tour Guide"}!</h1>{" "}
             {/* Display the username */}
             {error && <p style={{ color: "red" }}>{error}</p>}
-            {/* <nav>
-              <button onClick={() => setView("itineraries")}>
+
+            { <nav>
+            <button onClick={() => setView("salesReport")}>Sales Report</button> {/* Button for Sales Report */}
+            <button onClick={() => setView("touristReport")}>Tourist Report</button> {/* Button for Tourist Report */}
+              /*<button onClick={() => setView("itineraries")}>
                 View Itineraries (done)
               </button>
               <button onClick={() => setView("tourGuideProfile")}>
@@ -125,8 +130,8 @@ function TourGuide() {
               </button>
               <button onClick={() => setView("notifications")}>
                 View Notifications (done)
-              </button>
-            </nav> */}
+              </button>*/
+            </nav> }
             {/* Input for itinerary ID */}
             {(view === "activate" || view === "deactivate") && (
               <div>
@@ -139,7 +144,9 @@ function TourGuide() {
               </div>
             )}
             {/* Conditional rendering based on view */}
-            {view === "itineraries" && (
+            {view === "salesReport" && <TourGuideSalesReport tourGuideID={tourGuideID}/>} {/* Render Sales Report */}
+          {view === "touristReport" && <TourGuideReport tourGuideID={tourGuideID}/>} {/* Render Tourist Report */}
+            view === "itineraries" && (
               <div>
                 <div>
                   <button onClick={() => setView("itineraries")}>
@@ -151,7 +158,7 @@ function TourGuide() {
                 </div>
                 <ItineraryList />
               </div>
-            )}
+            )
 
             {view === "ViewCreatedItineraries" && (
               <div>
