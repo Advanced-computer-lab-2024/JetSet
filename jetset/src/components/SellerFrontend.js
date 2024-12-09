@@ -260,9 +260,9 @@ const SellerFrontend = () => {
       <button onClick={() => setShowSellerReport(!showSellerReport)}>
         {showSellerReport ? "Hide Sales Report" : "Show Sales Report"}
       </button>
-      {showSellerReport && <SellerReport sellerId={sellerId}/>}
+      {showSellerReport && <SellerReport sellerId={sellerId} />}
     </div>
   );
 };
 
-export default SellerFrontend; 
+export default SellerFrontend;
