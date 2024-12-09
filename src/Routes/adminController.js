@@ -526,6 +526,192 @@ const getComplaintsByStatus = async (req, res) => {
   }
 };
 
+//VIew admin sales report 
+const getSalesReport = async (req, res) => {
+  const { id: adminId } = req.query;  // Accessing adminId from the query parameter
+
+  // Check if adminId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(adminId)) {
+    return res.status(400).json({
+      message: "Invalid admin ID format",
+    });
+  }
+
+  try {
+    // Fetch all tourists
+    const tourists = await Tourist.find()
+      .populate("bookedActivities")
+      .populate("bookedItineraries");
+
+    // Fetch all products belonging to the admin, including purchase records
+    const products = await Product.find({ seller_id: new mongoose.Types.ObjectId(adminId) })
+      .populate("purchaseRecords"); // Assuming purchaseRecords is a field in Product
+
+    // Filter activities booked and paid for online by tourists
+    const bookedActivities = [];
+    const bookedItineraries = [];
+
+    tourists.forEach((tourist) => {
+      if (tourist.bookedActivities.length > 0) {
+        bookedActivities.push(...tourist.bookedActivities);
+      }
+      if (tourist.bookedItineraries.length > 0) {
+        bookedItineraries.push(...tourist.bookedItineraries);
+      }
+    });
+
+    // Remove duplicates
+    const uniqueBookedActivities = Array.from(
+      new Set(bookedActivities.map((activity) => activity._id.toString()))
+    ).map((id) => bookedActivities.find((activity) => activity._id.toString() === id));
+
+    const uniqueBookedItineraries = Array.from(
+      new Set(bookedItineraries.map((itinerary) => itinerary._id.toString()))
+    ).map((id) => bookedItineraries.find((itinerary) => itinerary._id.toString() === id));
+
+    // Calculate revenues
+    const activityRevenue = uniqueBookedActivities.reduce(
+      (total, activity) => total + (activity.budget || 0) * 0.1,
+      0
+    );
+
+    const itineraryRevenue = uniqueBookedItineraries.reduce(
+      (total, itinerary) => total + (itinerary.budget || 0) * 0.1,
+      0
+    );
+
+    const productRevenue = products.reduce(
+      (total, product) => total + (product.sales || 0) * (product.price || 0),
+      0
+    );
+
+    // Total revenue
+    const totalRevenue = activityRevenue + itineraryRevenue + productRevenue;
+
+    // Response with overall and individual reports
+    res.status(200).json({
+      message: "Sales Report",
+      totalRevenue,
+      breakdown: {
+        activityRevenue,
+        itineraryRevenue,
+        productRevenue,
+      },
+      individualReports: {
+        activities: uniqueBookedActivities.map((activity) => ({
+          id: activity._id,
+          title: activity.title,
+          budget: activity.budget,
+          revenue: (activity.budget || 0) * 0.1,
+        })),
+        itineraries: uniqueBookedItineraries.map((itinerary) => ({
+          id: itinerary._id,
+          name: itinerary.name,
+          budget: itinerary.budget,
+          revenue: (itinerary.budget || 0) * 0.1,
+        })),
+        products: products.map((product) => ({
+          id: product._id,
+          name: product.name,
+          price: product.price,
+          sales: product.sales,
+          revenue: (product.sales || 0) * (product.price || 0),
+          purchaseRecords: product.purchaseRecords.map((record) => ({
+            touristUsername: record.touristUsername,
+            touristEmail: record.touristEmail,
+            quantity: record.quantity,
+            purchaseDate: record.purchaseDate,
+          })),
+        })),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error generating sales report",
+      error: error.message || error,
+    });
+  }
+};
+
+//filter admin sales
+const getFilteredSalesReport = async (req, res) => {
+  const { id: adminId, product, startDate, endDate, month } = req.query;
+
+  if (!mongoose.Types.ObjectId.isValid(adminId)) {
+    return res.status(400).json({
+      message: "Invalid admin ID format",
+    });
+  }
+
+  try {
+    let dateFilter = {};
+
+    // Apply date or month filters
+    if (startDate && endDate) {
+      dateFilter = {
+        purchaseDate: {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate),
+        },
+      };
+    } else if (month) {
+      const [year, monthIndex] = month.split("-"); // Format: YYYY-MM
+      const start = new Date(year, monthIndex - 1, 1);
+      const end = new Date(year, monthIndex, 0);
+      dateFilter = {
+        purchaseDate: {
+          $gte: start,
+          $lte: end,
+        },
+      };
+    }
+
+    // Fetch products with optional product name filter
+    const productFilter = product ? { name: new RegExp(product, "i") } : {};
+    const products = await Product.find({
+      seller_id: new mongoose.Types.ObjectId(adminId),
+      ...productFilter,
+    })
+      .populate({
+        path: "purchaseRecords",
+        match: dateFilter, // Apply date filter to purchase records
+      });
+
+    const filteredProducts = products.map((prod) => ({
+      id: prod._id,
+      name: prod.name,
+      price: prod.price,
+      sales: prod.sales,
+      revenue: prod.purchaseRecords.reduce(
+        (total, record) => total + record.quantity * prod.price,
+        0
+      ),
+      purchaseRecords: prod.purchaseRecords.map((record) => ({
+        touristUsername: record.touristUsername,
+        touristEmail: record.touristEmail,
+        quantity: record.quantity,
+        purchaseDate: record.purchaseDate,
+      })),
+    }));
+
+    const totalRevenue = filteredProducts.reduce(
+      (total, prod) => total + prod.revenue,
+      0
+    );
+
+    res.status(200).json({
+      message: "Filtered Sales Report",
+      totalRevenue,
+      filteredProducts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error generating filtered sales report",
+      error: error.message || error,
+    });
+  }
+};
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -556,4 +742,6 @@ module.exports = {
   addReplyToComplaint,
   getComplaintsSortedByDate,
   getComplaintsByStatus,
+  getSalesReport,
+  getFilteredSalesReport,
 };

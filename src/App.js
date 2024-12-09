@@ -7,6 +7,8 @@ const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
 
+
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -42,6 +44,10 @@ const {
   gettransportation,
   updateActivityCreator,
   deleteAdvertiserAccount,
+  getAdvertiserSalesReport,
+  getAdvertiserTouristReport,
+  filterAdvertiserSalesReport,
+  filterAdvertiserTouristReportByMonth,
 } = require("./Routes/advertiserController"); // Adjust path as necessary
 
 const {
@@ -75,6 +81,8 @@ const {
   archiveProduct,
   changePasswordSeller,
   deleteSellerAccount,
+  getSellerSalesReport,
+  filterSellerSalesReport,
 } = require("./Routes/sellerController");
 const {
   createPrefTag,
@@ -92,6 +100,8 @@ const {
   addReplyToComplaint,
   getComplaintsSortedByDate,
   getComplaintsByStatus,
+  getSalesReport,
+  
 } = require("./Routes/adminController");
 
 const {
@@ -108,6 +118,7 @@ const {
   viewAllComplaints,
   flagItinerary,
   flagActivity,
+  getFilteredSalesReport,
 } = require("./Routes/adminController");
 
 const {
@@ -177,6 +188,11 @@ const {
   deactivateItinerary,
   changePasswordTourGuide,
   deleteTourGuideAccount,
+  getTourGuideSalesReport,
+  getTourGuideTouristReport,
+  filterTourGuideSalesReport,
+  filterTourGuideTouristReportByMonth,
+
 } = require("../src/Routes/tourguideController");
 
 //tourguide tourist itinerary
@@ -497,6 +513,49 @@ app.post("/book-hotel/:touristId", bookHotel);
 
 app.get("/flight", viewFlight);
 app.get("/hotel", viewHotel);
+
+//SPRINT3 ITEN
+// app.get("/tour-guide-sales",   getSalesReport); 
+// app.get("/filter-tour-guide-sales",   filterSalesReport); 
+
+//view tour guide sales report
+app.get("/tour-guide-sales-report", getTourGuideSalesReport);
+// Route for filtering the sales report
+app.get("/filter-tour-guide-sales-report", filterTourGuideSalesReport); //filterAdvertiserSalesReport
+//view tour guide tourist report 
+app.get("/tour-guide-tourist-report", getTourGuideTouristReport);
+//filter tour guide tourist report //filterTourGuideTouristReportByMonth
+app.get("/filter-tour-guide-tourist-report", filterTourGuideTouristReportByMonth); 
+
+
+//view advertiser sales report
+app.get("/advertiser-sales-report", getAdvertiserSalesReport);
+// Route for filtering the sales report
+app.get("/filter-advertiser-sales-report", filterAdvertiserSalesReport); 
+//view tourist advertiser tourist report
+app.get("/advertiser-tourist-report", getAdvertiserTouristReport);
+//filter advertiser tourist report
+app.get("/filter-advertiser-tourist-report", filterAdvertiserTouristReportByMonth); //filterAdvertiserTouristReportByMonth
+
+
+//filter seller sales report 
+app.get("/seller-sales-report", getSellerSalesReport);
+//filter seller sales report  //filterSellerSalesReport
+app.get("/filter-seller-sales-report", filterSellerSalesReport); 
+
+
+//view admin sales report 
+app.get("/admin-sales-report", getSalesReport);
+//filter admin sales report 
+app.get("/filter-admin-report", getFilteredSalesReport); 
+
+//filter admin sales report 
+
+//app.get("/seller-sales-report", getSellerSalesReport);
+//app.get("/admin-user-statistics", getAllUserStatistics);
+//app.get("/admin-sales-report",getSalesReport);
+
+
 
 const Category = require("./Models/Category.js");
 
