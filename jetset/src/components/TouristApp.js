@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Layout, Menu, Button, Card, Row, Col, Typography, Spin } from "antd";
 import NavTourist from "./tourist/navTourist";
 import {
@@ -40,7 +40,7 @@ const { Title } = Typography;
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
-  const touristId = useParams();
+  const touristId = location.state?.touristId;
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPurchasedProducts, setShowPurchasedProducts] = useState(false);

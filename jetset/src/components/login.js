@@ -39,7 +39,9 @@ const Register = () => {
       });
 
       if (role === "tourist") {
-        navigate(`/tourist/${response.data.tourist._id}`);
+        navigate("/tourist", {
+          state: { touristId: response.data.tourist._id },
+        });
       } else if (role === "seller") {
         const newSellerId = response.data.seller._id;
         navigate(`/sellerfrontend/${newSellerId}`);
