@@ -39,9 +39,7 @@ const Register = () => {
       });
 
       if (role === "tourist") {
-        navigate("/tourist", {
-          state: { touristId: response.data.tourist._id },
-        });
+        navigate(`/tourist/${response.data.tourist._id}`);
       } else if (role === "seller") {
         const newSellerId = response.data.seller._id;
         navigate(`/sellerfrontend/${newSellerId}`);
@@ -92,9 +90,36 @@ const Register = () => {
   const customBlue = "#1d3557"; // Custom blue shade
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", backgroundColor: "#f4f4f9" }}>
-      <div style={{ backgroundColor: "white", padding: "30px", borderRadius: "8px", boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)", width: "100%", maxWidth: "450px" }}>
-        <Title level={2} style={{ textAlign: "center", fontSize: "30px", color: customBlue, fontWeight: "bold" }}>Login</Title>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        backgroundColor: "#f4f4f9",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "30px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+          width: "100%",
+          maxWidth: "450px",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            textAlign: "center",
+            fontSize: "30px",
+            color: customBlue,
+            fontWeight: "bold",
+          }}
+        >
+          Login
+        </Title>
 
         {/* Username Input */}
         <Input
@@ -146,7 +171,9 @@ const Register = () => {
           <Select.Option value="seller">Seller</Select.Option>
           <Select.Option value="tourguide">Tour Guide</Select.Option>
           <Select.Option value="advertisor">Advertisor</Select.Option>
-          <Select.Option value="tourismgovernor">Tourism Governor</Select.Option>
+          <Select.Option value="tourismgovernor">
+            Tourism Governor
+          </Select.Option>
         </Select>
 
         {/* Login Button */}
@@ -177,7 +204,19 @@ const Register = () => {
         </Button>
 
         {/* Error Message */}
-        {message && <Text type="danger" style={{ display: "block", textAlign: "center", marginTop: "15px", fontSize: "16px" }}>{message}</Text>}
+        {message && (
+          <Text
+            type="danger"
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginTop: "15px",
+              fontSize: "16px",
+            }}
+          >
+            {message}
+          </Text>
+        )}
       </div>
 
       {/* Modal for Forgot Password */}
@@ -220,7 +259,9 @@ const Register = () => {
             <Select.Option value="seller">Seller</Select.Option>
             <Select.Option value="tourguide">Tour Guide</Select.Option>
             <Select.Option value="advertisor">Advertisor</Select.Option>
-            <Select.Option value="tourismgovernor">Tourism Governor</Select.Option>
+            <Select.Option value="tourismgovernor">
+              Tourism Governor
+            </Select.Option>
           </Select>
           <Button
             type="primary"

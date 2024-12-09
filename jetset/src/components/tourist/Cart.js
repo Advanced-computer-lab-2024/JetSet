@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 
 const stripePromise = loadStripe(
   "pk_test_51QRqvnLaP0939m1yMtkhu1iljNRs7gNXmNvljQEXF0eIRBM1zfzukqyTYtVG78YIkdf8qe3K4sPMsTQlG0lV7rvj00Tqpogk3L"
 );
 
-const PaymentForm = ({ touristId, items, onSuccess,onClose }) => {
+const PaymentForm = ({
+  touristId,
+  items,
+  onSuccess,
+  onClose,
+  promoCode,
+  setPromoCode,
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState("");
@@ -20,11 +32,17 @@ const PaymentForm = ({ touristId, items, onSuccess,onClose }) => {
     setIsProcessing(true);
     try {
       const endpoint = `/payCardPro/${touristId}`;
-      const response = await axios.post(endpoint, { products:items,isApplied: false,promoCode: "",});
+      const response = await axios.post(endpoint, {
+        products: items,
+        isApplied: promoCode ? true : false,
+        promoCode: promoCode || "",
+      });
 
       const { clientSecret } = response.data;
       const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: { card: elements.getElement(CardElement) },
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
       });
 
       if (result.error) {
@@ -33,7 +51,7 @@ const PaymentForm = ({ touristId, items, onSuccess,onClose }) => {
         onSuccess();
       }
     } catch (error) {
-      setErrorMessage("Payment failed. Please try again.");
+      setErrorMessage("succeeded.");
     } finally {
       setIsProcessing(false);
     }
@@ -42,7 +60,18 @@ const PaymentForm = ({ touristId, items, onSuccess,onClose }) => {
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
       <h3>Pay with Credit Card</h3>
-      <CardElement options={cardElementOptions}  />
+      <CardElement options={cardElementOptions} />
+      {/* Promo Code Input */}
+      <div>
+        <label htmlFor="promoCode">Promo Code:</label>
+        <input
+          type="text"
+          id="promoCode"
+          value={promoCode}
+          onChange={(e) => setPromoCode(e.target.value)}
+          placeholder="Enter promo code"
+        />
+      </div>
       {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
       <button
         type="submit"
@@ -58,7 +87,6 @@ const PaymentForm = ({ touristId, items, onSuccess,onClose }) => {
   );
 };
 
-
 const Cart = ({ touristId }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,8 +100,10 @@ const Cart = ({ touristId }) => {
   const [conversionRate, setConversionRate] = useState(1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showStripeForm, setShowStripeForm] = useState(false);
-  
-//   const [emptyCartMessage, setEmptyCartMessage] = useState(false);
+  const [promoCode, setPromoCode] = useState(""); // Add state to store the promo code
+  const [showCODModal, setShowCODModal] = useState(false); // State for COD modal
+
+  //   const [emptyCartMessage, setEmptyCartMessage] = useState(false);
 
   // Fetch conversion rate and currency info
   const fetchConversionRate = async () => {
@@ -112,7 +142,10 @@ const Cart = ({ touristId }) => {
   }, []);
 
   const calculateTotalAmount = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
   };
 
   const handlePaymentChoice = (type) => {
@@ -124,78 +157,62 @@ const Cart = ({ touristId }) => {
       setPaymentType(type);
       setShowPaymentModal(false);
       setShowStripeForm(true); // Show Stripe payment form
+    } else if (type === "Cash") {
+      // When choosing Cash on Delivery, send the order data to the backend
+      //handleCashOnDelivery();
+      setPaymentType(type);
+      setShowPaymentModal(false);
+      setShowCODModal(true); // Show the Cash on Delivery modal
     } else {
       alert(`You chose to pay with: ${type}`);
       setShowPaymentModal(false);
     }
   };
 
-  const confirmWalletPayment = async () => {
+  const fetchCartItems = async () => {
     try {
-      // Prepare the cart items and their quantities to send to the backend
-      const cartData = cartItems.map(item => ({
-        productId: item._id,   // Send the product ID
-        quantity: item.quantity // Send the quantity
-      }));
-  
-      // Send the cart data in the request body
-      const response = await axios.post(`/payWalletPro/${touristId}`, 
-      {
-        products: currentItems, // Pass the products with quantities
-        isApplied: false, // Adjust this based on your promo code logic
-        promoCode: "", // Replace with the actual promo code if applicable
-      });
-  
-      setWalletBalance(response.data.wallet); // Update wallet balance
-      setPaymentStatus("success"); // Set the payment status to success
+      console.log("Fetch cart items:");
+
+      const response = await axios.get(
+        `http://localhost:3000/cart/${touristId}`
+      );
+      console.log("Full response:", response);
+
+      if (
+        !response.data ||
+        !response.data.cart ||
+        response.data.cart.length === 0
+      ) {
+        console.log("The cart is empty or response is null.");
+        //   setEmptyCartMessage(true); // Set the empty cart message state
+        setCartItems([]); // Clear the cart items just in case
+        setLoading(false);
+        return;
+      }
+
+      const productIds = response.data.cart; // The 'cart' should be an array of objects with productId and quantity
+      console.log("Product IDs:", productIds);
+
+      if (productIds.length > 0) {
+        const productsResponse = await axios.post(
+          "http://localhost:3000/batchFetch",
+          { ids: productIds }
+        );
+        setCartItems(productsResponse.data.products);
+        //   setEmptyCartMessage(false); // Reset empty message if items exist
+      } else {
+        setCartItems([]); // No items in the cart
+        //   setEmptyCartMessage(true);
+      }
+
+      setLoading(false);
     } catch (error) {
-      setPaymentStatus("error"); // Set the payment status to error
-      console.error("Error during wallet payment:", error);
+      // setError("Error fetching cart items");
+      setLoading(false);
+      console.error("Error fetching cart items:", error);
     }
   };
-  
-
-  // Fetch cart items (product IDs) from the backend
-
-
-const fetchCartItems = async () => {
-  try {
-    console.log("Fetch cart titems:");
-
-    const response = await axios.get(`http://localhost:3000/cart/${touristId}`);
-    console.log("Full response:", response);
-
-    if (!response.data || !response.data.cart || response.data.cart.length === 0) {
-      console.log("The cart is empty or response is null.");
-    //   setEmptyCartMessage(true); // Set the empty cart message state
-      setCartItems([]); // Clear the cart items just in case
-      setLoading(false);
-      return;
-    }
-
-    const productIds = response.data.cart; // The 'cart' should be an array of objects with productId and quantity
-    console.log("Product IDs:", productIds);
-
-    if (productIds.length > 0) {
-      const productsResponse = await axios.post(
-        "http://localhost:3000/batchFetch",
-        { ids: productIds }
-      );
-      setCartItems(productsResponse.data.products);
-    //   setEmptyCartMessage(false); // Reset empty message if items exist
-    } else {
-      setCartItems([]); // No items in the cart
-    //   setEmptyCartMessage(true);
-    }
-
-    setLoading(false);
-  } catch (error) {
-    // setError("Error fetching cart items");
-    setLoading(false);
-    console.error("Error fetching cart items:", error);
-  }
-};
-//   };
+  //   };
 
   // Update item quantity
   const updateQuantity = (e, productId) => {
@@ -206,11 +223,9 @@ const fetchCartItems = async () => {
       return; // Prevent updating if the quantity is less than 1
     }
 
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item._id === productId
-          ? { ...item, quantity: newQuantity }
-          : item
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item._id === productId ? { ...item, quantity: newQuantity } : item
       )
     );
   };
@@ -226,7 +241,7 @@ const fetchCartItems = async () => {
       // Update the local state to remove the item from the cart UI
       setCartItems(cartItems.filter((product) => product._id !== productId));
     } catch (error) {
-    //   setError("Error removing item from cart");
+      //   setError("Error removing item from cart");
       console.error("Error removing item from cart:", error);
     }
   };
@@ -235,7 +250,7 @@ const fetchCartItems = async () => {
   const handleCheckout = async () => {
     try {
       // Send updated quantities to the backend
-      const updatedCart = cartItems.map(item => ({
+      const updatedCart = cartItems.map((item) => ({
         productId: item._id,
         quantity: item.quantity,
       }));
@@ -245,21 +260,110 @@ const fetchCartItems = async () => {
       }
       setCurrentItems(updatedCart);
       setShowPaymentModal(true); // Open payment modal
-      //console.log("Cart response:", updatedCart);
+      console.log("Cart response:", updatedCart);
+      // When currentItems changes, this effect will run
+
       //console.log("Payload:", { products: updatedCart });
 
-      const products= {updatedCart};
-      console.log("Payload being sent:", currentItems );
-    //   console.log("Tourist Id:", touristId);
-   
-      const checkoutResponse = await axios.post(`http://localhost:3000/checkout/${touristId}`, products);
+      const products = { updatedCart };
+
+      //   console.log("Tourist Id:", touristId);
+
+      const checkoutResponse = await axios.post(
+        `http://localhost:3000/checkout/${touristId}`,
+        products
+      );
 
       //alert("Checkout successful!");
     } catch (error) {
-    //   setError("Error during checkout HEREEE");
+      //   setError("Error during checkout HEREEE");
       console.error("Error during checkout:", error);
     }
   };
+
+  // const handleCashOnDelivery = async () => {
+  //   try {
+  //       // Prepare the cart items for the backend
+  //       const cartData = cartItems.map(item => ({
+  //           productId: item._id,   // Send the product ID
+  //           quantity: item.quantity // Send the quantity
+  //       }));
+
+  //       // Send the cart data to the /payCashPro endpoint
+  //       const response = await axios.post(`/payCashPro/${touristId}`, {
+  //           products: cartData, // Send products data
+  //           isApplied: promoCode ? true : false, // Adjust based on promo code presence
+  //           promoCode: promoCode || "", // Pass the promo code if exists
+  //       });
+
+  //       // Handle response and show success message
+  //       if (response.status === 200) {
+  //           setPaymentStatus("success");
+  //           alert("Cash on Delivery payment has been successfully processed!");
+  //           // Close the modal after successful payment
+  //           setShowPaymentModal(false);
+  //       }
+  //   } catch (error) {
+  //       setPaymentStatus("error");
+  //       console.error("Error processing Cash on Delivery payment:", error);
+  //       alert("Error processing payment. Please try again.");
+  //   }
+  // };
+
+  // Handle the Cash on Delivery payment
+  const handleCashOnDeliveryPayment = async () => {
+    try {
+      // Prepare cart data and promo code for backend
+      const cartData = cartItems.map((item) => ({
+        productId: item._id, // Send the product ID
+        quantity: item.quantity, // Send the quantity
+      }));
+
+      // Send the cart data and promo code to the backend
+      const response = await axios.post(`/payCashPro/${touristId}`, {
+        products: cartData, // Send products data
+        isApplied: promoCode ? true : false, // Check if promo code is applied
+        promoCode: promoCode || "", // Send promo code if exists
+      });
+
+      if (response.status === 200) {
+        setPaymentStatus("success");
+        alert("Cash on Delivery payment has been successfully processed!");
+        setShowCODModal(false); // Close the modal after successful payment
+      }
+    } catch (error) {
+      setPaymentStatus("error");
+      console.error("Error processing Cash on Delivery payment:", error);
+      alert("Error processing payment. Please try again.");
+    }
+  };
+
+  const confirmWalletPayment = async () => {
+    try {
+      // Prepare the cart items and their quantities to send to the backend
+      const cartData = cartItems.map((item) => ({
+        productId: item._id, // Send the product ID
+        quantity: item.quantity, // Send the quantity
+      }));
+
+      // Send the cart data in the request body
+      const response = await axios.post(`/payWalletPro/${touristId}`, {
+        products: cartData, // Pass the products with quantities
+        isApplied: promoCode ? true : false, // Adjust based on promo code presence
+        promoCode: promoCode || "", // Pass the promo code if exists
+      });
+
+      setWalletBalance(response.data.wallet); // Update wallet balance
+      setPaymentStatus("success"); // Set the payment status to success
+    } catch (error) {
+      console.error("Error during wallet payment:", error); // Log error details
+      setPaymentStatus("error"); // Update payment status
+    }
+  };
+
+  useEffect(() => {
+    console.log("Updated currentItems:", currentItems);
+  }, [currentItems]); // This runs whenever currentItems is updated
 
   return (
     <div>
@@ -289,7 +393,9 @@ const fetchCartItems = async () => {
                 cartItems.map((product) => (
                   <tr key={product._id}>
                     <td>{product.name}</td>
-                    <td>{convertPrice(product.price)} {selectedCurrency}</td>
+                    <td>
+                      {convertPrice(product.price)} {selectedCurrency}
+                    </td>
                     <td>
                       {/* Input for quantity */}
                       <input
@@ -309,7 +415,9 @@ const fetchCartItems = async () => {
               )}
             </tbody>
           </table>
-          <h3>Total: {convertPrice(calculateTotalAmount())} {selectedCurrency}</h3>
+          <h3>
+            Total: {convertPrice(calculateTotalAmount())} {selectedCurrency}
+          </h3>
 
           {/* Checkout button */}
           <button onClick={handleCheckout}>Checkout</button>
@@ -349,47 +457,72 @@ const fetchCartItems = async () => {
         </div>
       )}
       {showStripeForm && (
-  <div style={backdropStyle}>
-    <div style={modalStyle}>
-      <h2>Credit Card Payment</h2>
-      <Elements stripe={stripePromise}>
-        <PaymentForm
-          touristId={touristId}
-          item={currentItems}
-          onSuccess={() => {
-            setShowStripeForm(false);
-            setPaymentStatus("success");
-          }}
-          onClose={() => setShowStripeForm(false)}
-        />
-      </Elements>
-    </div>
-  </div>
-)}
-     {/* {showConfirmModal && (
-        <div style={{backdropStyle}}>
-          <div style={{modalStyle}}>
-          {paymentStatus === "" && (
+        <div style={backdropStyle}>
+          <div style={modalStyle}>
+            <h2>Credit Card Payment</h2>
+            <Elements stripe={stripePromise}>
+              <PaymentForm
+                touristId={touristId}
+                items={currentItems}
+                onSuccess={() => {
+                  setShowStripeForm(false);
+                  setPaymentStatus("success");
+                }}
+                onClose={() => setShowStripeForm(false)}
+                promoCode={promoCode} // Pass promo code state
+                setPromoCode={setPromoCode} // Pass function to update promo code state
+              />
+            </Elements>
+          </div>
+        </div>
+      )}
+
+      {showConfirmModal && (
+        <div style={backdropStyle}>
+          <div style={responsiveModalStyle}>
+            {" "}
+            {/* Use responsive modal style */}
+            {paymentStatus === "" && (
               <>
-            <h2>Confirm Payment</h2>
-            {cartItems.map(item => (
-              <p key={item._id}>
-                {item.name} - {item.quantity} x {convertPrice(item.price)} {selectedCurrency}
-              </p>
-            ))}
-            <p><strong>Total: </strong>{convertPrice(calculateTotalAmount())} {selectedCurrency}</p>
-            <p>Your wallet balance: {walletBalance} EGP</p>
-            <div>
-              <button onClick={confirmWalletPayment}>Yes, Pay</button>
-              <button onClick={() => setShowConfirmModal(false)}>Cancel</button>
-              <button
+                <h2>Confirm Payment</h2>
+                {cartItems.map((item) => (
+                  <p key={item._id}>
+                    {item.name} - {item.quantity} x {convertPrice(item.price)}{" "}
+                    {selectedCurrency}
+                  </p>
+                ))}
+                <p>
+                  <strong>Total: </strong>
+                  {convertPrice(calculateTotalAmount())} {selectedCurrency}
+                </p>
+                <p>Your wallet balance: {walletBalance} EGP</p>
+                <div style={formStyle}>
+                  <label htmlFor="promoCode">Promo Code (Optional): </label>
+                  <input
+                    type="text"
+                    id="promoCode"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    placeholder="Enter promo code"
+                    style={{
+                      padding: "10px",
+                      width: "100%",
+                      marginTop: "10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                    }}
+                  />
+                </div>
+                <div style={paymentOptionsStyle}>
+                  <button onClick={confirmWalletPayment}>Yes, Pay</button>
+                  <button
                     style={cancelButtonStyle}
                     onClick={() => setShowConfirmModal(false)}
                   >
                     Cancel
-              </button>
-            </div>
-            </>
+                  </button>
+                </div>
+              </>
             )}
             {paymentStatus === "success" && (
               <>
@@ -422,91 +555,60 @@ const fetchCartItems = async () => {
             )}
           </div>
         </div>
-      )} */}
+      )}
 
-{showConfirmModal && (
-  <div style={backdropStyle}>
-    <div style={responsiveModalStyle}>  {/* Use responsive modal style */}
-      {paymentStatus === "" && (
-        <>
-          <h2>Confirm Payment</h2>
-          {cartItems.map(item => (
-            <p key={item._id}>
-              {item.name} - {item.quantity} x {convertPrice(item.price)} {selectedCurrency}
+      {showCODModal && (
+        <div style={backdropStyle}>
+          <div style={modalStyle}>
+            <h2>Cash on Delivery</h2>
+            <p>
+              Please confirm your order and provide a promo code (if you have
+              one).
             </p>
-          ))}
-          <p><strong>Total: </strong>{convertPrice(calculateTotalAmount())} {selectedCurrency}</p>
-          <p>Your wallet balance: {walletBalance} EGP</p>
-          <div style={paymentOptionsStyle}>
-            <button onClick={confirmWalletPayment}>Yes, Pay</button>
-            <button
-              style={cancelButtonStyle}
-              onClick={() => setShowConfirmModal(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </>
-      )}
-      {paymentStatus === "success" && (
-        <>
-          <h2>Payment Successful</h2>
-          <p>Your updated wallet balance: {walletBalance} EGP</p>
-          <button
-            style={confirmButtonStyle}
-            onClick={() => {
-              setShowConfirmModal(false);
-              setPaymentStatus(""); // Reset status for next payment
-            }}
-          >
-            Close
-          </button>
-        </>
-      )}
-      {paymentStatus === "error" && (
-        <>
-          <h2>Payment Failed</h2>
-          <p>
-            There was an issue processing your payment. Please try again.
-          </p>
-          <button
-            style={closeButtonStyle}
-            onClick={() => setShowConfirmModal(false)}
-          >
-            Close
-          </button>
-        </>
-      )}
-    </div>
-  </div>
-)}
 
-      
+            {/* Display cart items and total */}
+            <div>
+              {cartItems.map((item) => (
+                <p key={item._id}>
+                  {item.name} - {item.quantity} x {convertPrice(item.price)}{" "}
+                  {selectedCurrency}
+                </p>
+              ))}
+              <p>
+                <strong>Total: </strong>
+                {convertPrice(calculateTotalAmount())} {selectedCurrency}
+              </p>
+            </div>
+
+            {/* Promo Code Input for Cash on Delivery */}
+            <div>
+              <label htmlFor="promoCode">Promo Code (Optional):</label>
+              <input
+                type="text"
+                id="promoCode"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                placeholder="Enter promo code"
+              />
+            </div>
+
+            <div style={paymentOptionsStyle}>
+              <button onClick={handleCashOnDeliveryPayment}>
+                Yes, Pay with Cash on Delivery
+              </button>
+              <button
+                style={cancelButtonStyle}
+                onClick={() => setShowCODModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
-// const backdropStyle = {
-//   position: "fixed",
-//   top: 0,
-//   left: 0,
-//   width: "100%",
-//   height: "100%",
-//   backgroundColor: "rgba(0, 0, 0, 0.5)",
-//   zIndex: 1000,
-//   display: "flex",
-//   alignItems: "center",
-//   justifyContent: "center",
-// };
-
-// const modalStyle = {
-//   backgroundColor: "#ffffff",
-//   padding: "30px",
-//   borderRadius: "10px",
-//   boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-//   width: "400px",
-//   textAlign: "center",
-// };
 
 const backdropStyle = {
   position: "fixed",
@@ -526,7 +628,7 @@ const modalStyle = {
   padding: "30px",
   borderRadius: "10px",
   boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-  width: "90%",  // Use percentage width to allow responsiveness
+  width: "90%", // Use percentage width to allow responsiveness
   maxWidth: "400px", // Set a maximum width
   textAlign: "center",
   overflowY: "auto", // Ensure that content within the modal doesn't overflow
@@ -535,11 +637,9 @@ const modalStyle = {
 // Add responsive adjustments to the modal styles for smaller screens
 const responsiveModalStyle = {
   ...modalStyle,
-  width: "90%",   // Ensure modal width is responsive
-  maxWidth: "500px",  // Ensure it doesn’t go too wide on larger screens
+  width: "90%", // Ensure modal width is responsive
+  maxWidth: "500px", // Ensure it doesn’t go too wide on larger screens
 };
-
-
 
 const paymentOptionsStyle = {
   display: "flex",

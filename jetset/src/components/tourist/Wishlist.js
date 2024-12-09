@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Table, Button, Spin, message } from "antd"; // Import Ant Design components
 
 const Wishlist = ({ touristId }) => {
   const [wishlist, setWishlist] = useState([]);
@@ -28,15 +29,16 @@ const Wishlist = ({ touristId }) => {
   const handleRemoveFromWishlist = async (productId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3000/Wishlist/${touristId}`,{
-            data: { productID: productId }
+        `http://localhost:3000/Wishlist/${touristId}`,
+        {
+          data: { productID: productId },
         }
       );
-      alert(response.data.message); // Success message
+      message.success(response.data.message); // Display success message
       fetchWishlist(); // Refresh the wishlist after removal
     } catch (error) {
       console.error("Error removing product:", error);
-      alert("Failed to remove from wishlist.");
+      message.error("Failed to remove from wishlist."); // Display error message
     }
   };
 
@@ -48,56 +50,79 @@ const Wishlist = ({ touristId }) => {
           item: productId,
         }
       );
-      alert(response.data.message); 
+      message.success(response.data.message); // Display success message
     } catch (error) {
       console.error("Error adding item to cart:", error);
-      alert(error.response?.data?.error || "An error occurred while adding the item to the cart");
-    }};
+      message.error(
+        error.response?.data?.error ||
+          "An error occurred while adding the item to the cart"
+      ); // Display error message
+    }
+  };
+
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      key: "price",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <div>
+          <Button
+            type="danger"
+            onClick={() => handleRemoveFromWishlist(record.productId._id)}
+            style={{
+              backgroundColor: "#1d3557", // Custom background color
+              color: "white", // White text color for contrast
+              border: "none", // Remove default border
+              marginRight: 10,
+            }}
+          >
+            Remove
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => handleAddToCart(record.productId._id)}
+            style={{
+              backgroundColor: "#1d3557", // Custom background color
+              color: "white", // White text color for contrast
+              border: "none", // Remove default border
+            }}
+          >
+            Add to Cart
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div>
       <h1>Your Wishlist</h1>
 
       {loading ? (
-        <p>Loading wishlist...</p>
+        <Spin tip="Loading Wishlist..." />
       ) : error ? (
-        <p>{error}</p>
+        <message.error>{error}</message.error> // Use message component instead of Alert for errors
       ) : (
-        <table>
-          <thead>
-            <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {wishlist.length === 0 ? (
-              <tr>
-                <td colSpan="3">Your wishlist is empty.</td>
-              </tr>
-            ) : (
-              wishlist.map((item) => (
-                <tr key={item.productId}>
-                  <td>{item.productId.name}</td>
-                  <td>{item.productId.price}</td>
-                  <td>
-                    <button
-                      onClick={() => handleRemoveFromWishlist(item.productId._id)}
-                    >
-                      Remove
-                    </button>
-                    <button
-                      onClick={() => handleAddToCart(item.productId._id)}
-                    >
-                      Add To Cart
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <Table
+          columns={columns}
+          dataSource={wishlist.map((item) => ({
+            key: item.productId._id,
+            name: item.productId.name,
+            price: item.productId.price,
+            productId: item,
+          }))}
+          pagination={false}
+        />
       )}
     </div>
   );

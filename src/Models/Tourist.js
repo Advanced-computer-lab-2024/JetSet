@@ -111,12 +111,10 @@ const touristSchema = new Schema(
         productId: {
           type: String,
           required: true,
-          
         },
         quantity: {
           type: Number,
           // required: true,
-          
         },
       },
     ],
@@ -147,6 +145,43 @@ const touristSchema = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "PromoCode",
+      },
+    ],
+    orders: [
+      {
+        orderNumber: {
+          type: String,
+          required: true,
+          unique: true, // Unique order number for each order
+        },
+        status: {
+          type: String,
+          enum: ["pending", "shipped", "delivered", "cancelled"], // Define possible statuses
+          default: "pending", // Default status
+        },
+        products: [
+          {
+            productId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "Product", // Reference to the Product model
+              required: true,
+            },
+            quantity: {
+              type: Number,
+              required: true,
+              min: 1, // Quantity should be at least 1
+            },
+          },
+        ],
+        orderDate: {
+          type: Date,
+          default: Date.now,
+        },
+        paymentMethod: {
+          type: String,
+          enum: ["cash", "credit card", "wallet"], // Payment method options
+          required: true, // Ensure this field is always provided
+        },
       },
     ],
     resetOtp: { type: String },

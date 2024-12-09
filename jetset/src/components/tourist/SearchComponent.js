@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Input, Select, Button, Card, List, Spin, message } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+
+const { Option } = Select;
 
 const SearchComponent = ({ touristId }) => {
   const [searchType, setSearchType] = useState("place"); // Default search type
@@ -8,6 +12,7 @@ const SearchComponent = ({ touristId }) => {
   const [error, setError] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState("EGP");
   const [conversionRate, setConversionRate] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const fetchConversionRate = async (currency) => {
     try {
@@ -15,15 +20,17 @@ const SearchComponent = ({ touristId }) => {
         `http://localhost:3000/tourist/${touristId}/preferredCurrency`
       );
       setSelectedCurrency(response.data.preferredCurrency); // Set the currency
-
       setConversionRate(response.data.conversionRate); // Set the conversion rate
     } catch (error) {
       console.error("Error fetching currency data:", error);
+      message.error("Failed to fetch currency data.");
     }
   };
+
   useEffect(() => {
     fetchConversionRate(selectedCurrency);
   }, [selectedCurrency]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setQuery((prev) => ({ ...prev, [name]: value }));
@@ -31,6 +38,7 @@ const SearchComponent = ({ touristId }) => {
 
   const handleSearch = async () => {
     setError(null); // Reset any previous errors
+    setLoading(true);
     try {
       let response;
       if (searchType === "place") {
@@ -49,196 +57,137 @@ const SearchComponent = ({ touristId }) => {
       setResults(response.data);
     } catch (err) {
       setError(err.message);
+      message.error("Search failed, please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h1>Search</h1>
-      <div>
-        <label>
-          Search Type:
-          <select
-            onChange={(e) => setSearchType(e.target.value)}
-            value={searchType}
-          >
-            <option value="place">Place</option>
-            <option value="activity">Activity</option>
-            <option value="itinerary">Itinerary</option>
-          </select>
-        </label>
+      <div style={{ marginBottom: "20px" }}>
+        <label>Search Type:</label>
+        <Select
+          value={searchType}
+          onChange={(value) => setSearchType(value)}
+          style={{ width: 200, marginLeft: 10 }}
+        >
+          <Option value="place">Place</Option>
+          <Option value="activity">Activity</Option>
+          <Option value="itinerary">Itinerary</Option>
+        </Select>
       </div>
-      <div>
-        <input
-          type="text"
+      <div style={{ marginBottom: "20px" }}>
+        <Input
           name="name"
           placeholder="Name"
           value={query.name}
           onChange={handleChange}
+          style={{ width: 200, marginRight: 10 }}
         />
-        <input
-          type="text"
+        <Input
           name="category"
           placeholder="Category"
           value={query.category}
           onChange={handleChange}
+          style={{ width: 200, marginRight: 10 }}
         />
-        <input
-          type="text"
+        <Input
           name="tags"
           placeholder="Tags (comma separated)"
           value={query.tags}
           onChange={handleChange}
+          style={{ width: 200, marginRight: 10 }}
         />
-        <button onClick={handleSearch}>Search</button>
+        <Button
+          type="primary"
+          onClick={handleSearch}
+          loading={loading}
+          style={{ marginTop: 10 }}
+        >
+          Search
+        </Button>
       </div>
       {error && <div style={{ color: "red" }}>{error}</div>}
-      <div>
-        <h2>Results:</h2>
-        <ul>
-          {results.map((result) => (
-            <li key={result._id}>
-              {/* Check if the result is a Place */}
-              {result.Name ? (
-                <div>
-                  <h3>Place: {result.Name}</h3>
-                  <p>
-                    <strong>Description:</strong> {result.Description || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Opening Hours:</strong>{" "}
-                    {result.opening_hours || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Ticket Prices (Family):</strong>
-                    {(result.TicketPricesF * conversionRate).toFixed(2) ||
-                      "N/A"}
-                    {selectedCurrency}
-                  </p>
-                  <p>
-                    <strong>Ticket Prices (Normal):</strong>
-                    {(result.TicketPricesN * conversionRate).toFixed(2) ||
-                      "N/A"}
-                    {selectedCurrency}
-                  </p>
-                  <p>
-                    <strong>Ticket Prices (Student):</strong>
-                    {(result.TicketPricesS * conversionRate).toFixed(2) ||
-                      "N/A"}
-                    {selectedCurrency}
-                  </p>
-                  <p>
-                    <strong>Tags:</strong>{" "}
-                    {Array.isArray(result.tags) && result.tags.length > 0
-                      ? result.tags.join(", ")
-                      : "N/A"}
-                  </p>
-                  <p>
-                    <strong>Created At:</strong>{" "}
-                    {new Date(result.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              ) : null}
 
-              {/* Check if the result is an Activity */}
-              {result.title ? (
-                <div>
-                  <h3>Activity: {result.title}</h3>
-                  <p>
-                    <strong>Budget:</strong>{" "}
-                    {(result.budget * conversionRate).toFixed(2) || "N/A"}
-                    {selectedCurrency}
-                  </p>
-                  <p>
-                    <strong>Date:</strong>{" "}
-                    {new Date(result.date).toLocaleDateString() || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Time:</strong> {result.time || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Location:</strong> {result.location || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Category:</strong> {result.category || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Tags:</strong>{" "}
-                    {Array.isArray(result.tags) && result.tags.length > 0
-                      ? result.tags.join(", ")
-                      : "N/A"}
-                  </p>
-                  <p>
-                    <strong>Special Discount:</strong>{" "}
-                    {result.special_discount || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Rating:</strong> {result.rating || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Booking Open:</strong>{" "}
-                    {result.booking_open ? "Yes" : "No"}
-                  </p>
-                  <p>
-                    <strong>Created At:</strong>{" "}
-                    {new Date(result.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              ) : null}
+      <h2>Results:</h2>
+      {loading ? (
+        <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+      ) : (
+        <List
+          grid={{ gutter: 16, column: 1 }}
+          dataSource={results}
+          renderItem={(result) => (
+            <List.Item>
+              <Card
+                title={result.name || result.title || result.Name}
+                style={{ width: "100%" }}
+              >
+                {/* Common Info */}
+                <p>
+                  <strong>Created At:</strong>{" "}
+                  {new Date(result.createdAt).toLocaleDateString()}
+                </p>
 
-              {/* Check if the result is an Itinerary */}
-              {result.name ? (
-                <div>
-                  <h3>Itinerary: {result.name}</h3>
-                  <p>
-                    <strong>Budget:</strong>{" "}
-                    {(result.budget * conversionRate).toFixed(2) || "N/A"}
-                    {selectedCurrency}
-                  </p>
-                  <p>
-                    <strong>Locations:</strong>{" "}
-                    {Array.isArray(result.locations) &&
-                    result.locations.length > 0
-                      ? result.locations.join(", ")
-                      : "N/A"}
-                  </p>
-                  <p>
-                    <strong>Timeline:</strong> {result.timeline || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Duration:</strong> {result.duration || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Language:</strong> {result.language || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Pickup Location:</strong>{" "}
-                    {result.pickup_location || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Dropoff Location:</strong>{" "}
-                    {result.dropoff_location || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Accessibility:</strong>{" "}
-                    {result.accessibility || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Tags:</strong>{" "}
-                    {Array.isArray(result.tags) && result.tags.length > 0
-                      ? result.tags.join(", ")
-                      : "N/A"}
-                  </p>
-                  <p>
-                    <strong>Created At:</strong>{" "}
-                    {new Date(result.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </div>
+                {/* Dynamic Info Based on Result Type */}
+                {result.Name && (
+                  <div>
+                    <h4>Place</h4>
+                    <p>
+                      <strong>Description:</strong>{" "}
+                      {result.Description || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Ticket Prices (Family):</strong>
+                      {(result.TicketPricesF * conversionRate).toFixed(2)}{" "}
+                      {selectedCurrency}
+                    </p>
+                    <p>
+                      <strong>Tags:</strong>{" "}
+                      {Array.isArray(result.tags) && result.tags.length > 0
+                        ? result.tags.join(", ")
+                        : "N/A"}
+                    </p>
+                  </div>
+                )}
+
+                {result.title && (
+                  <div>
+                    <h4>Activity</h4>
+                    <p>
+                      <strong>Budget:</strong>{" "}
+                      {(result.budget * conversionRate).toFixed(2)}{" "}
+                      {selectedCurrency}
+                    </p>
+                    <p>
+                      <strong>Time:</strong> {result.time || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Location:</strong> {result.location || "N/A"}
+                    </p>
+                  </div>
+                )}
+
+                {result.name && (
+                  <div>
+                    <h4>Itinerary</h4>
+                    <p>
+                      <strong>Budget:</strong>{" "}
+                      {(result.budget * conversionRate).toFixed(2)}{" "}
+                      {selectedCurrency}
+                    </p>
+                    <p>
+                      <strong>Locations:</strong>{" "}
+                      {result.locations.join(", ") || "N/A"}
+                    </p>
+                  </div>
+                )}
+              </Card>
+            </List.Item>
+          )}
+        />
+      )}
     </div>
   );
 };

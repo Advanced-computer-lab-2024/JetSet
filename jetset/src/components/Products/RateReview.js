@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Button, Rate } from "antd"; // Import Ant Design components
 
 const TouristProducts = ({ touristId }) => {
   const [products, setProducts] = useState([]);
@@ -13,7 +14,9 @@ const TouristProducts = ({ touristId }) => {
   useEffect(() => {
     const fetchPurchasedProducts = async () => {
       try {
-        const response = await axios.get(`/purchased-products/${touristId}`);
+        const response = await axios.get(
+          `http://localhost:3000/purchased-products/${touristId}`
+        );
         setProducts(response.data.products);
       } catch (err) {
         console.error(err);
@@ -21,23 +24,6 @@ const TouristProducts = ({ touristId }) => {
     };
 
     fetchPurchasedProducts();
-  }, [touristId]);
-
-  // Fetch currency data
-  useEffect(() => {
-    const fetchCurrencyData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/tourist/${touristId}/preferredCurrency`
-        );
-        setCurrency(response.data.preferredCurrency);
-        setConversionRate(response.data.conversionRate);
-      } catch (error) {
-        console.error("Error fetching currency data:", error);
-      }
-    };
-
-    fetchCurrencyData();
   }, [touristId]);
 
   // Handle rating submission
@@ -78,26 +64,27 @@ const TouristProducts = ({ touristId }) => {
     const productRating = ratings[productId] || 0;
     return (
       <div>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <span
-            key={star}
-            onClick={() =>
-              setRatings((prevRatings) => ({
-                ...prevRatings,
-                [productId]: star,
-              }))
-            }
-            style={{
-              fontSize: "24px",
-              cursor: "pointer",
-              color: star <= productRating ? "gold" : "gray",
-            }}
-          >
-            ★
-          </span>
-        ))}
+        <Rate
+          value={productRating}
+          onChange={(value) =>
+            setRatings((prevRatings) => ({
+              ...prevRatings,
+              [productId]: value,
+            }))
+          }
+        />
         <br />
-        <button onClick={(e) => handleRatingSubmit(e, productId)}>Rate</button>
+        <Button
+          style={{
+            backgroundColor: "#1d3557",
+            color: "white",
+            border: "none",
+            marginTop: "10px",
+          }}
+          onClick={(e) => handleRatingSubmit(e, productId)}
+        >
+          Rate
+        </Button>
       </div>
     );
   };
@@ -108,49 +95,60 @@ const TouristProducts = ({ touristId }) => {
       {message && <p>{message}</p>}
 
       <ul>
-        {products.map((product) => (
-          <li key={product._id}>
-            <h2>{product.name}</h2>
-            <p>
-              <strong>Description:</strong> {product.description}
-            </p>
-            <p>
-              <strong>Price:</strong>{" "}
-              {(product.price * conversionRate).toFixed(2)} {currency}
-            </p>
-            <p>
-              <strong>Quantity Purchased:</strong> {product.sales}
-            </p>
-            <p>
-              <strong>Seller:</strong> {product.seller_id?.username}
-            </p>
-            <p>
-              <strong>Average Rating:</strong>{" "}
-              {product.ratings?.toFixed(1) || "N/A"}
-            </p>
-            <div>
-              <label>Rate this product:</label>
-              {renderStars(product._id)}
-            </div>
+        {products.length === 0 ? (
+          <p>No purchased products available.</p>
+        ) : (
+          products.map((product) => (
+            <li key={product._id}>
+              <h2>{product.name}</h2>
+              <p>
+                <strong>Description:</strong> {product.description}
+              </p>
+              <p>
+                <strong>Price:</strong>{" "}
+                {(product.price * conversionRate).toFixed(2)} {currency}
+              </p>
+              <p>
+                <strong>Quantity Purchased:</strong> {product.sales}
+              </p>
+              <p>
+                <strong>Average Rating:</strong>{" "}
+                {product.ratings?.toFixed(1) || "N/A"}
+              </p>
+              <div>
+                <label>Rate this product:</label>
+                {renderStars(product._id)}
+              </div>
 
-            <form onSubmit={(e) => handleReviewSubmit(e, product._id)}>
-              <label>
-                <strong>Review:</strong>
-                <textarea
-                  value={reviews[product._id] || ""}
-                  onChange={(e) =>
-                    setReviews((prevReviews) => ({
-                      ...prevReviews,
-                      [product._id]: e.target.value,
-                    }))
-                  }
-                />
-              </label>
-              <br />
-              <button type="submit">Submit</button>
-            </form>
-          </li>
-        ))}
+              <form onSubmit={(e) => handleReviewSubmit(e, product._id)}>
+                <label>
+                  <strong>Review:</strong>
+                  <textarea
+                    value={reviews[product._id] || ""}
+                    onChange={(e) =>
+                      setReviews((prevReviews) => ({
+                        ...prevReviews,
+                        [product._id]: e.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <br />
+                <Button
+                  style={{
+                    backgroundColor: "#1d3557",
+                    color: "white",
+                    border: "none",
+                    marginTop: "10px",
+                  }}
+                  type="submit"
+                >
+                  Submit Review
+                </Button>
+              </form>
+            </li>
+          ))
+        )}
       </ul>
     </div>
   );

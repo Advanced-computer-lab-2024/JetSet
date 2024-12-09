@@ -358,6 +358,7 @@ import ComplaintsReply from "./Complaints/ComplaintsReply";
 import ComplaintsFilter from "./Complaints/ComplaintsFilter";
 import ComplaintsSort from "./Complaints/ComplaintsSort";
 import ComplaintsStatus from "./Complaints/ComplaintsStatus";
+import ItineraryList from "./Itinerary/ItineraryTourist";
 
 function AdminFrontend() {
   const { adminId } = useParams();
@@ -458,6 +459,8 @@ function AdminFrontend() {
             <CreateAdmin />
             <CreateTourismGovernor />
             <DeleteAccount />
+            <ActivityList />
+            <Itineraries />
           </div>
         );
       case "tags":
@@ -484,7 +487,15 @@ function AdminFrontend() {
           </div>
         );
       case "complaints":
-        return <ComplaintList />;
+        return (
+          <div>
+            <ComplaintList />
+            <ComplaintsReply />
+            <ComplaintsSort />
+            <ComplaintsFilter />
+            <ComplaintsStatus />
+          </div>
+        );
       default:
         return <div>Select a section from the sidebar.</div>;
     }

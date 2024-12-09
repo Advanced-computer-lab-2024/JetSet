@@ -9,6 +9,7 @@ import {
   faChevronLeft,
   faSignOutAlt,
   faKey,
+  faChalkboardTeacher, // Icon for Guide
 } from "@fortawesome/free-solid-svg-icons";
 
 const NavTourist = ({ touristId, username }) => {
@@ -50,12 +51,17 @@ const NavTourist = ({ touristId, username }) => {
     navigate(`/notifications/${touristId}`);
   };
 
+  const handleGuide = () => {
+    //   navigate(`/guide/${touristId}`); // Adjust URL to guide-related path
+  };
+
   const handleBack = () => {
     navigate(-1);
   };
 
   return (
     <div className="admin-frontend">
+      <NavTourist touristId={touristId} username={username} />
       <header>
         <nav className="navbar">
           <div className="navbar-left" onClick={handleBack}>
@@ -70,6 +76,12 @@ const NavTourist = ({ touristId, username }) => {
               {unreadCount > 0 && (
                 <span className="notification-count">{unreadCount}</span>
               )}
+            </div>
+            <div className="guide" onClick={handleGuide}>
+              <FontAwesomeIcon
+                icon={faChalkboardTeacher}
+                className="guide-icon"
+              />
             </div>
             <div className="admin-info">
               <span className="username">Hi, {username}</span>

@@ -24,7 +24,7 @@ const TouristForm = () => {
       const response = await axios.post("/addTourist", tourist);
       alert(response.data.msg); // Show success message
       // Navigate to the Tourist component after registration
-      navigate("/tourist", { state: { touristId: response.data.touristId } });
+      navigate(`/tourist/${response.data.touristId}`);
       console.log(response.data.touristId);
     } catch (error) {
       alert(error.response.data.error); // Show error message
@@ -32,7 +32,6 @@ const TouristForm = () => {
   };
 
   return (
-    
     <form onSubmit={handleSubmit}>
       <h2>Create Tourist</h2>
       <input
@@ -86,7 +85,6 @@ const TouristForm = () => {
       />
       <button type="submit">Create Tourist</button>
     </form>
-
   );
 };
 

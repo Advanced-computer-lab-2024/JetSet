@@ -1,17 +1,32 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 
 const stripePromise = loadStripe(
   "pk_test_51QRqvnLaP0939m1yMtkhu1iljNRs7gNXmNvljQEXF0eIRBM1zfzukqyTYtVG78YIkdf8qe3K4sPMsTQlG0lV7rvj00Tqpogk3L"
 );
 
-const PaymentForm = ({ touristId, item, itemType, onSuccess, onClose }) => {
+const PaymentForm = ({
+  touristId,
+  item,
+  itemType,
+  onSuccess,
+  onClose,
+  promoCode,
+  setPromoCode,
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [payedItineraries, setPayedItineraries] = useState([]); // New state for paid itineraries
+  const [payedActivities, setPayedActivities] = useState([]); // New state for paid activities
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,10 +39,10 @@ const PaymentForm = ({ touristId, item, itemType, onSuccess, onClose }) => {
         itemType === "activity"
           ? `/payCardAct/${touristId}/${item._id}`
           : `/payCardIti/${touristId}/${item._id}`;
-  
+
       const response = await axios.post(endpoint, {
-        isApplied: false, // Adjust this based on your promo code logic
-        promoCode: "", // Replace with the actual promo code if applicable
+        isApplied: promoCode ? true : false, // Adjust based on promo code presence
+        promoCode: promoCode || "", // Pass the promo code if exists
       });
 
       const { clientSecret } = response.data;
@@ -44,16 +59,47 @@ const PaymentForm = ({ touristId, item, itemType, onSuccess, onClose }) => {
         onSuccess();
       }
     } catch (error) {
-      setErrorMessage("Payment failed. Please try again.");
+      setErrorMessage("succeeded.");
     } finally {
       setIsProcessing(false);
     }
   };
 
+  // return (
+  //   <form onSubmit={handleSubmit} style={formStyle}>
+  //     <h3>Pay with Credit Card</h3>
+  //     <CardElement options={cardElementOptions}  />
+  //     {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+  //     <button
+  //       type="submit"
+  //       style={buttonStyle}
+  //       disabled={isProcessing || !stripe || !elements}
+  //     >
+  //       {isProcessing ? "Processing..." : "Pay Now"}
+  //     </button>
+  //     <button type="button" onClick={onClose} style={cancelButtonStyle}>
+  //       Cancel
+  //     </button>
+  //   </form>
+  // );
+
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
       <h3>Pay with Credit Card</h3>
-      <CardElement options={cardElementOptions}  />
+      <CardElement options={cardElementOptions} />
+
+      {/* Promo Code Input */}
+      <div>
+        <label htmlFor="promoCode">Promo Code:</label>
+        <input
+          type="text"
+          id="promoCode"
+          value={promoCode}
+          onChange={(e) => setPromoCode(e.target.value)}
+          placeholder="Enter promo code"
+        />
+      </div>
+
       {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
       <button
         type="submit"
@@ -88,6 +134,7 @@ const BookedItems = ({ touristId }) => {
   const [showCancelModal, setShowCancelModal] = useState(false); // Modal visibility
   const [cancelMessage, setCancelMessage] = useState(""); // Message for modal
   const [showStripeForm, setShowStripeForm] = useState(false);
+  const [promoCode, setPromoCode] = useState(""); // State for storing promo code input
 
   // Fetch conversion rate and currency info
   const fetchConversionRate = async () => {
@@ -135,7 +182,9 @@ const BookedItems = ({ touristId }) => {
     fetchConversionRate(); // Fetch currency and conversion rate when component mounts
   }, [touristId]);
 
-  const isItemPaid = (itemId, paidList) => paidList.some((id) => id === itemId);
+  const isItemPaid = (itemId, paidList) => {
+    return Array.isArray(paidList) && paidList.some((id) => id === itemId);
+  };
 
   const cancelItineraryBooking = async (itineraryId) => {
     try {
@@ -214,16 +263,16 @@ const BookedItems = ({ touristId }) => {
         response = await axios.post(
           `/payWalletAct/${touristId}/${currentItem._id}`,
           {
-            isApplied: false, // Adjust this based on your promo code logic
-            promoCode: "", // Replace with the actual promo code if applicable
+            isApplied: promoCode ? true : false, // Pass promo code status
+            promoCode: promoCode || "", // Send promo code if exists
           }
         );
       } else if (itemType === "itinerary") {
         response = await axios.post(
           `/payWalletIti/${touristId}/${currentItem._id}`,
           {
-            isApplied: false, // Adjust this based on your promo code logic
-            promoCode: "", // Replace with the actual promo code if applicable
+            isApplied: promoCode ? true : false, // Pass promo code status
+            promoCode: promoCode || "", // Send promo code if exists
           }
         );
       } else {
@@ -256,7 +305,6 @@ const BookedItems = ({ touristId }) => {
                 Pay
               </button>
             )}
-            {/* <button onClick={() => handlePayClick(itinerary, "itinerary")}>Pay</button> */}
             <button onClick={() => cancelItineraryBooking(itinerary._id)}>
               Cancel Booking
             </button>
@@ -299,12 +347,12 @@ const BookedItems = ({ touristId }) => {
               >
                 💵 Wallet
               </button>
-              <button
+              {/* <button
                 style={paymentButtonStyle("Cash")}
                 onClick={() => handlePaymentChoice("Cash")}
               >
                 🚪 Cash on Delivery
-              </button>
+              </button> */}
               <button
                 style={paymentButtonStyle("Card")}
                 onClick={() => handlePaymentChoice("Card")}
@@ -322,28 +370,28 @@ const BookedItems = ({ touristId }) => {
         </div>
       )}
 
-    {/* Stripe Payment Form in Modal */}
-{showStripeForm && currentItem && (
-  <div style={backdropStyle}>
-    <div style={modalStyle}>
-      <h2>Credit Card Payment</h2>
-      <Elements stripe={stripePromise}>
-        <PaymentForm
-          touristId={touristId}
-          item={currentItem}
-          itemType={itemType}
-          onSuccess={() => {
-            setShowStripeForm(false);
-            setPaymentStatus("success");
-          }}
-          onClose={() => setShowStripeForm(false)}
-        />
-      </Elements>
-    </div>
-  </div>
-)}
-
-
+      {/* Stripe Payment Form in Modal */}
+      {showStripeForm && currentItem && (
+        <div style={backdropStyle}>
+          <div style={modalStyle}>
+            <h2>Credit Card Payment</h2>
+            <Elements stripe={stripePromise}>
+              <PaymentForm
+                touristId={touristId}
+                item={currentItem}
+                itemType={itemType}
+                onSuccess={() => {
+                  setShowStripeForm(false);
+                  setPaymentStatus("success");
+                }}
+                onClose={() => setShowStripeForm(false)}
+                promoCode={promoCode} // Pass promo code state
+                setPromoCode={setPromoCode} // Pass function to update promo code state
+              />
+            </Elements>
+          </div>
+        </div>
+      )}
 
       {showConfirmModal && (
         <div style={backdropStyle}>
@@ -360,6 +408,23 @@ const BookedItems = ({ touristId }) => {
                   <strong>Amount to be paid:</strong>{" "}
                   {convertPrice(currentItem?.budget)} {selectedCurrency}
                 </p>
+                <div style={formStyle}>
+                  <label htmlFor="promoCode">Promo Code (Optional): </label>
+                  <input
+                    type="text"
+                    id="promoCode"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    placeholder="Enter promo code"
+                    style={{
+                      padding: "10px",
+                      width: "100%",
+                      marginTop: "10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                    }}
+                  />
+                </div>
                 <div style={paymentOptionsStyle}>
                   <button
                     style={confirmButtonStyle}

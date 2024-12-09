@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Input, Select, Spin, Alert, Card, Typography } from "antd";
-import { StarOutlined, DollarOutlined, CalendarOutlined, TagsOutlined } from "@ant-design/icons";
+import {
+  StarOutlined,
+  DollarOutlined,
+  CalendarOutlined,
+  TagsOutlined,
+} from "@ant-design/icons";
 import "font-awesome/css/font-awesome.min.css";
 import "./bookmark.css";
 
@@ -91,7 +96,9 @@ const ActivitiesList = ({ touristId }) => {
   // Bookmark or unbookmark activity
   const bookmarkActivity = async (activityId, isBookmarked) => {
     try {
-      const endpoint = isBookmarked ? "/api/unbookmarkActivity" : "/api/bookmarkActivity";
+      const endpoint = isBookmarked
+        ? "/api/unbookmarkActivity"
+        : "/api/bookmarkActivity";
 
       const response = await axios.post(endpoint, {
         touristId,
@@ -100,7 +107,9 @@ const ActivitiesList = ({ touristId }) => {
 
       if (response.data.message) {
         setBookmarkedActivities((prev) =>
-          isBookmarked ? prev.filter((id) => id !== activityId) : [...prev, activityId]
+          isBookmarked
+            ? prev.filter((id) => id !== activityId)
+            : [...prev, activityId]
         );
       } else {
         alert(response.data.error || "Error updating bookmark status");
@@ -123,7 +132,9 @@ const ActivitiesList = ({ touristId }) => {
 
   // Filter activities to show only bookmarked ones if the flag is true
   const displayedActivities = showBookmarked
-    ? activities.filter((activity) => bookmarkedActivities.includes(activity._id))
+    ? activities.filter((activity) =>
+        bookmarkedActivities.includes(activity._id)
+      )
     : activities;
 
   return (
@@ -132,7 +143,9 @@ const ActivitiesList = ({ touristId }) => {
 
       {/* Loading and Error States */}
       {loading && <Spin tip="Loading activities..." size="large" />}
-      {error && <Alert message="Error" description={error} type="error" showIcon />}
+      {error && (
+        <Alert message="Error" description={error} type="error" showIcon />
+      )}
 
       {/* Filter Inputs */}
       <div className="filters">
@@ -168,7 +181,9 @@ const ActivitiesList = ({ touristId }) => {
           prefix={<StarOutlined />}
           style={{ width: "200px", marginRight: "10px" }}
         />
-        <Button type="primary" onClick={filterActivities}>Filter Activities</Button>
+        <Button type="primary" onClick={filterActivities}>
+          Filter Activities
+        </Button>
       </div>
 
       {/* Sort Options */}
@@ -190,7 +205,9 @@ const ActivitiesList = ({ touristId }) => {
           <Option value={1}>Ascending</Option>
           <Option value={-1}>Descending</Option>
         </Select>
-        <Button type="primary" onClick={sortActivities}>Sort Activities</Button>
+        <Button type="primary" onClick={sortActivities}>
+          Sort Activities
+        </Button>
       </div>
 
       {/* Toggle Bookmarked Activities */}
@@ -216,7 +233,11 @@ const ActivitiesList = ({ touristId }) => {
                   <Button
                     type="link"
                     icon={
-                      <i className={`fa ${isBookmarked ? "fa-bookmark" : "fa-bookmark-o"}`} />
+                      <i
+                        className={`fa ${
+                          isBookmarked ? "fa-bookmark" : "fa-bookmark-o"
+                        }`}
+                      />
                     }
                     onClick={() => bookmarkActivity(activity._id, isBookmarked)}
                   >
@@ -224,9 +245,13 @@ const ActivitiesList = ({ touristId }) => {
                   </Button>
                 }
               >
-                <Text>Location: {activity.location?.address || "No Location"}</Text>
+                <Text>
+                  Location: {activity.location?.address || "No Location"}
+                </Text>
                 <br />
-                <Text>Date: {new Date(activity.date).toLocaleDateString()}</Text>
+                <Text>
+                  Date: {new Date(activity.date).toLocaleDateString()}
+                </Text>
                 <br />
                 <Text>Budget: {activity.budget || "No Budget"}</Text>
                 <br />
@@ -234,9 +259,16 @@ const ActivitiesList = ({ touristId }) => {
                 <br />
                 <Text>Category: {activity.category || "No Category"}</Text>
                 <br />
-                <Text>Tags: {activity.tags.length > 0 ? activity.tags.join(", ") : "No Tags"}</Text>
+                <Text>
+                  Tags:{" "}
+                  {activity.tags.length > 0
+                    ? activity.tags.join(", ")
+                    : "No Tags"}
+                </Text>
                 <br />
-                <Text>Booking Open: {activity.booking_open ? "Yes" : "No"}</Text>
+                <Text>
+                  Booking Open: {activity.booking_open ? "Yes" : "No"}
+                </Text>
               </Card>
             );
           })

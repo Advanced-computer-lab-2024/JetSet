@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import { Layout, Menu, Button, Card, Row, Col, Typography, Spin } from "antd";
+import NavTourist from "./tourist/navTourist";
+import {
+  SearchOutlined,
+  HistoryOutlined,
+  ShoppingCartOutlined,
+  FileAddOutlined,
+  AppstoreAddOutlined,
+  ShareAltOutlined,
+  TeamOutlined,
+  HomeOutlined,
+} from "@ant-design/icons";
 
 import ActivityList from "./Activity/ActivitiesList";
 import ItineraryList from "./Itinerary/ItineraryTourist";
@@ -8,62 +20,148 @@ import HistoricalPlaces from "./Place/HistoricalPlacesList";
 import Search from "./tourist/SearchComponent";
 import ProductList from "./Products/productTourist";
 import TouristProducts from "./Products/RateReview";
-import LoyaltyPointsForm from "./tourist/LoyaltyPoints";
-import ComplaintForm from "./tourist/complaintForm";
 import MyComplaintList from "./tourist/myComplaintsList";
 import RatingForm from "./tourist/RatingForm";
 import RateandcommentActivity from "./tourist/RateandcommentActivity";
 import RateandcommentItinerary from "./tourist/RateandcommentItinerary";
-import Book from "./tourist/ActivitiesAndItineraries";
-import Transportations from "./tourist/Transportations";
 import ShareItem from "./tourist/ShareItem";
 import ActivityByCategory from "./Activity/ActivitiesByCategory";
-import FlightBooking from "./Booking/FlightBooking";
-import HotelSearch from "./Booking/HotelSearch";
 import BookedItineraries from "./tourist/BookedItineraries";
 import VacationGuide from "./tourist/VacationGuide";
 import Cart from "./tourist/Cart";
 import PaidItemsView from "./tourist/PaidItemsView";
 import Wishlist from "./tourist/Wishlist";
-import ViewOrders from "./tourist/vieworders";
-import ViewOrderDetails from "./tourist/ViewOrderDetails";
-import CancelOrder from "./tourist/CancelOrder";
-import ViewRefundAmount from "./tourist/ViewRefundAmount";
+import BookSection from "./BookSection";
+import Orders from "./tourist/Orders";
 
-import NavTourist from "./tourist/navTourist";
+const { Content, Sider } = Layout;
+const { Title } = Typography;
 
 const Tourist = () => {
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
-  const touristId = location.state?.touristId;
+  const touristId = useParams();
   const [username, setUsername] = useState("");
-  const [showPurchasedProducts, setShowPurchasedProducts] = useState();
+  const [loading, setLoading] = useState(false);
+  const [showPurchasedProducts, setShowPurchasedProducts] = useState(false);
 
   useEffect(() => {
     const fetchTourist = async () => {
       if (touristId) {
+        setLoading(true);
         try {
-          console.log("Fetching tourist profile for ID:", touristId);
           const response = await axios.get(
             `http://localhost:3000/getTourist/${touristId}`
           );
-          console.log("Tourist data:", response.data);
           setUsername(response.data.username);
         } catch (error) {
-          console.error("Error during fetch:", error);
           alert(
             error.response?.data?.message || "Error fetching tourist profile"
           );
+        } finally {
+          setLoading(false);
         }
-      } else {
-        console.log("touristId is undefined");
       }
     };
     fetchTourist();
   }, [touristId]);
 
+  const HomePage = ({ touristId }) => {
+    const [activities, setActivities] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const getActivities = async () => {
+        setLoading(true);
+        try {
+          const response = await axios.get(
+            `http://localhost:3000/preferences/${touristId}`
+          );
+          console.log(response.data); // Check if data is correct
+          setActivities(response.data);
+        } catch (error) {
+          console.error(
+            "Error fetching activities based on preferences",
+            error
+          );
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      getActivities();
+    }, [touristId]);
+
+    if (loading) return <Spin size="large" />;
+
+    if (activities.length === 0) return <div>No activities available</div>;
+
+    return (
+      <div>
+        <Title level={2}>Recommended Activities</Title>
+        <Row gutter={[16, 16]}>
+          {activities.map((activity) => (
+            <Col span={8} key={activity._id}>
+              <Card
+                hoverable
+                cover={
+                  <img
+                    alt={activity.title}
+                    src={activity.image || "default-image-path.jpg"}
+                  />
+                }
+              >
+                <Title level={4}>{activity.title}</Title>
+                <p>
+                  <strong>Budget:</strong> ${activity.budget}
+                </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {new Date(activity.date).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Time:</strong> {activity.time}
+                </p>
+                <p>
+                  <strong>Location:</strong> {activity.location}
+                </p>
+                <p>
+                  <strong>Category:</strong> {activity.category.name}
+                </p>
+                <p>
+                  <strong>Special Discount:</strong> {activity.special_discount}
+                </p>
+                <p>
+                  <strong>Booking Open:</strong>{" "}
+                  {activity.booking_open ? "Yes" : "No"}
+                </p>
+                <div>
+                  <strong>Ratings:</strong>
+                  <ul>
+                    {activity.ratings.map((rating) => (
+                      <li key={rating._id}>
+                        <p>Rating: {rating.rating}</p>
+                        {rating.comment && (
+                          <p>
+                            <strong>Comment:</strong> {rating.comment}
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+    );
+  };
+
   const renderPage = () => {
     switch (currentPage) {
+      case "Home":
+        return <HomePage touristId={touristId} />;
       case "productList":
         return <ProductList touristId={touristId} />;
       case "activityList":
@@ -82,10 +180,6 @@ const Tourist = () => {
         return <ActivityByCategory touristId={touristId} />;
       case "ShareItem":
         return <ShareItem />;
-      case "loyaltyPoints":
-        return <LoyaltyPointsForm touristId={touristId} />;
-      case "ComplaintForm":
-        return <ComplaintForm touristId={touristId} />;
       case "MyComplaintsList":
         return <MyComplaintList touristID={touristId} />;
       case "ratingForm":
@@ -94,152 +188,137 @@ const Tourist = () => {
         return <RateandcommentActivity touristId={touristId} />;
       case "RateandcommentItinerary":
         return <RateandcommentItinerary touristId={touristId} />;
-      case "booking":
-        return <Book touristId={touristId} />;
-      case "transportation":
-        return <Transportations touristId={touristId} />;
       case "book":
-        return <FlightBooking touristId={touristId} />;
-      case "bookh":
-        return <HotelSearch touristId={touristId} />;
-      case "bookIti":
+        return <BookSection touristId={touristId} />;
+      case "mybooking":
         return <BookedItineraries touristId={touristId} />;
-      case "vacationGuide": // New case for Vacation Guide
+      case "vacationGuide":
         return <VacationGuide touristId={touristId} />;
-      case "cart": // New case for Vacation Guide
+      case "cart":
         return <Cart touristId={touristId} />;
       case "viewPaid":
         return <PaidItemsView touristId={touristId} />;
-      case "viewOrders":
-        return <ViewOrders touristId={touristId} />;
-      case "viewOrderDetails":
-        return <ViewOrderDetails touristId={touristId} />;
-      case "cancelOrder":
-        return <CancelOrder touristId={touristId} />;
-      case "viewRefundAmount":
-        return <ViewRefundAmount touristId={touristId} />;
+      case "Orders":
+        return <Orders touristId={touristId} />;
       default:
         return (
-          <section className="tourist-frontend">
-            <NavTourist touristId={touristId} username={username} />
-
-            <div className="button-groups">
-              <section>
-                <h2>Activities & Itineraries</h2>
-                <button onClick={() => setCurrentPage("activityList")}>
-                  View Activities
-                </button>
-                <button onClick={() => setCurrentPage("itineraryList")}>
-                  View Itineraries
-                </button>
-                <button onClick={() => setCurrentPage("historicalPlaces")}>
-                  View Place
-                </button>
-                <button onClick={() => setCurrentPage("ActivityByCategory")}>
-                  Activities by Category
-                </button>
-                <button onClick={() => setCurrentPage("search")}>Search</button>
-                <button onClick={() => setCurrentPage("booking")}>
-                  Book/Cancel Activity & Itinerary
-                </button>
-                <button
-                  onClick={() => setCurrentPage("RateandcommentActivity")}
-                >
-                  Rate & Comment on Activities
-                </button>
-                <button
-                  onClick={() => setCurrentPage("RateandcommentItinerary")}
-                >
-                  Rate & Comment on Itineraries
-                </button>
-                <button onClick={() => setCurrentPage("bookIti")}>
-                  Booked itineraries
-                </button>
-                <button onClick={() => setCurrentPage("viewPaid")}>
-                  Paid Activities and Iteniraries
-                </button>
-              </section>
-
-              <section>
-                <h2>Products & Purchases</h2>
-                <button onClick={() => setCurrentPage("productList")}>
-                  View Products
-                </button>
-                <button onClick={() => setCurrentPage("cart")}>
-                  View My Cart
-                </button>
-                <button onClick={() => setCurrentPage("Wishlist")}>
-                  View My WishList
-                </button>
-                <button
-                  onClick={() =>
-                    setShowPurchasedProducts(!showPurchasedProducts)
-                  }
-                >
-                  {showPurchasedProducts
-                    ? "Hide Purchased Products"
-                    : "View Purchased Products"}
-                </button>{" "}
-                {showPurchasedProducts && (
-                  <TouristProducts touristId={touristId} />
-                )}
-                <button onClick={() => setCurrentPage("viewOrders")}>
-                  View Orders
-                </button>
-                <button onClick={() => setCurrentPage("viewOrderDetails")}>
-                  View Order Details
-                </button>
-                <button onClick={() => setCurrentPage("cancelOrder")}>
-                  Cancel Order
-                </button>
-                <button onClick={() => setCurrentPage("viewRefundAmount")}>
-                  View Refund Amount
-                </button>
-              </section>
-
-              <section>
-                <h2>Bookings & Travel</h2>
-                <button onClick={() => setCurrentPage("book")}>
-                  Book Flight
-                </button>
-                <button onClick={() => setCurrentPage("bookh")}>
-                  Book Hotel
-                </button>
-                <button onClick={() => setCurrentPage("transportation")}>
-                  Book Transportation
-                </button>
-              </section>
-
-              <section>
-                <h2>Complaints & Ratings</h2>
-                <button onClick={() => setCurrentPage("ComplaintForm")}>
-                  File a Complaint
-                </button>
-                <button onClick={() => setCurrentPage("MyComplaintsList")}>
-                  View My Complaints
-                </button>
-                <button onClick={() => setCurrentPage("ratingForm")}>
-                  Rate a Tour Guide
-                </button>
-              </section>
-
-              <section>
-                <h2>Extras</h2>
-
-                <button onClick={() => setCurrentPage("ShareItem")}>
-                  Share an Item
-                </button>
-                <button onClick={() => setCurrentPage("vacationGuide")}>
-                  View Vacation Guide
-                </button>
-              </section>
-            </div>
-          </section>
+          <>
+            <HomePage touristId={touristId} />
+          </>
         );
     }
   };
 
-  return <div className="tourist-frontend">{renderPage()}</div>;
+  return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider width={240} theme="dark">
+        <Menu mode="inline" theme="dark" defaultSelectedKeys={["1"]}>
+          <Menu.Item
+            key="1"
+            icon={<HomeOutlined />}
+            onClick={() => setCurrentPage("Home")}
+          >
+            Home
+          </Menu.Item>
+          <Menu.Item
+            key="2"
+            icon={<SearchOutlined />}
+            onClick={() => setCurrentPage("search")}
+          >
+            Search
+          </Menu.Item>
+          <Menu.Item
+            key="3"
+            icon={<AppstoreAddOutlined />}
+            onClick={() => setCurrentPage("activityList")}
+          >
+            Activities
+          </Menu.Item>
+          <Menu.Item
+            key="4"
+            icon={<HistoryOutlined />}
+            onClick={() => setCurrentPage("itineraryList")}
+          >
+            Itineraries
+          </Menu.Item>
+          <Menu.Item
+            key="5"
+            icon={<AppstoreAddOutlined />}
+            onClick={() => setCurrentPage("historicalPlaces")}
+          >
+            Places
+          </Menu.Item>
+          <Menu.Item
+            key="6"
+            icon={<TeamOutlined />}
+            onClick={() => setCurrentPage("book")}
+          >
+            Book
+          </Menu.Item>
+          <Menu.Item
+            key="7"
+            icon={<TeamOutlined />}
+            onClick={() => setCurrentPage("mybooking")}
+          >
+            My Booking
+          </Menu.Item>
+          <Menu.Item
+            key="8"
+            icon={<TeamOutlined />}
+            onClick={() => setCurrentPage("productList")}
+          >
+            Products
+          </Menu.Item>
+          <Menu.Item
+            key="9"
+            icon={<TeamOutlined />}
+            onClick={() => setCurrentPage("touristProduct")}
+          >
+            Purchased Products
+          </Menu.Item>
+
+          <Menu.Item
+            key="10"
+            icon={<FileAddOutlined />}
+            onClick={() => setCurrentPage("cart")}
+          >
+            My Cart
+          </Menu.Item>
+
+          <Menu.Item
+            key="11"
+            icon={<FileAddOutlined />}
+            onClick={() => setCurrentPage("Wishlist")}
+          >
+            My WishList
+          </Menu.Item>
+
+          <Menu.Item
+            key="12"
+            icon={<FileAddOutlined />}
+            onClick={() => setCurrentPage("Orders")}
+          >
+            Orders
+          </Menu.Item>
+
+          <Menu.Item
+            key="13"
+            icon={<FileAddOutlined />}
+            onClick={() => setCurrentPage("MyComplaintsList")}
+          >
+            Complaints
+          </Menu.Item>
+        </Menu>
+      </Sider>
+
+      <Layout style={{ padding: "0 24px 24px" }}>
+        <NavTourist touristId={touristId} username={username} />
+        <Content style={{ padding: 24, margin: 0, minHeight: 280 }}>
+          {loading ? <Spin size="large" /> : renderPage()}
+        </Content>
+      </Layout>
+    </Layout>
+  );
 };
 
 export default Tourist;

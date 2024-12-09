@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Form,
-  Input,
-  Checkbox,
-  Button,
-  Row,
-  Col,
-  notification,
-  Spin,
-} from "antd";
+import { Form, Input, Checkbox, Button, message } from "antd";
 
 const UpdatePreferencesForm = ({ touristId }) => {
   const [preferences, setPreferences] = useState({
@@ -20,7 +11,6 @@ const UpdatePreferencesForm = ({ touristId }) => {
     budget: 0,
   });
   const [username, setUsername] = useState("");
-  const [loading, setLoading] = useState(true); // Add loading state for better UX
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -30,13 +20,7 @@ const UpdatePreferencesForm = ({ touristId }) => {
         );
         setUsername(response.data.username);
       } catch (error) {
-        console.error("Error fetching tourist data:", error);
-        notification.error({
-          message: "Error",
-          description: "Error fetching tourist information",
-        });
-      } finally {
-        setLoading(false); // Set loading to false once data is fetched
+        message.error("Error fetching tourist information");
       }
     };
     fetchTouristData();
@@ -50,139 +34,76 @@ const UpdatePreferencesForm = ({ touristId }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async (values) => {
     try {
       const response = await axios.put(
         `http://localhost:3000/tourist/preferences/${touristId}`,
-        { preferences }
+        { preferences: values }
       );
-      notification.success({
-        message: "Preferences Updated",
-        description: `Preferences updated successfully: ${JSON.stringify(
-          response.data
-        )}`,
-      });
+      message.success("Preferences updated successfully");
     } catch (error) {
-      console.error("Error updating preferences:", error);
-      notification.error({
-        message: "Error",
-        description: error.response?.data.message || "Something went wrong",
-      });
+      message.error(error.response?.data.message || "Something went wrong");
     }
   };
 
   return (
     <div
       style={{
-        maxWidth: "800px",
-        margin: "auto",
-        padding: "30px",
-        fontFamily: "Arial, sans-serif",
+        maxWidth: "600px",
+        margin: "0 auto",
+        padding: "20px",
+        backgroundColor: "#f4f4f4", // Light background to highlight the form
+        borderRadius: "10px",
       }}
     >
-      <h2
-        style={{
-          textAlign: "center",
-          marginBottom: "30px",
-          fontSize: "24px",
-          fontWeight: "bold",
-        }}
+      <h1 style={{ color: "#1d3557" }}>Update Tourist Preferences</h1>
+      <p style={{ color: "#1d3557" }}>Username: {username}</p>
+      <Form
+        initialValues={preferences}
+        onFinish={handleSubmit}
+        layout="vertical"
+        size="large"
       >
-        Update Tourist Preferences
-      </h2>
-      {loading ? (
-        <div style={{ textAlign: "center" }}>
-          <Spin size="large" tip="Loading..." />
-        </div>
-      ) : (
-        <>
-          <p style={{ textAlign: "center", marginBottom: "20px" }}>
-            Username: {username}
-          </p>
+        <Form.Item name="historicAreas" valuePropName="checked">
+          <Checkbox onChange={handleChange}>Historic Areas</Checkbox>
+        </Form.Item>
 
-          <Form onSubmit={handleSubmit} layout="vertical">
-            <Row gutter={16}>
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item label="Historic Areas">
-                  <Checkbox
-                    name="historicAreas"
-                    checked={preferences.historicAreas}
-                    onChange={handleChange}
-                  />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item label="Beaches">
-                  <Checkbox
-                    name="beaches"
-                    checked={preferences.beaches}
-                    onChange={handleChange}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
+        <Form.Item name="beaches" valuePropName="checked">
+          <Checkbox onChange={handleChange}>Beaches</Checkbox>
+        </Form.Item>
 
-            <Row gutter={16}>
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item label="Family Friendly">
-                  <Checkbox
-                    name="familyFriendly"
-                    checked={preferences.familyFriendly}
-                    onChange={handleChange}
-                  />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={8}>
-                <Form.Item label="Shopping">
-                  <Checkbox
-                    name="shopping"
-                    checked={preferences.shopping}
-                    onChange={handleChange}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
+        <Form.Item name="familyFriendly" valuePropName="checked">
+          <Checkbox onChange={handleChange}>Family Friendly</Checkbox>
+        </Form.Item>
 
-            <Form.Item label="Budget">
-              <Input
-                type="number"
-                name="budget"
-                value={preferences.budget}
-                onChange={handleChange}
-                min="0"
-                placeholder="Enter your budget"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                  border: "1px solid #ccc",
-                }}
-              />
-            </Form.Item>
+        <Form.Item name="shopping" valuePropName="checked">
+          <Checkbox onChange={handleChange}>Shopping</Checkbox>
+        </Form.Item>
 
-            <Form.Item style={{ textAlign: "center" }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                style={{
-                  backgroundColor: "#1d3557",
-                  borderColor: "#1d3557",
-                  color: "white",
-                  width: "100%",
-                  padding: "12px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                }}
-              >
-                Update Preferences
-              </Button>
-            </Form.Item>
-          </Form>
-        </>
-      )}
+        <Form.Item name="budget" label="Budget">
+          <Input
+            type="number"
+            onChange={handleChange}
+            min={0}
+            value={preferences.budget}
+          />
+        </Form.Item>
+
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            block
+            style={{
+              backgroundColor: "#1d3557",
+              borderColor: "#1d3557",
+              fontWeight: "bold",
+            }}
+          >
+            Update Preferences
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 };

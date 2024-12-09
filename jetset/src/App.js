@@ -29,6 +29,7 @@ import ChangePasswordFormTourist from "./components/Place/ChangePasswordForm";
 
 import TouristProfile from "./components/tourist/TouristProfile";
 import NotificationsPage from "./components/tourist/notifications";
+import VacationGuestGuide from "./components/Guest/VacationGuestGuide";
 
 const App = () => {
   return (
@@ -37,7 +38,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/touristregister" element={<RegisterTourist />} />
-        <Route path="/tourist" element={<Tourist />} />
+        <Route path="/tourist/:touristId" element={<Tourist />} />
         <Route path="/admin/:adminId" element={<AdminFrontend />} />
         <Route
           path="/admin/change-password/:adminId"
@@ -67,6 +68,7 @@ const App = () => {
           path="/notifications/:touristId"
           element={<NotificationsPage />}
         />
+        <Route path="/guide/:touristId" element={<VacationGuestGuide />} />
       </Routes>
     </Router>
   );

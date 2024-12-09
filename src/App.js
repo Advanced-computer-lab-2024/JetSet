@@ -192,12 +192,10 @@ const {
   cancelOrder,
   viewRefundAmount,
   addTouristAddress,
-
+  payCashOnDelivery,
   getAddress,
-
   payByCardPro,
   getActivitiesBasedOnPreferences,
-
 } = require("../src/Routes/touristController");
 
 const {
@@ -810,4 +808,6 @@ app.get("/historical/:id", async (req, res) => {
   }
 });
 
-app.get("/preferences/:touristId",getActivitiesBasedOnPreferences);
+app.get("/preferences/:touristId", getActivitiesBasedOnPreferences);
+
+app.post("/payCashPro/:touristId", payCashOnDelivery);
