@@ -15,6 +15,7 @@ const itineraryModel = require("../Models/Itinerary.js");
 const Activity = require("../Models/Activity.js");
 const Notification = require("../Models/Notification.js");
 const PromoCode = require("../Models/PromoCode");
+const mongoose = require("mongoose");
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -772,6 +773,375 @@ const createPromoCode = async (req, res) => {
   }
 };
 
+const getSalesReport = async (req, res) => {
+  const { id: adminId } = req.query;  // Accessing adminId from the query parameter
+
+  // Check if adminId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(adminId)) {
+    return res.status(400).json({
+      message: "Invalid admin ID format",
+    });
+  }
+
+  try {
+    // Fetch all tourists
+    const tourists = await Tourist.find()
+      .populate("bookedActivities")
+      .populate("bookedItineraries");
+
+    // Fetch all products belonging to the admin, including purchase records
+    const products = await Product.find({ seller_id: new mongoose.Types.ObjectId(adminId) })
+      .populate("purchaseRecords"); // Assuming purchaseRecords is a field in Product
+
+    // Filter activities booked and paid for online by tourists
+    const bookedActivities = [];
+    const bookedItineraries = [];
+
+    tourists.forEach((tourist) => {
+      if (tourist.bookedActivities.length > 0) {
+        bookedActivities.push(...tourist.bookedActivities);
+      }
+      if (tourist.bookedItineraries.length > 0) {
+        bookedItineraries.push(...tourist.bookedItineraries);
+      }
+    });
+
+    // Remove duplicates
+    const uniqueBookedActivities = Array.from(
+      new Set(bookedActivities.map((activity) => activity._id.toString()))
+    ).map((id) => bookedActivities.find((activity) => activity._id.toString() === id));
+
+    const uniqueBookedItineraries = Array.from(
+      new Set(bookedItineraries.map((itinerary) => itinerary._id.toString()))
+    ).map((id) => bookedItineraries.find((itinerary) => itinerary._id.toString() === id));
+
+    // Calculate revenues for activities and itineraries
+    const activityRevenue = uniqueBookedActivities.reduce(
+      (total, activity) => total + (activity.budget || 0) * 0.1,
+      0
+    );
+
+    const itineraryRevenue = uniqueBookedItineraries.reduce(
+      (total, itinerary) => total + (itinerary.budget || 0) * 0.1,
+      0
+    );
+
+    // Calculate revenues for products based on purchase records
+    const productRevenue = products.reduce(
+      (total, product) => {
+        const productRevenue = product.purchaseRecords.reduce((revenue, record) => {
+          return revenue + (record.quantity * product.price - (record.quantity * product.price * 0.1));
+        }, 0);
+        return total + productRevenue;
+      },
+      0
+    );
+
+    // Total revenue
+    const totalRevenue = activityRevenue + itineraryRevenue + productRevenue;
+
+    // Response with overall and individual reports
+    res.status(200).json({
+      message: "Sales Report",
+      totalRevenue,
+      breakdown: {
+        activityRevenue,
+        itineraryRevenue,
+        productRevenue,
+      },
+      individualReports: {
+        activities: uniqueBookedActivities.map((activity) => ({
+          id: activity._id,
+          title: activity.title,
+          budget: activity.budget,
+          revenue: (activity.budget || 0) * 0.1,
+        })),
+        itineraries: uniqueBookedItineraries.map((itinerary) => ({
+          id: itinerary._id,
+          name: itinerary.name,
+          budget: itinerary.budget,
+          revenue: (itinerary.budget || 0) * 0.1,
+        })),
+        products: products.map((product) => ({
+          id: product._id,
+          name: product.name,
+          price: product.price,
+          sales: product.sales,
+          revenue: product.purchaseRecords.reduce((revenue, record) => {
+            return revenue + (record.quantity * product.price - (record.quantity * product.price * 0.1));
+          }, 0),
+          purchaseRecords: product.purchaseRecords.map((record) => ({
+            touristUsername: record.touristUsername,
+            touristEmail: record.touristEmail,
+            quantity: record.quantity,
+            purchaseDate: record.purchaseDate,
+          })),
+        })),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error generating sales report",
+      error: error.message || error,
+    });
+  }
+};
+
+const getFilteredSalesReport = async (req, res) => {
+  const { id, product, date, month } = req.query; // Extract filters from query
+
+  // Validate admin ID
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      message: "Invalid ID format",
+    });
+  }
+
+  try {
+    // Fetch admin by ID
+    const admin = await Admin.findById(id);
+    if (!admin) {
+      return res.status(404).json({
+        message: "Admin not found",
+      });
+    }
+
+    // Fetch all products belonging to the admin, including purchase records
+    const productFilter = { seller_id: new mongoose.Types.ObjectId(id) };
+    if (product) {
+      productFilter.name = { $regex: new RegExp(product, 'i') }; // Filter by product name using regex (case-insensitive)
+    }
+
+    const products = await Product.find(productFilter)
+      .populate("purchaseRecords") // Assuming purchaseRecords is a field in Product
+      .exec();
+
+    // Filter purchase records based on date or month
+    const filteredProductDetails = products
+      .map((product) => {
+        // Filter purchase records based on date or month
+        const filteredPurchaseRecords = product.purchaseRecords.filter((record) => {
+          const purchaseDate = new Date(record.purchaseDate);
+
+          // Apply date filter if provided
+          const isDateMatch = date ? purchaseDate.toISOString().split('T')[0] === date : true;
+
+          // Apply month filter if provided
+          const isMonthMatch = month
+            ? purchaseDate.getMonth() + 1 === parseInt(month) // Months are 0-indexed
+            : true;
+
+          // Include records matching both filters or all records if no filters
+          return isDateMatch && isMonthMatch;
+        });
+
+        const productRevenue = filteredPurchaseRecords.reduce((total, record) => {
+          return total + (record.quantity * product.price - (record.quantity * product.price * 0.1));
+        }, 0);
+        
+        return {
+          productId: product._id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          quantity: product.quantity, // Remaining stock
+          ratings: product.ratings,
+          sales: product.sales || 0,
+          revenue: productRevenue,
+          purchaseRecords: filteredPurchaseRecords.map((record) => ({
+            touristId: record.tourist?._id,
+            touristUsername: record.tourist?.username,
+            touristEmail: record.tourist?.email,
+            purchaseDate: record.purchaseDate,
+            quantity: record.quantity,
+          })),
+        };
+      })
+      .filter((product) => product.purchaseRecords.length > 0 || (!date && !month)); // Only include products with matching records or all if no filters
+
+    // Calculate total revenue for filtered products
+    let totalRevenue = 0;
+    filteredProductDetails.forEach((product) => {
+      totalRevenue += product.revenue;
+    });
+
+    // Send response with filtered details
+    res.status(200).json({
+      message: `Filtered sales report for admin: ${admin.username}`,
+      adminDetails: {
+        id: admin._id,
+        name: admin.username,
+        email: admin.email,
+        images: admin.images,
+      },
+      totalRevenue,
+      products: filteredProductDetails,
+    });
+  } catch (error) {
+    console.error("Error filtering sales report:", error);
+    res.status(500).json({
+      message: "Error filtering sales report",
+      error: error.message || error,
+    });
+  }
+};
+
+const getAllUserStatistics = async (req, res) => {
+  try {
+    // Count total users for each model
+    const totalTourists = await Tourist.countDocuments();
+    const totalTourGuides = await TourGuide.countDocuments();
+    const totalAdvertisers = await Advertiser.countDocuments();
+    const totalGovernors = await TourismGoverner.countDocuments();
+    const totalSellers = await Seller.countDocuments();
+
+    // Get the current date
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+
+    // Count new users per month for each model
+    const monthlyTourists = await Tourist.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          "_id.year": currentYear,
+        },
+      },
+      {
+        $project: {
+          month: "$_id.month",
+          count: 1,
+          _id: 0,
+        },
+      },
+    ]);
+
+    const monthlyTourGuides = await TourGuide.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          "_id.year": currentYear,
+        },
+      },
+      {
+        $project: {
+          month: "$_id.month",
+          count: 1,
+          _id: 0,
+        },
+      },
+    ]);
+
+    const monthlyAdvertisers = await Advertiser.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          "_id.year": currentYear,
+        },
+      },
+      {
+        $project: {
+          month: "$_id.month",
+          count: 1,
+          _id: 0,
+        },
+      },
+    ]);
+
+    const monthlyGovernors = await TourismGoverner.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          "_id.year": currentYear,
+        },
+      },
+      {
+        $project: {
+          month: "$_id.month",
+          count: 1,
+          _id: 0,
+        },
+      },
+    ]);
+
+    const monthlySellers = await Seller.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          "_id.year": currentYear,
+        },
+      },
+      {
+        $project: {
+          month: "$_id.month",
+          count: 1,
+          _id: 0,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      totalUsers: {
+        tourists: totalTourists,
+        tourGuides: totalTourGuides,
+        advertisers: totalAdvertisers,
+        governors: totalGovernors,
+        sellers: totalSellers,
+      },
+      monthlyUsers: {
+        tourists: monthlyTourists,
+        tourGuides: monthlyTourGuides,
+        advertisers: monthlyAdvertisers,
+        governors: monthlyGovernors,
+        sellers: monthlySellers,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user statistics:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   createTourismGoverner,
   createAdmin,
@@ -807,4 +1177,7 @@ module.exports = {
   forgetPass,
   restPass,
   createPromoCode,
+  getAllUserStatistics,
+  getSalesReport,
+  getFilteredSalesReport
 };

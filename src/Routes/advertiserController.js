@@ -1,4 +1,5 @@
 const advertiserModel = require("../Models/Advertiser.js");
+const Advertiser = require("../Models/Advertiser.js");
 const Activity = require("../Models/Activity.js");
 const Tourist = require("../Models/Tourist.js");
 const Transportation = require("../Models/Transportation.js");
@@ -414,6 +415,242 @@ const deleteAdvertiserAccount = async (req, res) => {
     });
   }
 };
+
+const getAdvertiserSalesReport = async (req, res) => {
+  const { id } = req.query; // Advertiser's ID passed as a query parameter
+
+  try {
+    // Check if the Advertiser exists
+    const advertiser = await Advertiser.findById(id);
+    if (!advertiser) {
+      return res.status(404).json({ error: "Advertiser not found in the database." });
+    }
+
+    let totalRevenue = 0;
+    const activityDetails = [];
+
+    // Fetch activities created by the Advertiser
+    const activities = await Activity.find({ creator: advertiser._id }).exec();
+
+    // Fetch tourists who booked these activities
+    const bookedActivityIds = activities.map(activity => activity._id);
+    const tourists = await Tourist.find({ bookedActivities: { $in: bookedActivityIds } }).exec();
+
+    // Loop through the activities and calculate revenue
+    activities.forEach((activity) => {
+      const activityTourists = tourists.filter(tourist => tourist.bookedActivities.includes(activity._id));
+
+      // Add activity details including budget and bookings
+      activityDetails.push({
+        name: activity.title,
+        budget: activity.budget,
+        location: activity.location,
+        date: activity.date,
+        bookings: activityTourists.map(tourist => ({
+          touristId: tourist._id,
+          touristName: tourist.username,
+          bookingDate: tourist.updatedAt, // Assuming the booking date is the last updated timestamp
+        }))
+      });
+
+      // Calculate total revenue from the booked activities
+      activityTourists.forEach(tourist => {
+        if (activity.budget) {
+          totalRevenue += activity.budget - (activity.budget * 0.1); // Assume 10% revenue from activity budget
+        }
+      });
+    });
+
+    return res.json({ totalRevenue, activityDetails });
+  } catch (error) {
+    console.error("Error generating Advertiser sales report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+const filterAdvertiserSalesReport = async (req, res) => {
+  const { id, month, date, activity } = req.query; // Added activity to query parameters
+
+  try {
+    // Check if the Advertiser exists
+    const advertiser = await Advertiser.findById(id);
+    if (!advertiser) {
+      return res.status(404).json({ error: "Advertiser not found in the database." });
+    }
+
+    let totalRevenue = 0;
+    const activityDetails = [];
+
+    // Fetch activities created by the Advertiser
+    let activities = await Activity.find({ creator: advertiser._id }).exec();
+
+    // Filter activities by activity title if provided
+    if (activity) {
+      activities = activities.filter(act => act.title.toLowerCase().includes(activity.toLowerCase()));
+    }
+
+    // Loop through each activity and apply month and date filters
+    for (const act of activities) {
+      const activityMonth = new Date(act.date).getMonth() + 1; // getMonth returns a zero-based month
+      const activityDate = new Date(act.date).toDateString(); // Activity date string for comparison
+
+      let applyFilters = true;
+
+      // Apply month filter
+      if (month && activityMonth !== parseInt(month)) {
+        applyFilters = false;
+      }
+
+      // Apply date filter
+      if (date && activityDate !== new Date(date).toDateString()) {
+        applyFilters = false;
+      }
+
+      if (!applyFilters) continue; // Skip the activity if it doesn't pass filters
+
+      // Fetch tourists who booked the activity
+      const tourists = await Tourist.find({ bookedActivities: act._id }).exec();
+
+      const activityTouristsCount = tourists.length;
+      let activityRevenue = 0;
+
+      if (activityTouristsCount > 0) {
+        activityRevenue = act.budget * 0.9; // 90% of the budget is the revenue
+        totalRevenue += activityRevenue * activityTouristsCount;
+      }
+
+      activityDetails.push({
+        name: act.title,
+        totalTourists: activityTouristsCount,
+        budget: act.budget,
+        location: act.location,
+        date: act.date,
+        revenue: activityRevenue * activityTouristsCount, // Revenue for this specific activity
+        tourists: tourists.map(tourist => ({
+          touristId: tourist._id,
+          touristName: tourist.username,
+          touristEmail: tourist.email,
+          touristMobile: tourist.mobile_number,
+          bookingDate: tourist.updatedAt,
+        })),
+      });
+    }
+
+    // Respond with the total revenue and filtered activity details
+    res.json({ totalRevenue, activityDetails });
+  } catch (error) {
+    console.error("Error filtering Advertiser sales report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const getAdvertiserTouristReport = async (req, res) => {
+  const { id } = req.query; // Advertiser's ID passed as a query parameter
+
+  try {
+    // Check if the Advertiser exists
+    const advertiser = await Advertiser.findById(id);
+    if (!advertiser) {
+      return res.status(404).json({ error: "Advertiser not found in the database." });
+    }
+
+    let totalTourists = 0;
+    const activityDetails = [];
+
+    // Fetch activities created by the Advertiser
+    const activities = await Activity.find({ creator: advertiser._id }).exec();
+
+    // Loop through each activity to calculate tourist data
+    for (const activity of activities) {
+      // Find tourists who booked the activity
+      const tourists = await Tourist.find({ bookedActivities: activity._id }).exec();
+      const touristsCount = tourists.length;
+      totalTourists += touristsCount;
+
+      activityDetails.push({
+        name: activity.title,
+        totalTourists: touristsCount,
+        budget: activity.budget,
+        location: activity.location,
+        date: activity.date,
+        tourists: tourists.map(tourist => ({
+          touristId: tourist._id,
+          touristName: tourist.username,
+          touristEmail: tourist.email,
+          touristMobile: tourist.mobile_number,
+          bookingDate: tourist.updatedAt, // Assuming the booking date is the last updated timestamp
+        }))
+      });
+    }
+
+    // Respond with the total number of tourists and activity details
+    res.json({ totalTourists, activityDetails });
+  } catch (error) {
+    console.error("Error generating Advertiser tourist report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const filterAdvertiserTouristReportByMonth = async (req, res) => {
+  const { id, month } = req.query; // Advertiser's ID and month filter
+
+  try {
+    // Check if the Advertiser exists
+    const advertiser = await advertiserModel.findById(id);
+    if (!advertiser) {
+      return res.status(404).json({ error: "Advertiser not found in the database." });
+    }
+
+    let totalTourists = 0;
+    const activityDetails = [];
+
+    // Fetch activities created by the Advertiser
+    const activities = await Activity.find({ creator: advertiser._id }).exec();
+
+    // Loop through each activity and apply month filter
+    for (const activity of activities) {
+      // Filter tourists who booked the activity
+      let tourists = await Tourist.find({
+        bookedActivities: activity._id,
+      }).exec();
+
+      // Apply month filter on activity's date
+      const activityMonth = new Date(activity.date).getMonth() + 1; // getMonth returns a zero-based month
+      if (activityMonth !== parseInt(month)) {
+        continue; // Skip this activity if it doesn't match the requested month
+      }
+
+      // Filter tourists based on the activity's booking date
+      tourists = tourists.filter(tourist => {
+        const bookingMonth = new Date(tourist.updatedAt).getMonth() + 1;
+        return bookingMonth === parseInt(month); // Ensure tourist booking is in the same month
+      });
+
+      const touristsCount = tourists.length;
+      totalTourists += touristsCount;
+
+      activityDetails.push({
+        name: activity.title,
+        totalTourists: touristsCount,
+        budget: activity.budget,
+        location: activity.location,
+        date: activity.date,
+        tourists: tourists.map((tourist) => ({
+          touristId: tourist._id,
+          touristName: tourist.username,
+          touristEmail: tourist.email,
+          touristMobile: tourist.mobile_number,
+          bookingDate: tourist.updatedAt,
+        })),
+      });
+    }
+
+    // Respond with the total number of tourists and filtered activity details
+    res.json({ totalTourists, activityDetails });
+  } catch (error) {
+    console.error("Error filtering Advertiser tourist report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 module.exports = {
   createProfile,
   getProfile,
@@ -432,4 +669,8 @@ module.exports = {
   updateActivityCreator,
   deleteAdvertiserAccount,
   loginAdv,
+  getAdvertiserSalesReport,
+  getAdvertiserTouristReport,
+  filterAdvertiserTouristReportByMonth,
+  filterAdvertiserSalesReport
 };

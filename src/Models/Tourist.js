@@ -31,16 +31,28 @@ const touristSchema = new Schema(
     job: String,
     products: [
       {
-        productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
+    purchasedProducts: [
+      {
+        product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
+          required: true,
         },
-        purchaseQuantity: {
+        purchaseDate: {
+          type: Date,
+          default: Date.now,
+        },
+        quantity: {
           type: Number,
-          default: 1, // Default quantity
+          required: true,
         },
       },
     ],
+
     wallet: { type: Number, default: 0 },
     loyaltyPoints: {
       type: Number,
@@ -72,24 +84,6 @@ const touristSchema = new Schema(
         ref: "Transportation",
       },
     ],
-    payedActivities: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Activity",
-      },
-    ],
-    payedItineraries: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Itinerary",
-      },
-    ],
-    payedProducts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
     preferredCurrency: {
       type: String,
       default: "EGP",
@@ -102,68 +96,9 @@ const touristSchema = new Schema(
         ref: "Activity",
       },
     ],
-    cart: {
-      type: [String], // An array of strings
-      default: [], // Default value as an empty array
-    },
-    cartQuantities: [
-      {
-        productId: {
-          type: String,
-          required: true,
-          
-        },
-        quantity: {
-          type: Number,
-          // required: true,
-          
-        },
-      },
-    ],
-    addresses: {
-      type: [String], // Array of strings
-      default: [], // Default value as an empty array
-    },
-    wishlist: [
-      {
-        productId: {
-          type: Schema.Types.ObjectId,
-          ref: "Product", // Reference to the Product model
-          required: true,
-        },
-        addedAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
-    bookmarkedIteniraries: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Itinerary",
-      },
-    ],
-    promoCodes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "PromoCode",
-      },
-    ],
-    resetOtp: { type: String },
   },
   { timestamps: true }
 );
-// touristSchema.virtual("cartWithQuantities").get(function () {
-//   return this.products.map(product => ({
-//     productId: product.productId,
-//     quantity: product.purchaseQuantity,
-//   }));
-// });
-
-// // Ensure virtual fields are included in the output
-// touristSchema.set("toJSON", {
-//   virtuals: true,
-// });
 
 const Tourist = mongoose.model("Tourist", touristSchema);
 module.exports = Tourist;

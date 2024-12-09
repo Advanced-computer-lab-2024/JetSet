@@ -1,5 +1,6 @@
 const TourGuide = require("../Models/TourGuide.js");
 const itineraryModel = require("../Models/Itinerary.js");
+const Itinerary = require("../Models/Itinerary.js");
 const mongoose = require("mongoose");
 const bookingModel = require("../Models/Activity.js");
 //TOURIST ITINERARY
@@ -139,9 +140,8 @@ const createItinerary = async (req, res) => {
     pickup_location,
     dropoff_location,
     accessibility,
-    created_by,
     tags,
-    tourguideId,
+    created_by,
   } = req.body;
 
   try {
@@ -159,7 +159,6 @@ const createItinerary = async (req, res) => {
       accessibility,
       created_by,
       tags,
-      created_by: tourguideId,
     });
     res.status(201).json({ msg: "Itinerary created", itinerary });
   } catch (err) {
@@ -169,7 +168,7 @@ const createItinerary = async (req, res) => {
 
 const getItineraries = async (req, res) => {
   try {
-    const itineraries = await itineraryModel.find();
+    const itineraries = await itineraryModel.find().populate();
     res.status(200).json(itineraries);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -557,6 +556,252 @@ const deleteTourGuideAccount = async (req, res) => {
     });
   }
 };
+const getTourGuideSalesReport = async (req, res) => {
+  const { id } = req.query; // Tour Guide's ID passed as a query parameter
+
+  try {
+    // Check if the Tour Guide exists
+    const tourGuide = await TourGuide.findById(id);
+    if (!tourGuide) {
+      return res.status(404).json({ error: "Tour Guide not found in the database." });
+    }
+
+    let totalRevenue = 0;
+    const itineraryDetails = [];
+
+    // Fetch itineraries created by the Tour Guide
+    const itineraries = await Itinerary.find({ created_by: tourGuide._id }).exec();
+
+    // Fetch tourists who booked these itineraries
+    const bookedItineraryIds = itineraries.map(itinerary => itinerary._id);
+    const tourists = await Tourist.find({ bookedItineraries: { $in: bookedItineraryIds } }).exec();
+
+    // Loop through the itineraries and calculate revenue
+    itineraries.forEach((itinerary) => {
+      const itineraryTourists = tourists.filter(tourist => tourist.bookedItineraries.includes(itinerary._id));
+
+      // Add itinerary details including budget and bookings
+      itineraryDetails.push({
+        name: itinerary.name,
+        budget: itinerary.budget,
+        locations: itinerary.locations,
+        availability_dates: itinerary.availability_dates,
+        bookings: itineraryTourists.map(tourist => ({
+          touristId: tourist._id,
+          touristName: tourist.username,
+          bookingDate: tourist.updatedAt, // Assuming the booking date is the last updated timestamp
+        }))
+      });
+
+      // Calculate total revenue from the booked itineraries
+      itineraryTourists.forEach(tourist => {
+        if (itinerary.budget) {
+          totalRevenue += itinerary.budget - (itinerary.budget * 0.1); // Assume 10% revenue from itinerary budget
+        }
+      });
+    });
+
+    return res.json({ totalRevenue, itineraryDetails });
+  } catch (error) {
+    console.error("Error generating Tour Guide sales report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const filterTourGuideSalesReport = async (req, res) => {
+  const { id, itinerary, date, month } = req.query; // Include filters in query parameters
+
+  try {
+    // Check if the Tour Guide exists
+    const tourGuide = await TourGuide.findById(id);
+    if (!tourGuide) {
+      return res.status(404).json({ error: "Tour Guide not found in the database." });
+    }
+
+    // Fetch itineraries created by the Tour Guide
+    let itineraries = await itineraryModel.find({ created_by: tourGuide._id }).exec();
+
+    // Apply itinerary filter and ensure it belongs to the Tour Guide
+    if (itinerary) {
+      itineraries = itineraries.filter(it => it.name === itinerary && it.created_by.equals(tourGuide._id));
+    }
+
+    // Fetch tourists who booked these itineraries
+    const bookedItineraryIds = itineraries.map(it => it._id);
+    let tourists = await Tourist.find({ bookedItineraries: { $in: bookedItineraryIds } }).exec();
+
+    // Apply date and month filters
+    if (date || month) {
+      const filterDate = date ? new Date(date) : null;
+      const filterMonth = month ? parseInt(month) : null;
+
+      tourists = tourists.filter(tourist => {
+        return tourist.bookedItineraries.some(bookingId => {
+          const bookingItinerary = itineraries.find(it => it._id.equals(bookingId));
+          if (!bookingItinerary) return false;
+
+          const bookingDate = new Date(tourist.updatedAt); // Assuming this is the booking date
+          if (filterDate && bookingDate.toDateString() !== filterDate.toDateString()) return false;
+          if (filterMonth && bookingDate.getMonth() + 1 !== filterMonth) return false;
+
+          return true;
+        });
+      });
+    }
+
+    let totalRevenue = 0;
+    const itineraryDetails = [];
+
+    // Loop through the filtered itineraries and calculate revenue
+    itineraries.forEach((itinerary) => {
+      const itineraryTourists = tourists.filter(tourist => tourist.bookedItineraries.includes(itinerary._id));
+
+      itineraryDetails.push({
+        name: itinerary.name,
+        budget: itinerary.budget,
+        locations: itinerary.locations,
+        availability_dates: itinerary.availability_dates,
+        bookings: itineraryTourists.map(tourist => ({
+          touristId: tourist._id,
+          touristName: tourist.username,
+          bookingDate: tourist.updatedAt,
+        })),
+      });
+
+      // Calculate total revenue
+      itineraryTourists.forEach(tourist => {
+        if (itinerary.budget) {
+          totalRevenue += itinerary.budget - (itinerary.budget * 0.1); // Assume 10% revenue
+        }
+      });
+    });
+
+    return res.json({ totalRevenue, itineraryDetails });
+  } catch (error) {
+    console.error("Error filtering Tour Guide sales report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+const getTourGuideTouristReport = async (req, res) => {
+  const { id } = req.query; // Tour Guide's ID passed as a query parameter
+
+  try {
+    // Find the tour guide by ID
+    const tourGuide = await TourGuide.findById(id);
+    if (!tourGuide) {
+      return res.status(404).json({ error: "Tour Guide not found in the database." });
+    }
+
+    // Find itineraries created by the tour guide
+    const itineraries = await Itinerary.find({ created_by: tourGuide._id }).exec();
+
+    // Initialize total tourists and itinerary details
+    let totalTourists = 0;
+    const itineraryDetails = [];
+
+    // Loop through each itinerary to calculate tourist data
+    for (const itinerary of itineraries) {
+      // Find tourists who booked the itinerary
+      const tourists = await Tourist.find({ bookedItineraries: itinerary._id }).exec();
+      const touristsCount = tourists.length;
+      totalTourists += touristsCount;
+
+      itineraryDetails.push({
+        name: itinerary.name,
+        totalTourists: touristsCount,
+        budget: itinerary.budget,
+        locations: itinerary.locations,
+        availability_dates: itinerary.availability_dates,
+        tourists: tourists.map(tourist => ({
+          touristId: tourist._id,
+          touristName: tourist.username,
+          touristEmail: tourist.email,
+          touristMobile: tourist.mobile_number,
+          bookingDate: tourist.updatedAt, // Assuming the booking date is the last updated timestamp
+        }))
+      });
+    }
+
+    // Respond with the total number of tourists and itinerary details
+    res.json({ totalTourists, itineraryDetails });
+  } catch (error) {
+    console.error("Error generating Tour Guide tourist report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const filterTourGuideTouristReportByMonth = async (req, res) => {
+  const { id, month } = req.query; // Tour Guide's ID and filter month as query parameters
+
+  try {
+    // Find the tour guide by ID
+    const tourGuide = await TourGuide.findById(id);
+    if (!tourGuide) {
+      return res.status(404).json({ error: "Tour Guide not found in the database." });
+    }
+
+    // Find itineraries created by the tour guide
+    const itineraries = await Itinerary.find({ created_by: tourGuide._id }).exec();
+
+    if (itineraries.length === 0) {
+      return res.status(404).json({ error: "No itineraries found for the Tour Guide." });
+    }
+
+    // Validate month input
+    const filterMonth = month ? parseInt(month, 10) : null;
+    if (filterMonth && (filterMonth < 1 || filterMonth > 12)) {
+      return res.status(400).json({ error: "Invalid month provided. Must be between 1 and 12." });
+    }
+
+    // Initialize total tourists and filtered itinerary details
+    let totalTourists = 0;
+    const filteredItineraryDetails = [];
+
+    // Loop through each itinerary to calculate tourist data
+    for (const itinerary of itineraries) {
+      // Find tourists who booked the itinerary
+      let tourists = await Tourist.find({ bookedItineraries: itinerary._id }).exec();
+
+      // Apply month filter
+      if (filterMonth) {
+        tourists = tourists.filter(tourist => {
+          const bookingDate = new Date(tourist.updatedAt); // Using updatedAt as the booking date
+          return bookingDate.getMonth() + 1 === filterMonth;
+        });
+      }
+
+      const touristsCount = tourists.length;
+      totalTourists += touristsCount;
+
+      if (touristsCount > 0) {
+        filteredItineraryDetails.push({
+          name: itinerary.name,
+          totalTourists: touristsCount,
+          budget: itinerary.budget,
+          locations: itinerary.locations,
+          availability_dates: itinerary.availability_dates,
+          tourists: tourists.map(tourist => ({
+            touristId: tourist._id,
+            touristName: tourist.username,
+            touristEmail: tourist.email,
+            touristMobile: tourist.mobile_number,
+            bookingDate: tourist.updatedAt, // Using updatedAt for the booking date
+          })),
+        });
+      }
+    }
+
+    if (filteredItineraryDetails.length === 0) {
+      return res.status(404).json({ error: "No tourists found matching the filter criteria." });
+    }
+
+    // Respond with the filtered total number of tourists and itinerary details
+    res.json({ totalTourists, filteredItineraryDetails });
+  } catch (error) {
+    console.error("Error filtering Tour Guide tourist report by month:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 module.exports = {
   createTourGuideProfile,
@@ -579,4 +824,8 @@ module.exports = {
   changePasswordTourGuide,
   deleteTourGuideAccount,
   loginTourGuide,
+  getTourGuideSalesReport,
+  getTourGuideTouristReport,
+  filterTourGuideTouristReportByMonth,
+  filterTourGuideSalesReport
 };

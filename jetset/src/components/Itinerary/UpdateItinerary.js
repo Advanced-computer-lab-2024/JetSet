@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-const UpdateItinerary = () => {
+const UpdateItinerary = ({id}) => {
   const { id } = useParams();
   const [formData, setFormData] = useState({
     name: "",
