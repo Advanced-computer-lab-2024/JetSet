@@ -323,6 +323,200 @@
 
 // export default AdminFrontend;
 
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { useParams } from "react-router-dom";
+// import NavAdmin from "./Admin/navAdmin";
+// import "./AdminFrontend.css";
+
+// // Import components for Tag Management
+// import TagList from "./Tag/TagList";
+
+// // Import components for Category Management
+// import CategoryList from "./Category/CategoryList";
+
+// // Import components for Product Management
+// import AddProduct from "./Products/AddProduct";
+// import EditProduct from "./Products/EditProduct";
+// import FilterProducts from "./Products/FilterProducts";
+// import ProductList from "./Products/ProductList";
+// import SearchProduct from "./Products/SearchProduct";
+// import SortProducts from "./Products/SortProducts";
+
+// // Import new components for Account Management
+// import DeleteAccount from "./Admin/DeleteAccount";
+// import CreateAdmin from "./Admin/CreateAdmin";
+// import CreateTourismGovernor from "./Admin/CreateTourismGovernor";
+
+// import GuestList from "./Admin/viewGuest";
+// import ComplaintList from "./Admin/viewComplaints";
+
+// import Itineraries from "./Itinerary/FlagItinerary";
+// import ActivityList from "./Activity/FlagActivity";
+
+// import ComplaintsReply from "./Complaints/ComplaintsReply";
+// import ComplaintsFilter from "./Complaints/ComplaintsFilter";
+// import ComplaintsSort from "./Complaints/ComplaintsSort";
+// import ComplaintsStatus from "./Complaints/ComplaintsStatus";
+
+// function AdminFrontend() {
+//   const { adminId } = useParams();
+//   const [adminUsername, setAdminUsername] = useState("");
+//   const [currentSection, setCurrentSection] = useState("dashboard");
+//   const [tags, setTags] = useState([]);
+//   const [tagLoading, setTagLoading] = useState(true);
+//   const [tagError, setTagError] = useState(null);
+
+//   const [categories, setCategories] = useState([]);
+//   const [categoryLoading, setCategoryLoading] = useState(true);
+//   const [categoryError, setCategoryError] = useState(null);
+
+//   const [products, setProducts] = useState([]);
+//   const [productLoading, setProductLoading] = useState(true);
+//   const [productError, setProductError] = useState(null);
+
+//   // Toggle state for each section
+//   const [showTagActions, setShowTagActions] = useState(false);
+//   const [showCategoryActions, setShowCategoryActions] = useState(false);
+//   const [showProductActions, setShowProductActions] = useState(false);
+//   const [showGuestActions, setShowGuestActions] = useState(false);
+//   const [showItineraryActions, setShowItineraryActions] = useState(false);
+//   const [showActivityActions, setShowActivityActions] = useState(false);
+//   const [showComplaintActions, setshowComplaintActions] = useState(false);
+//   const [currentPage, setCurrentPage] = useState("");
+//   const [currentAction, setCurrentAction] = useState("");
+
+//   useEffect(() => {
+//     const fetchAdminData = async () => {
+//       try {
+//         const response = await axios.get(
+//           `http://localhost:3000/getadminbyId/${adminId}`
+//         );
+//         setAdminUsername(response.data.username);
+//       } catch (error) {
+//         console.error("Error fetching admin data:", error);
+//       }
+//     };
+
+//     fetchAdminData();
+//   }, [adminId]);
+
+//   // Fetch functions for tags, categories, and products
+//   const fetchTags = async () => {
+//     setTagLoading(true);
+//     setTagError(null);
+//     try {
+//       const response = await axios.get(
+//         "http://localhost:3000/getPreferancetag"
+//       );
+//       setTags(response.data);
+//     } catch (error) {
+//       setTagError("Error retrieving tags");
+//     } finally {
+//       setTagLoading(false);
+//     }
+//   };
+
+//   const fetchCategories = async () => {
+//     setCategoryLoading(true);
+//     setCategoryError(null);
+//     try {
+//       const response = await axios.get("http://localhost:3000/viewCategory");
+//       setCategories(response.data);
+//     } catch (error) {
+//       setCategoryError("Error retrieving categories");
+//     } finally {
+//       setCategoryLoading(false);
+//     }
+//   };
+
+//   const fetchProducts = async () => {
+//     setProductLoading(true);
+//     setProductError(null);
+//     try {
+//       const response = await axios.get("http://localhost:3000/productsAdmin");
+//       setProducts(response.data);
+//     } catch (error) {
+//       setProductError("Error retrieving products");
+//     } finally {
+//       setProductLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchTags();
+//     fetchCategories();
+//     fetchProducts();
+//   }, []);
+
+//   const renderSectionContent = () => {
+//     switch (currentSection) {
+//       case "dashboard":
+//         return (
+//           <div>
+//             <GuestList />
+//             <CreateAdmin />
+//             <CreateTourismGovernor />
+//             <DeleteAccount />
+//           </div>
+//         );
+//       case "tags":
+//         return (
+//           <div>
+//             <TagList tags={tags} />
+//           </div>
+//         );
+//       case "categories":
+//         return (
+//           <div>
+//             <CategoryList categories={categories} />
+//           </div>
+//         );
+//       case "products":
+//         return (
+//           <div>
+//             <AddProduct adminId={adminId} />
+//             <ProductList products={products} />
+//             <EditProduct />
+//             <FilterProducts />
+//             <SearchProduct />
+//             <SortProducts products={products} />
+//           </div>
+//         );
+//       case "complaints":
+//         return <ComplaintList />;
+//       default:
+//         return <div>Select a section from the sidebar.</div>;
+//     }
+//   };
+
+//   return (
+//     <div className="admin-frontend">
+//       <NavAdmin adminUsername={adminUsername} />
+//       <div className="admin-container">
+//         {/* Sidebar Navigation */}
+//         <aside className="admin-sidebar">
+//           <ul>
+//             <li onClick={() => setCurrentSection("dashboard")}>🏠 Dashboard</li>
+//             <li onClick={() => setCurrentSection("tags")}>🏷️ Tags</li>
+//             <li onClick={() => setCurrentSection("categories")}>
+//               📂 Categories
+//             </li>
+//             <li onClick={() => setCurrentSection("products")}>🛒 Products</li>
+//             <li onClick={() => setCurrentSection("complaints")}>
+//               ⚠️ Complaints
+//             </li>
+//           </ul>
+//         </aside>
+
+//         {/* Main Content */}
+//         <main className="admin-main-content">{renderSectionContent()}</main>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default AdminFrontend;
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -360,6 +554,10 @@ import ComplaintsSort from "./Complaints/ComplaintsSort";
 import ComplaintsStatus from "./Complaints/ComplaintsStatus";
 import ItineraryList from "./Itinerary/ItineraryTourist";
 
+// Import the new components
+import SalesReport from "./Reports/AdminSales"; // Adjust the path as necessary
+import UserStatistics from "./Reports/UserStatistics"; // Adjust the path as necessary
+
 function AdminFrontend() {
   const { adminId } = useParams();
   const [adminUsername, setAdminUsername] = useState("");
@@ -376,17 +574,6 @@ function AdminFrontend() {
   const [productLoading, setProductLoading] = useState(true);
   const [productError, setProductError] = useState(null);
 
-  // Toggle state for each section
-  const [showTagActions, setShowTagActions] = useState(false);
-  const [showCategoryActions, setShowCategoryActions] = useState(false);
-  const [showProductActions, setShowProductActions] = useState(false);
-  const [showGuestActions, setShowGuestActions] = useState(false);
-  const [showItineraryActions, setShowItineraryActions] = useState(false);
-  const [showActivityActions, setShowActivityActions] = useState(false);
-  const [showComplaintActions, setshowComplaintActions] = useState(false);
-  const [currentPage, setCurrentPage] = useState("");
-  const [currentAction, setCurrentAction] = useState("");
-
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
@@ -402,7 +589,6 @@ function AdminFrontend() {
     fetchAdminData();
   }, [adminId]);
 
-  // Fetch functions for tags, categories, and products
   const fetchTags = async () => {
     setTagLoading(true);
     setTagError(null);
@@ -464,17 +650,9 @@ function AdminFrontend() {
           </div>
         );
       case "tags":
-        return (
-          <div>
-            <TagList tags={tags} />
-          </div>
-        );
+        return <TagList tags={tags} />;
       case "categories":
-        return (
-          <div>
-            <CategoryList categories={categories} />
-          </div>
-        );
+        return <CategoryList categories={categories} />;
       case "products":
         return (
           <div>
@@ -496,6 +674,10 @@ function AdminFrontend() {
             <ComplaintsStatus />
           </div>
         );
+      case "salesReport":
+        return <SalesReport adminId={adminId} />;
+      case "userStatistics":
+        return <UserStatistics />;
       default:
         return <div>Select a section from the sidebar.</div>;
     }
@@ -516,6 +698,12 @@ function AdminFrontend() {
             <li onClick={() => setCurrentSection("products")}>🛒 Products</li>
             <li onClick={() => setCurrentSection("complaints")}>
               ⚠️ Complaints
+            </li>
+            <li onClick={() => setCurrentSection("salesReport")}>
+              📊 Sales Report
+            </li>
+            <li onClick={() => setCurrentSection("userStatistics")}>
+              📈 User Statistics
             </li>
           </ul>
         </aside>

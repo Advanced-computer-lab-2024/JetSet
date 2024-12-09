@@ -31,16 +31,28 @@ const touristSchema = new Schema(
     job: String,
     products: [
       {
-        productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
+    purchasedProducts: [
+      {
+        product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
+          required: true,
         },
-        purchaseQuantity: {
+        purchaseDate: {
+          type: Date,
+          default: Date.now,
+        },
+        quantity: {
           type: Number,
-          default: 1, // Default quantity
+          required: true,
         },
       },
     ],
+
     wallet: { type: Number, default: 0 },
     loyaltyPoints: {
       type: Number,
@@ -70,24 +82,6 @@ const touristSchema = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Transportation",
-      },
-    ],
-    payedActivities: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Activity",
-      },
-    ],
-    payedItineraries: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Itinerary",
-      },
-    ],
-    payedProducts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
       },
     ],
     preferredCurrency: {
@@ -186,19 +180,9 @@ const touristSchema = new Schema(
     ],
     resetOtp: { type: String },
   },
+
   { timestamps: true }
 );
-// touristSchema.virtual("cartWithQuantities").get(function () {
-//   return this.products.map(product => ({
-//     productId: product.productId,
-//     quantity: product.purchaseQuantity,
-//   }));
-// });
-
-// // Ensure virtual fields are included in the output
-// touristSchema.set("toJSON", {
-//   virtuals: true,
-// });
 
 const Tourist = mongoose.model("Tourist", touristSchema);
 module.exports = Tourist;
