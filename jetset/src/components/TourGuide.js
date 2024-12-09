@@ -49,7 +49,7 @@ function TourGuide() {
         );
         setNotifications(response.data.notifications);
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching notifications");
+        //setError(err.response?.data?.message || "Error fetching notifications");
       } finally {
         setLoading(false);
       }
@@ -62,6 +62,9 @@ function TourGuide() {
     switch (section) {
       case "itinerary":
         setView("itineraries");
+        break;
+      case "ViewCreatedItineraries":
+        setView("ViewCreatedItineraries");
         break;
       case "profile":
         setView("readtourGuideProfile");
@@ -139,39 +142,19 @@ function TourGuide() {
             )}
             {/* Conditional rendering based on view */}
             {view === "itineraries" && (
-              <div>
-                <div>
-                  <button onClick={() => setView("itineraries")}>
-                    All Itineraries
-                  </button>
-                  <button onClick={() => setView("ViewCreatedItineraries")}>
-                    My Created Itineraries
-                  </button>
-                </div>
-                <ItineraryList 
+                <ItineraryList
                 onEdit={(itineraryId) => {
                   setItineraryID(itineraryId); // Set the ID of the itinerary to be updated
                   setView("updateItinerary");
-                }}/>
-              </div>
+                }} />
             )}
 
             {view === "ViewCreatedItineraries" && (
-              <div>
-                <div>
-                  <button onClick={() => setView("itineraries")}>
-                    All Itineraries
-                  </button>
-                  <button onClick={() => setView("ViewCreatedItineraries")}>
-                    My Created Itineraries
-                  </button>
-                </div>
                 <ViewCreatedItineraries id={tourGuideID}
                 onEdit={(itineraryId) => {
                 setItineraryID(itineraryId); // Set the ID of the itinerary to be updated
                 setView("updateItinerary");
               }} />
-              </div>
             )}
             {view === "tourGuideProfile" && (
               <TourGuideProfileForm tourGuideID={tourGuideID} />
@@ -226,7 +209,8 @@ function TourGuide() {
         {/* Sidebar Navigation */}
         <aside className="admin-sidebar">
           <ul>
-            <li onClick={() => setCurrentSection("itinerary")}>🗺️ My Itineraries</li>
+            <li onClick={() => setCurrentSection("itineraries")}>🗺️ All Itineraries</li>
+            <li onClick={() => setCurrentSection("ViewCreatedItineraries")}>🗺️ My Itineraries</li>
             <li onClick={() => setCurrentSection("createItinerary")}>🖌️ New Itinerary</li>
             {/* <li onClick={() => setCurrentSection("profile")}>👤 My Profile</li> */}
             <li onClick={() => setCurrentSection("password")}>

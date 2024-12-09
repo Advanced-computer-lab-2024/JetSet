@@ -4,8 +4,9 @@ import axios from "axios";
 const ItineraryList = (onEdit) => {
   const [itineraries, setItineraries] = useState([]);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
 
   // Fetch itineraries on component mount
   useEffect(() => {
@@ -24,26 +25,6 @@ const ItineraryList = (onEdit) => {
   }, []);
 
   // Handle itinerary deletion
-  // const handleDelete = async (id) => {
-  //   try {
-  //     const response = await axios.delete(
-  //       `http://localhost:3000/deleteItinerary`,
-  //       {
-  //         data: { id }, // Pass the ID in the request body
-  //       }
-  //     );
-
-  //     // Update the state to remove the deleted itinerary
-  //     setItineraries(itineraries.filter((itinerary) => itinerary._id !== id));
-  //     alert("Itinerary deleted successfully!");
-  //   } catch (err) {
-  //     setError(
-  //       err.response?.data?.error ||
-  //         "An error occurred while deleting the itinerary."
-  //     );
-  //   }
-  // };
-
   const deleteItinerary = async (itineraryId) => {
     // Show confirmation dialog
     const confirmed = window.confirm("Are you sure you want to delete this itinerary?");
@@ -56,6 +37,7 @@ const ItineraryList = (onEdit) => {
             data: { id: itineraryId }, // Sending the ID in the body
           }
         );
+        window.location.reload();
         setMessage(response.data.msg || "Itinerary deleted successfully!");
         setError(""); // Clear any previous error
         setItineraries((prevItineraries) =>
@@ -70,6 +52,7 @@ const ItineraryList = (onEdit) => {
       }
     }
   };
+  
 
   const toggleActivationStatus = async (itineraryId, currentStatus) => {
     try {
@@ -80,9 +63,9 @@ const ItineraryList = (onEdit) => {
       } else {
         response = await axios.post(`http://localhost:3000/activateItinerary/${itineraryId}`);
       }
+        window.location.reload();
         setMessage(response.data.message);
         setError("");
-        window.location.reload();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to toggle itinerary status.');
       setMessage("");
@@ -94,7 +77,7 @@ const ItineraryList = (onEdit) => {
 
   return (
     <div>
-      <h2>Itineraries</h2>
+      <h2>All Itineraries</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       {message && <p>{message}</p>}
       <ul>
@@ -129,7 +112,8 @@ const ItineraryList = (onEdit) => {
                 Tags:{" "}
                 {itinerary.tag?.map((tag) => tag.name).join(", ") ||
                   "No tags available"}
-              </p><div style={{ display: "flex", gap: "10px" }}>
+              </p>
+              <div style={{ display: "flex", gap: "10px" }}>
               <a
                 href="#"
                 style={{

@@ -3,7 +3,7 @@ import UpdateItineraryForm from "./UpdateItineraryForm.js";
 import axios from "axios";
 
 
-const ViewCreatedItineraries = ({ id, onEdit  }) => {
+const ViewCreatedItineraries = ({ id, onEdit }) => {
   const [itineraries, setItineraries] = useState([]);
   const [touristItineraries, setTouristItineraries] = useState([]);
   const [error, setError] = useState("");
@@ -46,6 +46,7 @@ const ViewCreatedItineraries = ({ id, onEdit  }) => {
             data: { id: itineraryId }, // Sending the ID in the body
           }
         );
+        window.location.reload();
         setMessage(response.data.msg || "Itinerary deleted successfully!");
         setError(""); // Clear any previous error
         setItineraries((prevItineraries) =>
@@ -62,10 +63,6 @@ const ViewCreatedItineraries = ({ id, onEdit  }) => {
   };
   
 
-  const editItinerary = async (itineraryId) => {
-    <UpdateItineraryForm itineraryID={itineraryId} />
-  };
-
   const toggleActivationStatus = async (itineraryId, currentStatus) => {
     try {
       let response;
@@ -75,6 +72,7 @@ const ViewCreatedItineraries = ({ id, onEdit  }) => {
       } else {
         response = await axios.post(`http://localhost:3000/activateItinerary/${itineraryId}`);
       }
+        ` window.location.reload();`
         setMessage(response.data.message);
         setError("");
     } catch (err) {
@@ -85,7 +83,7 @@ const ViewCreatedItineraries = ({ id, onEdit  }) => {
 
   return (
     <div>
-      <h2>Created Itineraries</h2>
+      <h2>My Created Itineraries</h2>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
       {message && <p>{message}</p>}
