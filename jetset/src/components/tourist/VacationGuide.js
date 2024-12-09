@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import vacationSteps from "../data/steps";
 
 const VacationGuide = () => {
-  const { touristId } = useParams();
+  //const { touristId } = useParams();
   const [completedSteps, setCompletedSteps] = useState([]);
   const [username, setUsername] = useState("");
 
@@ -18,24 +18,24 @@ const VacationGuide = () => {
     });
   };
 
-  useEffect(() => {
-    const fetchTourist = async () => {
-      if (touristId) {
-        try {
-          const response = await axios.get(
-            `http://localhost:3000/getTourist/${touristId}`
-          );
-          setUsername(response.data.username);
-        } catch (error) {
-          console.error("Error during fetch:", error);
-          alert(
-            error.response?.data?.message || "Error fetching tourist profile"
-          );
-        }
-      }
-    };
-    fetchTourist();
-  }, [touristId]);
+  // useEffect(() => {
+  //   const fetchTourist = async () => {
+  //     if (touristId) {
+  //       try {
+  //         const response = await axios.get(
+  //           `http://localhost:3000/getTourist/${touristId}`
+  //         );
+  //         setUsername(response.data.username);
+  //       } catch (error) {
+  //         console.error("Error during fetch:", error);
+  //         alert(
+  //           error.response?.data?.message || "Error fetching tourist profile"
+  //         );
+  //       }
+  //     }
+  //   };
+  //   fetchTourist();
+  // }, [touristId]);
 
   return (
     <div className="vacation-guide">

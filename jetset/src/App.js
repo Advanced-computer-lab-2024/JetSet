@@ -39,7 +39,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/touristregister" element={<RegisterTourist />} />
-        <Route path="/tourist" component={Tourist} />
+        <Route path="/tourist" element={<Tourist />} />
         <Route path="/admin/:adminId" element={<AdminFrontend />} />
         <Route
           path="/admin/change-password/:adminId"
@@ -74,7 +74,7 @@ const App = () => {
           path="/notifications/:touristId"
           element={<NotificationsPage />}
         />
-        <Route path="/guide/:touristId" element={<VacationGuestGuide />} />
+        <Route path="/guide" element={<VacationGuestGuide />} />
       </Routes>
     </Router>
   );

@@ -24,10 +24,14 @@ const NavTourist = ({ touristId, username }) => {
   useEffect(() => {
     if (username) {
       const fetchData = async () => {
-        const notifications = await axios.get(
-          `http://localhost:3000/unread?recipient=${username}&role=Tourist`
-        );
-        setUnreadCount(notifications.data.unreadCount);
+        try {
+          const notifications = await axios.get(
+            `http://localhost:3000/unread?recipient=${username}&role=Tourist`
+          );
+          setUnreadCount(notifications.data.unreadCount);
+        } catch (err) {
+          console.error("Error fetching notifications", err);
+        }
       };
 
       fetchData();
@@ -52,7 +56,7 @@ const NavTourist = ({ touristId, username }) => {
   };
 
   const handleGuide = () => {
-    //   navigate(`/guide/${touristId}`); // Adjust URL to guide-related path
+    navigate(`/guide`);
   };
 
   const handleBack = () => {
@@ -61,7 +65,6 @@ const NavTourist = ({ touristId, username }) => {
 
   return (
     <div className="admin-frontend">
-      <NavTourist touristId={touristId} username={username} />
       <header>
         <nav className="navbar">
           <div className="navbar-left" onClick={handleBack}>
