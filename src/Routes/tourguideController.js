@@ -140,9 +140,8 @@ const createItinerary = async (req, res) => {
     pickup_location,
     dropoff_location,
     accessibility,
-    created_by,
     tags,
-    tourguideId,
+    created_by,
   } = req.body;
 
   try {
@@ -160,7 +159,6 @@ const createItinerary = async (req, res) => {
       accessibility,
       created_by,
       tags,
-      created_by: tourguideId,
     });
     res.status(201).json({ msg: "Itinerary created", itinerary });
   } catch (err) {
@@ -170,7 +168,7 @@ const createItinerary = async (req, res) => {
 
 const getItineraries = async (req, res) => {
   try {
-    const itineraries = await itineraryModel.find();
+    const itineraries = await itineraryModel.find().populate();
     res.status(200).json(itineraries);
   } catch (err) {
     res.status(400).json({ error: err.message });

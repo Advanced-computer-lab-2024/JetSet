@@ -17,7 +17,7 @@ import Login from "./components/login"; // Use consistent case for component imp
 import CreateAdv from "./components/Advertiser/CreateAdv";
 import ResetPasswordPage from "./components/ResetPasswordPage";
 import ChangePasswordForm from "./components/Admin/ChangePasswordForm";
-
+import TourGuideProfile from "./components/Tourguide/ReadTourGuideProfileForm";
 // import PlaceManagement from "./components/PlaceManagement";
 import PlaceList from "./components/Place/PlaceList";
 import PlaceForm from "./components/Place/PlaceForm";
@@ -50,8 +50,9 @@ const App = () => {
         <Route path="/createAdv" element={<CreateAdv />} />
         <Route path="/createadvertiser/:id" element={<ProfileForm />} />
         <Route path="/place/:tourismGovernorId" element={<Place />} />
-        <Route path="/CreateTourGuide" element={<CreateTourGuideProfile />} />
+        <Route path="/CreateTourGuide/:tourGuideId" element={<CreateTourGuideProfile />} />
         <Route path="/tourguide/:tourGuideID" element={<TourGuide />} />
+        <Route path="/tourguide/profile" element={<TourGuideProfile />} />
         <Route path="/login" element={<Login />} />{" "}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         {/* Consistent casing here */}

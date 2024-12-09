@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { Card, Button, notification, Spin } from "antd";
+
 import { EditOutlined } from "@ant-design/icons";
 
 import NavTourist from "./navTourist";
@@ -19,6 +20,7 @@ const TouristProfile = () => {
   const [selectedCurrency, setSelectedCurrency] = useState("EGP");
   const [conversionRate, setConversionRate] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [addresses, setAddresses] = useState([]);
   const [showAddAddress, setShowAddAddress] = useState();
@@ -46,7 +48,7 @@ const TouristProfile = () => {
   const fetchConversionRate = async (currency) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+        "http://localhost:3000/tourist/${touristId}/preferredCurrency"
       );
       setSelectedCurrency(response.data.preferredCurrency);
       setConversionRate(response.data.conversionRate);
@@ -64,7 +66,7 @@ const TouristProfile = () => {
       if (touristId) {
         try {
           const response = await axios.get(
-            `http://localhost:3000/getTourist/${touristId}`
+            "http://localhost:3000/getTourist/${touristId}"
           );
           setTourist(response.data.tourist);
         } catch (error) {
@@ -74,6 +76,7 @@ const TouristProfile = () => {
               error.response?.data?.message || "Error fetching tourist profile",
           });
         } finally {
+
           setLoading(false);
         }
       }
@@ -89,7 +92,7 @@ const TouristProfile = () => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        `http://localhost:3000/updateTourist/${touristId}`,
+        "http://localhost:3000/updateTourist/${touristId}",
         updateFields
       );
       setTourist((prevTourist) => ({
@@ -131,6 +134,7 @@ const TouristProfile = () => {
             }}
             title={tourist?.username}
             extra={
+
               <div style={{ display: "flex", alignItems: "center" }}>
                 <Button
                   type="primary"
@@ -177,6 +181,7 @@ const TouristProfile = () => {
               <strong>Level:</strong> {tourist.level}
             </p>
           </Card>
+
 
           <Card
             title="Addresses"
