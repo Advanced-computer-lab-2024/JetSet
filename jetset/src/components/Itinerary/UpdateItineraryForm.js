@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const UpdateItineraryForm = ({ itineraryID }) => {
@@ -21,6 +21,40 @@ const UpdateItineraryForm = ({ itineraryID }) => {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  // Fetch itinerary data when the component mounts
+  useEffect(() => {
+    const fetchItineraryData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/itinerary/${itineraryID}`
+        );
+        const data = response.data;
+
+        // Set the form data to the fetched itinerary data
+        setFormData({
+          name: data.name || "",
+          activities: data.activities || "",
+          locations: data.locations || "",
+          timeline: data.timeline || "",
+          duration: data.duration || "",
+          language: data.language || "",
+          price: data.price || "",
+          availability_dates: data.availability_dates || "",
+          pickup_location: data.pickup_location || "",
+          dropoff_location: data.dropoff_location || "",
+          accessibility: data.accessibility || "",
+          budget: data.budget || "",
+          created_by: data.created_by || "",
+          tags: data.tags || "",
+        });
+      } catch (err) {
+        setError("An error occurred while fetching the itinerary data.");
+      }
+    };
+
+    fetchItineraryData();
+  }, [itineraryID]);
 
   // Handle form changes
   const handleChange = (e) => {

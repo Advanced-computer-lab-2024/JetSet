@@ -11,6 +11,7 @@ import Activate from "./Tourguide/Activate";
 import Deactivate from "./Tourguide/Deactivate";
 import ChangePasswordForm from "./Tourguide/ChangePasswordForm.js";
 import DeleteAccount from "./Tourguide/DeleteAccount.js";
+import NavTourGuide from "./Tourguide/navTourguide.js";
 import { useParams } from "react-router-dom";
 
 function TourGuide() {
@@ -48,7 +49,7 @@ function TourGuide() {
         );
         setNotifications(response.data.notifications);
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching notifications");
+        //setError(err.response?.data?.message || "Error fetching notifications");
       } finally {
         setLoading(false);
       }
@@ -62,15 +63,18 @@ function TourGuide() {
       case "itinerary":
         setView("itineraries");
         break;
+      case "ViewCreatedItineraries":
+        setView("ViewCreatedItineraries");
+        break;
       case "profile":
         setView("readtourGuideProfile");
         break;
       case "password":
         setView("ChangePassword");
         break;
-      case "notifications":
-        setView("notifications");
-        break;
+      // case "notifications":
+      //   setView("notifications");
+      //   break;
       case "account":
         setView("deleteAcc");
         break;
@@ -86,8 +90,6 @@ function TourGuide() {
     return(
     <div className="App">
           <header className="App-header">
-            <h1>Welcome, {username || "Tour Guide"}!</h1>{" "}
-            {/* Display the username */}
             {error && <p style={{ color: "red" }}>{error}</p>}
             {/* <nav>
               <button onClick={() => setView("itineraries")}>
@@ -140,31 +142,19 @@ function TourGuide() {
             )}
             {/* Conditional rendering based on view */}
             {view === "itineraries" && (
-              <div>
-                <div>
-                  <button onClick={() => setView("itineraries")}>
-                    All Itineraries
-                  </button>
-                  <button onClick={() => setView("ViewCreatedItineraries")}>
-                    My Created Itineraries
-                  </button>
-                </div>
-                <ItineraryList />
-              </div>
+                <ItineraryList
+                onEdit={(itineraryId) => {
+                  setItineraryID(itineraryId); // Set the ID of the itinerary to be updated
+                  setView("updateItinerary");
+                }} />
             )}
 
             {view === "ViewCreatedItineraries" && (
-              <div>
-                <div>
-                  <button onClick={() => setView("itineraries")}>
-                    All Itineraries
-                  </button>
-                  <button onClick={() => setView("ViewCreatedItineraries")}>
-                    My Created Itineraries
-                  </button>
-                </div>
-                <ViewCreatedItineraries id={tourGuideID} />
-              </div>
+                <ViewCreatedItineraries id={tourGuideID}
+                onEdit={(itineraryId) => {
+                setItineraryID(itineraryId); // Set the ID of the itinerary to be updated
+                setView("updateItinerary");
+              }} />
             )}
             {view === "tourGuideProfile" && (
               <TourGuideProfileForm tourGuideID={tourGuideID} />
@@ -172,7 +162,7 @@ function TourGuide() {
             {view === "readtourGuideProfile" && (
               <ReadTourGuideProfileForm tourGuideID={tourGuideID} />
             )}
-            {view === "createItinerary" && <CreateItineraryForm />}
+            {view === "createItinerary" && <CreateItineraryForm tourguideId={tourGuideID}/>}
             {view === "updateItinerary" && (
               <UpdateItineraryForm itineraryID={itineraryID} />
             )}
@@ -180,7 +170,7 @@ function TourGuide() {
               <ChangePasswordForm tourGuideID={tourGuideID} />
             )}
             {view === "deleteAcc" && <DeleteAccount tourguideId={tourGuideID} />}
-            {view === "notifications" && (
+            {/* {view === "notifications" && (
               <div>
                 <h2>Notifications</h2>
                 {loading && <p>Loading notifications...</p>}
@@ -203,7 +193,7 @@ function TourGuide() {
                   </ul>
                 )}
               </div>
-            )}
+            )} */}
           </header>
         </div>
     );
@@ -211,19 +201,24 @@ function TourGuide() {
 
   return (
     <div>
+      <NavTourGuide username={username} tourGuideId={tourGuideID} 
+      onEdit={(tourGuideID) => {
+        setView("readtourGuideProfile")
+         }} />
       <div className="admin-container">
         {/* Sidebar Navigation */}
         <aside className="admin-sidebar">
           <ul>
-            <li onClick={() => setCurrentSection("itinerary")}>🗺️ My Itineraries</li>
+            <li onClick={() => setCurrentSection("itineraries")}>🗺️ All Itineraries</li>
+            <li onClick={() => setCurrentSection("ViewCreatedItineraries")}>🗺️ My Itineraries</li>
             <li onClick={() => setCurrentSection("createItinerary")}>🖌️ New Itinerary</li>
-            <li onClick={() => setCurrentSection("profile")}>👤 My Profile</li>
+            {/* <li onClick={() => setCurrentSection("profile")}>👤 My Profile</li> */}
             <li onClick={() => setCurrentSection("password")}>
             🔑 Change Password
             </li>
-            <li onClick={() => setCurrentSection("notifications")}>
+            {/* <li onClick={() => setCurrentSection("notifications")}>
               ⚠️ Notifications
-            </li>
+            </li> */}
             <li onClick={() => setCurrentSection("account")}>🗑️ Delete My Account</li>
           </ul>
         </aside>
