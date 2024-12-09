@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { Card, Button, notification, Spin } from "antd"; // Importing Ant Design components
+import { Card, Button, notification, Spin } from "antd";
+
 import { EditOutlined } from "@ant-design/icons";
 
 import NavTourist from "./navTourist";
@@ -19,16 +20,30 @@ const TouristProfile = () => {
   const [selectedCurrency, setSelectedCurrency] = useState("EGP");
   const [conversionRate, setConversionRate] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true); // Adding loading state
 
-  // State to control visibility of components
-  const [showUpdatePreferences, setShowUpdatePreferences] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
-  const [showAddAddress, setShowAddAddress] = useState(false);
-  const [showSetPreferredCurrency, setShowSetPreferredCurrency] =
-    useState(false);
-  const [showLoyaltyPoints, setShowLoyaltyPoints] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [addresses, setAddresses] = useState([]);
+  const [showAddAddress, setShowAddAddress] = useState();
+  const [activeSection, setActiveSection] = useState(""); // Track active section
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/address/${touristId}`
+      );
+      setAddresses(response.data.addresses);
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+      notification.error({
+        message: "Error",
+        description: "Error fetching addresses",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchAddresses();
+  });
 
   const fetchConversionRate = async (currency) => {
     try {
@@ -61,7 +76,8 @@ const TouristProfile = () => {
               error.response?.data?.message || "Error fetching tourist profile",
           });
         } finally {
-          setLoading(false); // Set loading to false after fetch
+
+          setLoading(false);
         }
       }
     };
@@ -118,14 +134,22 @@ const TouristProfile = () => {
             }}
             title={tourist?.username}
             extra={
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                onClick={() => setIsEditing(!isEditing)}
-                style={{ backgroundColor: "#4CAF50", borderColor: "#4CAF50" }}
-              >
-                {isEditing ? "Cancel" : "Edit Profile"}
-              </Button>
+
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => setIsEditing(!isEditing)}
+                  style={{
+                    backgroundColor: "#1d3557",
+                    borderColor: "#1d3557",
+                    marginRight: "10px",
+                  }}
+                >
+                  {isEditing ? "Cancel" : "Edit Profile"}
+                </Button>
+                <DeleteAccount touristId={touristId} />
+              </div>
             }
           >
             <p>
@@ -158,157 +182,108 @@ const TouristProfile = () => {
             </p>
           </Card>
 
-          {/* Conditionally show edit form if in edit mode */}
-          {isEditing && (
-            <Card
-              title="Update Profile"
+
+          <Card
+            title="Addresses"
+            style={{
+              marginBottom: "20px",
+              padding: "20px",
+              borderRadius: "8px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            {addresses.length === 0 ? (
+              <p>No addresses added yet.</p>
+            ) : (
+              <div>
+                {addresses.map((address, index) => (
+                  <p>
+                    <strong>Address {index + 1}:</strong> {address}
+                  </p>
+                ))}
+              </div>
+            )}
+            <Button
+              type="primary"
+              onClick={() => setShowAddAddress(!showAddAddress)}
               style={{
-                marginTop: "20px",
-                padding: "20px",
-                borderRadius: "8px",
+                marginTop: "10px",
+                backgroundColor: "#1d3557",
+                borderColor: "#1d3557",
               }}
             >
-              <form onSubmit={handleUpdateSubmit}>
-                <div style={{ marginBottom: "15px" }}>
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="New Email"
-                    defaultValue={tourist.email}
-                    onChange={handleUpdateChange}
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      marginTop: "5px",
-                      borderRadius: "5px",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                </div>
-                <div style={{ marginBottom: "15px" }}>
-                  <label>Mobile</label>
-                  <input
-                    type="text"
-                    name="mobile_number"
-                    placeholder="New Mobile"
-                    defaultValue={tourist.mobile_number}
-                    onChange={handleUpdateChange}
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      marginTop: "5px",
-                      borderRadius: "5px",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                </div>
-                <div style={{ marginBottom: "15px" }}>
-                  <label>Job</label>
-                  <input
-                    type="text"
-                    name="job"
-                    placeholder="New Job"
-                    defaultValue={tourist.job}
-                    onChange={handleUpdateChange}
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      marginTop: "5px",
-                      borderRadius: "5px",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                </div>
-                <div style={{ marginBottom: "15px" }}>
-                  <label>Wallet</label>
-                  <input
-                    type="number"
-                    name="wallet"
-                    placeholder="Wallet Balance"
-                    defaultValue={tourist.wallet}
-                    onChange={handleUpdateChange}
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      marginTop: "5px",
-                      borderRadius: "5px",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                </div>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    backgroundColor: "#4CAF50",
-                    borderColor: "#4CAF50",
-                    color: "white",
-                  }}
-                >
-                  Update Profile
-                </Button>
-              </form>
-            </Card>
-          )}
+              {showAddAddress ? "Hide Add Address Form" : "Add New Address"}
+            </Button>
+            {showAddAddress && <AddAddress touristId={touristId} />}
+          </Card>
 
-          {/* Toggle Buttons */}
-          <Button
-            onClick={() => setShowUpdatePreferences(!showUpdatePreferences)}
-            style={{ marginBottom: "10px" }}
-          >
-            {showUpdatePreferences ? "Hide Preferences" : "Show Preferences"}
-          </Button>
-          <Button
-            onClick={() => setShowChangePassword(!showChangePassword)}
-            style={{ marginLeft: "10px" }}
-          >
-            {showChangePassword
-              ? "Hide Change Password"
-              : "Show Change Password"}
-          </Button>
-          <Button
-            onClick={() => setShowDeleteAccount(!showDeleteAccount)}
-            style={{ marginLeft: "10px" }}
-          >
-            {showDeleteAccount ? "Hide Delete Account" : "Show Delete Account"}
-          </Button>
-          <Button
-            onClick={() => setShowAddAddress(!showAddAddress)}
-            style={{ marginLeft: "10px" }}
-          >
-            {showAddAddress ? "Hide Add Address" : "Show Add Address"}
-          </Button>
-          <Button
-            onClick={() =>
-              setShowSetPreferredCurrency(!showSetPreferredCurrency)
-            }
-            style={{ marginLeft: "10px" }}
-          >
-            {showSetPreferredCurrency
-              ? "Hide Preferred Currency"
-              : "Show Preferred Currency"}
-          </Button>
-          <Button
-            onClick={() => setShowLoyaltyPoints(!showLoyaltyPoints)}
-            style={{ marginLeft: "10px" }}
-          >
-            {showLoyaltyPoints ? "Hide Loyalty Points" : "Show Loyalty Points"}
-          </Button>
+          {/* Buttons to toggle visibility */}
+          <div style={{ marginBottom: "20px" }}>
+            <Button
+              type={activeSection === "preferences" ? "primary" : "default"}
+              onClick={() =>
+                setActiveSection(
+                  activeSection === "preferences" ? "" : "preferences"
+                )
+              }
+              style={{ marginRight: "10px" }}
+            >
+              Preferences
+            </Button>
+            <Button
+              type={activeSection === "changePassword" ? "primary" : "default"}
+              onClick={() =>
+                setActiveSection(
+                  activeSection === "changePassword" ? "" : "changePassword"
+                )
+              }
+              style={{ marginRight: "10px" }}
+            >
+              Change Password
+            </Button>
+            <Button
+              type={
+                activeSection === "setPreferredCurrency" ? "primary" : "default"
+              }
+              onClick={() =>
+                setActiveSection(
+                  activeSection === "setPreferredCurrency"
+                    ? ""
+                    : "setPreferredCurrency"
+                )
+              }
+              style={{ marginRight: "10px" }}
+            >
+              Preferred Currency
+            </Button>
+            <Button
+              type={activeSection === "loyaltyPoints" ? "primary" : "default"}
+              onClick={() =>
+                setActiveSection(
+                  activeSection === "loyaltyPoints" ? "" : "loyaltyPoints"
+                )
+              }
+            >
+              Loyalty Points
+            </Button>
+          </div>
 
           {/* Conditionally Render Components */}
-          {showUpdatePreferences && (
+          {activeSection === "preferences" && (
             <UpdatePreferencesForm touristId={touristId} />
           )}
-          {showChangePassword && <ChangePassword touristId={touristId} />}
-          {showDeleteAccount && <DeleteAccount touristId={touristId} />}
-          {showAddAddress && <AddAddress touristId={touristId} />}
-          {showSetPreferredCurrency && (
+          {activeSection === "changePassword" && (
+            <ChangePassword touristId={touristId} />
+          )}
+          {activeSection === "addAddress" && (
+            <AddAddress touristId={touristId} />
+          )}
+          {activeSection === "setPreferredCurrency" && (
             <SetPreferredCurrency touristId={touristId} />
           )}
-          {showLoyaltyPoints && <LoyaltyPointsForm touristId={touristId} />}
+          {activeSection === "loyaltyPoints" && (
+            <LoyaltyPointsForm touristId={touristId} />
+          )}
         </div>
       )}
     </div>

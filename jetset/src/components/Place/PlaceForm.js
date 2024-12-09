@@ -28,7 +28,7 @@ const PlaceForm = () => {
     TicketPricesS: "",
     managed_by: "",
   });
-    const navigate = useNavigate();
+const navigate = useNavigate();
 
 
   const handleInputChange = (e) => {
@@ -184,9 +184,7 @@ const PlaceForm = () => {
       />
 
       <button type="submit">Submit</button>
-      <button className="back-button" onClick={() => navigate(-1)}>
-      <FontAwesomeIcon icon={faArrowLeft} /> Back
-    </button>
+    
     </form>
   );
 };

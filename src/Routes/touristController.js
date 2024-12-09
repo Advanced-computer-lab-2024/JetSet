@@ -5,6 +5,7 @@ const Historical = require("../Models/Historical");
 const Tourist = require("../Models/Tourist.js");
 const TourGuide = require("../Models/TourGuide.js");
 const Complaint = require("../Models/Complaint.js");
+const Category = require("../Models/Category.js"); // Import the Category model
 const Transportation = require("../Models/Transportation");
 const nodemailer = require("nodemailer");
 const cron = require("node-cron");
@@ -153,7 +154,8 @@ cron.schedule("17 14 * * *", async () => {
         const notification = new Notification({
           recipient: tourist.username,
           role: "Tourist",
-          message: `You have upcoming events: ${reminders.length} items. Please check your email for details.`,
+          message: `<p>You have the following upcoming events:</p>
+          <ul>${reminders.join("\n")}</ul>`,
         });
 
         // Save the notification
@@ -3570,6 +3572,87 @@ const addTouristAddress = async (req, res) => {
   }
 };
 
+
+const getAddress = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    // Find the tourist by their ID
+    const tourist = await Tourist.findById(id).select("addresses");
+
+    // Check if tourist exists
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Send the addresses in the response
+    return res.status(200).json({
+      success: true,
+      addresses: tourist.addresses,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+const getActivitiesBasedOnPreferences = async (req, res) => {
+  const { touristId } = req.params; // Destructure touristId from req.params
+  try {
+    // Find the tourist by ID
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found." });
+    }
+
+    // Extract preferences
+    const { preferences } = tourist;
+
+    // Map preferences to a list of category names
+    const preferredCategories = [];
+    if (preferences.historicAreas) preferredCategories.push("historicAreas");
+    if (preferences.beaches) preferredCategories.push("beaches");
+    if (preferences.familyFriendly) preferredCategories.push("familyFriendly");
+    if (preferences.shopping) preferredCategories.push("shopping");
+
+    // Find matching categories in the database
+    const categories = await Category.find({ name: { $in: preferredCategories } });
+    if (!categories.length) {
+      console.log("No matching categories found.");
+      return res.status(200).json([]); // Return empty array if no categories match
+    }
+
+    const categoryIds = categories.map((category) => category._id);
+
+    // Get all activities matching the preferred categories
+    const activities = await Activity.find({
+      category: { $in: categoryIds },
+    })
+      .populate("category") // Populate category details if needed
+      .populate("creator") // Optional: Populate creator details
+      .exec();
+
+    // Extract max budget from preferences
+    const maxBudget = preferences.budget || Number.MAX_SAFE_INTEGER;
+
+    // Filter activities by budget
+    const filteredActivities = activities.filter(
+      (activity) => activity.budget <= maxBudget
+    );
+
+    // Return the filtered activities
+    return res.status(200).json(filteredActivities);
+  } catch (error) {
+    console.error("Error fetching activities:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
 module.exports = {
   getProducts,
   SortActivities,
@@ -3649,5 +3732,9 @@ module.exports = {
   cancelOrder,
   viewRefundAmount,
   addTouristAddress,
+  getAddress,
+
   payByCardPro,
+  getActivitiesBasedOnPreferences,
+
 };

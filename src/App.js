@@ -192,7 +192,12 @@ const {
   cancelOrder,
   viewRefundAmount,
   addTouristAddress,
+
+  getAddress,
+
   payByCardPro,
+  getActivitiesBasedOnPreferences,
+
 } = require("../src/Routes/touristController");
 
 const {
@@ -632,6 +637,8 @@ app.get("/category", async (req, res) => {
 app.get("/bookedIti/:touristId", getBookedItinerary);
 app.get("/bookedAct/:touristId", getBookedActivities);
 
+app.get("/address/:id", getAddress);
+
 // Route to get tourist's preferred currency and conversion rate
 app.get("/tourist/:id/preferredCurrency", async (req, res) => {
   const { id } = req.params;
@@ -736,6 +743,34 @@ app.get("/unread", async (req, res) => {
   }
 });
 
+app.put("/read/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ message: "Missing notification ID in request" });
+  }
+
+  try {
+    const notification = await Notification.findByIdAndUpdate(
+      id,
+      { read: true },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Notification marked as read", notification });
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).json({ message: "Error marking notification as read" });
+  }
+});
+
 app.get("/activity/:id", async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.id);
@@ -774,3 +809,5 @@ app.get("/historical/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+app.get("/preferences/:touristId",getActivitiesBasedOnPreferences);

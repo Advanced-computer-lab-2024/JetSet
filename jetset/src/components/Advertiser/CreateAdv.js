@@ -1,50 +1,30 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Form, Input, Button, Upload, notification, Card } from "antd";
+import { InboxOutlined } from "@ant-design/icons";
+
+const { TextArea } = Input;
 
 const RegisterForm = () => {
   const location = useLocation();
   const { username = "", password = "", email = "" } = location.state || {};
 
-  const [company_name, setCompany] = useState("");
-  const [website, setWebsite] = useState("");
-  const [hotline, setHotline] = useState("");
-  const [companyDescription, setCompanyDescription] = useState("");
-  const [images, setImages] = useState([]);
-
-  const [error, setError] = useState("");
+  const [form] = Form.useForm();
   const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  // Handle file input change for image upload
-  const handleImageChange = (e) => {
-    setImages(e.target.files); // Store the selected files
-  };
-
-  // Handle input changes for text fields
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "company_name") setCompany(value);
-    else if (name === "website") setWebsite(value);
-    else if (name === "hotline") setHotline(value);
-    else if (name === "companyDescription") setCompanyDescription(value);
-  };
-
-  // Submit form data
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async (values) => {
     const formData = new FormData();
-    formData.append("username", username);
-    formData.append("password", password);
-    formData.append("email", email);
-    formData.append("company_name", company_name);
-    formData.append("website", website);
-    formData.append("hotline", hotline);
-    formData.append("companyDescription", companyDescription);
 
-    for (let i = 0; i < images.length; i++) {
-      formData.append("images", images[i]);
-    }
+    // Append form values
+    Object.keys(values).forEach((key) => {
+      if (key === "images") {
+        values.images.forEach((file) => formData.append("images", file.originFileObj));
+      } else {
+        formData.append(key, values[key]);
+      }
+    });
 
     try {
       const response = await axios.post(
@@ -52,87 +32,116 @@ const RegisterForm = () => {
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data", // Ensure the request is sent with the right content type for file upload
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      // On success, navigate to the SellerFrontend or wherever needed
-      console.log("Profile created successfully:", response.data);
-      navigate(`/createadvertiser/${response.data._id}`); // Navigate to the profile page or another page
+      notification.success({
+        message: "Success",
+        description: "Profile created successfully!",
+      });
+      navigate(`/createadvertiser/${response.data._id}`); // Navigate to the advertiser's profile page
     } catch (error) {
       console.error("Error creating the profile:", error);
-      setError(
-        error.response ? error.response.data.error : "Something went wrong!"
-      );
+      setError(error.response ? error.response.data.error : "Something went wrong!");
+      notification.error({
+        message: "Error",
+        description: error.response ? error.response.data.error : "Something went wrong!",
+      });
     }
   };
 
   return (
-    <div>
-      <h2>Register as Advertiser</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username</label>
-          <input type="text" name="username" value={username} readOnly />
-        </div>
-        <div>
-          <label>Password</label>
-          <input type="password" name="password" value={password} readOnly />
-        </div>
-        <div>
-          <label>Email</label>
-          <input type="email" name="email" value={email} readOnly />
-        </div>
-
-        <div>
-          <label>Company Name</label>
-          <input
-            type="text"
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+      <Card
+        title="Register as Advertiser"
+        style={{
+          maxWidth: "600px",
+          margin: "20px auto",
+          padding: "20px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{ username, password, email }}
+        >
+          <Form.Item label="Username" name="username">
+            <Input readOnly />
+          </Form.Item>
+          <Form.Item label="Password" name="password">
+            <Input.Password readOnly />
+          </Form.Item>
+          <Form.Item label="Email" name="email">
+            <Input type="email" readOnly />
+          </Form.Item>
+          <Form.Item
+            label="Company Name"
             name="company_name"
-            value={company_name}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label>Website</label>
-          <input
-            type="text"
+            rules={[{ required: true, message: "Please enter the company name!" }]}
+          >
+            <Input placeholder="Enter your company name" />
+          </Form.Item>
+          <Form.Item
+            label="Website"
             name="website"
-            value={website}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label>Hotline</label>
-          <input
-            type="text"
+            rules={[{ required: true, message: "Please enter the website URL!" }]}
+          >
+            <Input placeholder="Enter your website URL" />
+          </Form.Item>
+          <Form.Item
+            label="Hotline"
             name="hotline"
-            value={hotline}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label>Company Description</label>
-          <textarea
+            rules={[{ required: true, message: "Please enter the hotline number!" }]}
+          >
+            <Input placeholder="Enter your hotline number" />
+          </Form.Item>
+          <Form.Item
+            label="Company Description"
             name="companyDescription"
-            value={companyDescription}
-            onChange={handleChange}
-          />
-        </div>
+            rules={[{ required: true, message: "Please provide a company description!" }]}
+          >
+            <TextArea rows={4} placeholder="Enter a description of your company" />
+          </Form.Item>
+          <Form.Item
+            label="Profile Images"
+            name="images"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
+            rules={[{ required: true, message: "Please upload at least one image!" }]}
+          >
+            <Upload.Dragger
+              name="images"
+              multiple
+              beforeUpload={() => false} // Prevents automatic upload
+            >
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">Click or drag file to this area to upload</p>
+              <p className="ant-upload-hint">Upload company profile images.</p>
+            </Upload.Dragger>
+          </Form.Item>
 
-        {/* <div>
-          <label>Profile Image</label>
-          <input type="file" name="image" onChange={handleImageChange} />
-        </div> */}
+          {error && <p style={{ color: "red" }}>{error}</p>}
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-
-        <button type="submit">Submit</button>
-      </form>
+          <Button
+            type="primary"
+            htmlType="submit"
+            style={{
+              width: "100%",
+              backgroundColor: "#4CAF50",
+              borderColor: "#4CAF50",
+            }}
+          >
+            Submit
+          </Button>
+        </Form>
+      </Card>
     </div>
   );
 };
