@@ -43,6 +43,31 @@ We have used ESLint and Prettier styles.
 ![Advertiser profile](https://github.com/user-attachments/assets/8e866ed3-9746-4dbf-82c1-e5d28bec5304)
 ### **Tourist Profile**
 ![tourist profile](https://github.com/user-attachments/assets/f24000e6-1359-4045-90db-6a46174f851e)
+### **Tourist Notification**
+![toursit notification](https://github.com/user-attachments/assets/538f6439-ba62-48ef-98ca-283192de150a)
+### **Tourist Activity**
+![tourist activity](https://github.com/user-attachments/assets/4e50d7fe-8bd9-46db-816d-76b62d8f901d)
+### **Tourist Book**
+![tourist book](https://github.com/user-attachments/assets/9ae65642-8180-4824-a612-6ef0b80bab25)
+### **My booking**
+![my tourist booking](https://github.com/user-attachments/assets/5e408dd2-4d27-4164-84ec-a4cd3624ffe2)
+### **Product tourist**
+![Product tourist](https://github.com/user-attachments/assets/cd826772-9c71-41c6-bf2c-d8b64fa47a31)
+### **Tourist my cart**
+![tourist my cart](https://github.com/user-attachments/assets/a620ae45-edec-40bc-84cc-51541954d5d1)
+### **Wishlist tourist**
+![wishlist tourist](https://github.com/user-attachments/assets/453841be-8787-4ba5-af82-d3097f70d6d1)
+### **My order tourist**
+![my order tourist](https://github.com/user-attachments/assets/b081e705-2cd4-48b7-9d32-c2e3c56cbcbd)
+### **Tourist Complaints**
+![tourist complaints](https://github.com/user-attachments/assets/344c34c9-896c-415b-9759-a31ba888cf84)
+### **Admin taglist**
+![admin talgist](https://github.com/user-attachments/assets/c0064fdb-4981-4bf1-9d58-1796edd886fe)
+### **Admin Sales**
+![admin sales](https://github.com/user-attachments/assets/bea35f3a-79fc-452c-8bd4-5d4142cfd1b0)
+### **Itinerary tourguide**
+![itinerary tour guide](https://github.com/user-attachments/assets/ec4a9aed-f42d-4ef7-877b-41dc7aecec11)
+
 
 ## ⚒️ Tech and Framework used
 
@@ -1076,13 +1101,164 @@ npm start
       - `type`: `string`  
       - `period`: `string`  
     - **Response:** The created tag
+---
+### **Cart**
 
+  - **POST** `/addToCart/:id` - Adding to the cart  
+    - **Response:** New addition to the cart
+  - **POST** `removeFromCart/:id` - Removing from the cart  
+    - **Response:** The product is removed from the cart
+ - **POST** `/productQuantity/:id` - add product quantity  
+    - **Response:** The product quantity removed from the cart
+- **POST** `/addTouristAddress/:id` - add tourist address  
+    - **Response:** added tourist address
+  - **GET** `/cart/:id` - get cart
+      
+---
+### **Hotels**
+
+  - **POST** `/search-hotels` - Searching for hotels
+    - **Response:** The hotel looking for
+   - **POST** `/book-hotel/:touristId` - Booking hotels
+    - **Response:** Booking an hotel
+   - **GET** `/flight` - Get all flights
+   -  - **GET** `/hotel` - Get all hotels
+---
+### **Activity**
+
+  - **POST** `/book/:touristId/activity/:activityId` -book activity
+    - **Response:** booked activity
+   - **Delete** `/cancelActivity/:touristId/:activityId` -delete booking
+  ---
+  ### **Itinerary**
+
+  - **POST** `/book/:touristId/itinerary/:itineraryId` -book itineray
+    - **Response:** booked itinerary
+   - **Delete** `/cancelItinerary/:touristId/:itineraryId` -delete itinerary
+  ---
+   ### **Wallet**
+
+  - **POST** `/payByWallet/:touristId/:itemId` - pays by wallet
+    - **Response:** payed by wallet
+    -   **POST** `/payWalletAct/:touristId/:activityId` - pays activity by wallet
+        - **Response:**   payed by wallet
+    -   **POST** `/payWalletIti/:touristId/:iteniraryId` - pays activity by WalletIti
+        - **Response:**   payed by wallet
+    -   **POST** `/payWalletPro/:touristId` - pays activity by WalletPro
+        - **Response:**   payed by wallet
+        ---
+    ### **Card**
+      
+      - **POST** `/payCardAct/:touristId/:activityId` - pays activity by card
+        - **Response:** payed by card
+    -  - **POST** `/payCardIti/:touristId/:iteniraryId` - pays itinerary by card
+    - **Response:** payed by cardIti
+  - **POST** `/payCardPro/:touristId` - pays by CardPro
+    - **Response:** payed by cardPro
+    ---
+    ### **Transportation**
+      
+      - **POST** `/bookTransportation/:touristId/:transportationIdd` - book transportation
+        - **Response:** transportation booked
+      ---
+    ### **History**
+      
+      - **POST** `/paidUpcoming/:touristId` - pay upcoming
+         - **Response:** payed
+     - **POST** `/paidHistory/:touristId` - pay history
+         - **Response:** payed the history
+    ---
+    ### **Rate and Comment **
+      
+      - **POST** `/rateandcommentItinerary/:id` - rate and comment itinerary
+        - **Response:** rated and comment the itinerary
+    - **POST** `/rateandcommentactivity/:id` - rate and comment activity
+        - **Response:** rated and comment the activity
+    - **PUT** `/comment/:id` - update the comment
+        - **Response:** comment is updated
+    ---
+    ### **Tourist Prefrences **
+    - **PUT** `/tourist/preferences/:id` - update tourist preferences
+        - **Response:** the tourist prefrences updated
+     ---
+    ### **Points**
+      - **PUT** `/redeemMyPoints/:id"` - updates points
+        - **Response:** points updated
+     - **POST** `/addLoyaltyPoints/:id` -adds loaylty points
+        - **Response:** loyality points added
+   ---
+ ### *Sorting **
+ - **GET** `/sortactivities` - activity sorted
+ - **GET** `/SortItineraries` -sorted itineraries
+ - **GET** `/sortproductTourist` -sorted product
+---
+ ### *Search **
+ - **GET** `/searchplace` - search places
+ - **GET** `/searchactivity` - search activities
+ -  **GET** `/searchitinerary` - search itineraries
+ - **GET** `/searchProductTourist` - search product tourist
+---
+ ### *Products **
+ - **GET** `/purchased-products/:touristId` - purchase products
+ -  **GET** `/filterProduct` - filter product
+ - **GET** `/sortProducts` - sort products
+- **PUT** `/review/:productId` -reviews productId
+  - **PUT** `/editproduct/:id` -edits product
+   - **POST** `/createproduct` - create product
+        - **Response:** product created
+   ---
+ ### *Login **  
+  - **POST** `/loginTourist` - tourist login
+        - **Response:** tourist login
+  - **POST** `/loginAdv` - advertiser login
+        - **Response:** login advertiser
+  - **POST** `/loginTourGuide` - tourguide login
+        - **Response:** login tourguide
+    - **POST** `/loginSeller` - seller login
+        - **Response:** login seller
+    -  **POST** `/loginTourism` - tourism login
+        - **Response:** login tourism
+   -   **POST** `/loginAdmin` - admin login
+        - **Response:** login admin
+       
+     
 ## 🧪 Tests
 
 We use `Postman` to manually test all our api references to make sure we get the expected output.
 
 Here is an example:
 ![Tests](https://github.com/user-attachments/assets/259461f2-cef1-4619-bcac-ea88476375bb)
+### **Products**
+![products](https://github.com/user-attachments/assets/a09724cf-c3b5-4b0b-b678-075e1bde09ae)
+### *Activity**
+![activity](https://github.com/user-attachments/assets/b5091b28-8997-482d-8308-1bec278485d6)
+### **Update Tourist Profile**
+![update tourist profile](https://github.com/user-attachments/assets/f2c6a6d5-7405-49f4-a932-8429cfd3f474)
+### **Places**
+![places](https://github.com/user-attachments/assets/6849be34-8140-41f3-806f-19a1a969da4e)
+### **Pay by wallet**
+![pay by wallet](https://github.com/user-attachments/assets/f443b547-2142-4397-94fd-700580fde615)
+### **Add activity**
+![add activity](https://github.com/user-attachments/assets/c07a617c-43db-4eb7-a22b-3b061fcf90d5)
+### **Complaints**
+![complaints test](https://github.com/user-attachments/assets/f342cfbd-b612-4bc7-8377-8f2e7cba188d)
+### **Flag itinerary**
+![flag itinerary](https://github.com/user-attachments/assets/b4c863af-1cdf-4c3a-8184-efeec22f5ed0)
+### **Get orders**
+![get orders](https://github.com/user-attachments/assets/b12934c6-835b-4eaf-b9ba-df0a69d0dbc8)
+### **Create tourguide**
+![create tour guide](https://github.com/user-attachments/assets/08a52fb4-4092-47e6-96c0-61efbcc822f8)
+### **Sort products**
+![sort products](https://github.com/user-attachments/assets/4be0983f-6432-4fcd-9cb4-9bffd298dca0)
+### **Upcoming paid events**
+![upcoming paid events](https://github.com/user-attachments/assets/8f48e886-670a-4b2a-88f2-b0fb98115fcd)
+### **Add address tourist**
+![add address tourist](https://github.com/user-attachments/assets/01868efa-051c-4952-b96b-ec3e2e830516)
+### **Update Category**
+![update category](https://github.com/user-attachments/assets/7828d34f-8fc1-4cd0-987a-d160c2f530ed)
+### **Filter itineraries**
+![filter itineraries](https://github.com/user-attachments/assets/b29cf960-8df3-491e-80c4-1818532686de)
+
 We choose from the dropdown list whether(get) to retrieve date or (post) to add data or (put) to update data or (delete) to delete the data.
 You add you localhost:(Your Port)/your method name. 
 If id is needed you do this localhost:(Your Port)/your method name/id.
