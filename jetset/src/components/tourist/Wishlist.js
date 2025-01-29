@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Button, Spin, message } from "antd"; // Import Ant Design components
+import { notification, Table, Button } from "antd";
 
 const Wishlist = ({ touristId }) => {
   const [wishlist, setWishlist] = useState([]);
@@ -34,11 +34,17 @@ const Wishlist = ({ touristId }) => {
           data: { productID: productId },
         }
       );
-      message.success(response.data.message); // Display success message
+      notification.success({
+        message: "Success",
+        description: response.data.message,
+      });
       fetchWishlist(); // Refresh the wishlist after removal
     } catch (error) {
       console.error("Error removing product:", error);
-      message.error("Failed to remove from wishlist."); // Display error message
+      notification.error({
+        message: "Error",
+        description: "Failed to remove from wishlist.",
+      });
     }
   };
 
@@ -50,56 +56,50 @@ const Wishlist = ({ touristId }) => {
           item: productId,
         }
       );
-      message.success(response.data.message); // Display success message
+      notification.success({
+        message: "Success",
+        description: response.data.message,
+      });
     } catch (error) {
       console.error("Error adding item to cart:", error);
-      message.error(
-        error.response?.data?.error ||
-          "An error occurred while adding the item to the cart"
-      ); // Display error message
+      notification.error({
+        message: "Error",
+        description:
+          error.response?.data?.error ||
+          "An error occurred while adding the item to the cart",
+      });
     }
   };
 
   const columns = [
     {
       title: "Name",
-      dataIndex: "name",
+      dataIndex: ["productId", "name"],
       key: "name",
     },
     {
       title: "Price",
-      dataIndex: "price",
+      dataIndex: ["productId", "price"],
       key: "price",
     },
     {
       title: "Actions",
       key: "actions",
-      render: (_, record) => (
-        <div>
+      render: (text, record) => (
+        <>
           <Button
-            type="danger"
             onClick={() => handleRemoveFromWishlist(record.productId._id)}
-            style={{
-              backgroundColor: "#1d3557", // Custom background color
-              color: "white", // White text color for contrast
-              border: "none", // Remove default border
-              marginRight: 10,
-            }}
+            style={{ marginRight: "10px" }}
           >
             Remove
           </Button>
           <Button
             type="primary"
             onClick={() => handleAddToCart(record.productId._id)}
-            style={{
-              backgroundColor: "#1d3557", // Custom background color
-              color: "white", // White text color for contrast
-              border: "none", // Remove default border
-            }}
           >
-            Add to Cart
+            Add To Cart
           </Button>
-        </div>
+        </>
       ),
     },
   ];
@@ -107,20 +107,15 @@ const Wishlist = ({ touristId }) => {
   return (
     <div>
       <h1>Your Wishlist</h1>
-
       {loading ? (
-        <Spin tip="Loading Wishlist..." />
+        <p>Loading wishlist...</p>
       ) : error ? (
-        <message.error>{error}</message.error> // Use message component instead of Alert for errors
+        <p>{error}</p>
       ) : (
         <Table
+          dataSource={wishlist}
           columns={columns}
-          dataSource={wishlist.map((item) => ({
-            key: item.productId._id,
-            name: item.productId.name,
-            price: item.productId.price,
-            productId: item,
-          }))}
+          rowKey={(record) => record.productId._id}
           pagination={false}
         />
       )}

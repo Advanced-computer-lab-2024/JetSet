@@ -7,6 +7,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import PaidItemsView from "./PaidItemsView";
 
 const stripePromise = loadStripe(
   "pk_test_51QRqvnLaP0939m1yMtkhu1iljNRs7gNXmNvljQEXF0eIRBM1zfzukqyTYtVG78YIkdf8qe3K4sPMsTQlG0lV7rvj00Tqpogk3L"
@@ -37,8 +38,8 @@ const PaymentForm = ({
       // Determine the endpoint based on itemType
       const endpoint =
         itemType === "activity"
-          ? `/payCardAct/${touristId}/${item._id}`
-          : `/payCardIti/${touristId}/${item._id}`;
+          ? `http://localhost:3000/payCardAct/${touristId}/${item._id}`
+          : `http://localhost:3000/payCardIti/${touristId}/${item._id}`;
 
       const response = await axios.post(endpoint, {
         isApplied: promoCode ? true : false, // Adjust based on promo code presence
@@ -135,6 +136,11 @@ const BookedItems = ({ touristId }) => {
   const [cancelMessage, setCancelMessage] = useState(""); // Message for modal
   const [showStripeForm, setShowStripeForm] = useState(false);
   const [promoCode, setPromoCode] = useState(""); // State for storing promo code input
+  const [showHistory, setShowHistory] = useState(false);
+
+  const toggleHistory = () => {
+    setShowHistory(!showHistory);
+  };
 
   // Fetch conversion rate and currency info
   const fetchConversionRate = async () => {
@@ -158,20 +164,26 @@ const BookedItems = ({ touristId }) => {
   useEffect(() => {
     const fetchTouristData = async () => {
       try {
-        const response = await axios.get(`/getTourist/${touristId}`);
-        setWalletBalance(response.data.wallet);
-        setPayedItineraries(response.data.payedItineraries);
-        setPayedActivities(response.data.payedActivities);
+        const response = await axios.get(
+          `http://localhost:3000/getTourist/${touristId}`
+        );
+        setWalletBalance(response.data.tourist.wallet);
+        setPayedItineraries(response.data.tourist.payedItineraries);
+        setPayedActivities(response.data.tourist.payedActivities);
       } catch (error) {
         console.error("Error fetching tourist data:", error);
       }
     };
     const fetchBookedItems = async () => {
       try {
-        const itinerariesResponse = await axios.get(`/bookedIti/${touristId}`);
+        const itinerariesResponse = await axios.get(
+          `http://localhost:3000/bookedIti/${touristId}`
+        );
         setBookedItineraries(itinerariesResponse.data.bookedItineraries);
 
-        const activitiesResponse = await axios.get(`/bookedAct/${touristId}`);
+        const activitiesResponse = await axios.get(
+          `http://localhost:3000/bookedAct/${touristId}`
+        );
         setBookedActivities(activitiesResponse.data.bookedActivities);
       } catch (error) {
         setError("Error fetching booked items");
@@ -189,7 +201,7 @@ const BookedItems = ({ touristId }) => {
   const cancelItineraryBooking = async (itineraryId) => {
     try {
       const response = await axios.delete(
-        `/cancelItinerary/${touristId}/${itineraryId}`
+        `http://localhost:3000/cancelItinerary/${touristId}/${itineraryId}`
       );
       setBookedItineraries((prev) =>
         prev.filter((itinerary) => itinerary._id !== itineraryId)
@@ -213,7 +225,7 @@ const BookedItems = ({ touristId }) => {
   const cancelActivityBooking = async (activityId) => {
     try {
       const response = await axios.delete(
-        `/cancelActivity/${touristId}/${activityId}`
+        `http://localhost:3000/cancelActivity/${touristId}/${activityId}`
       );
       setBookedActivities((prev) =>
         prev.filter((activity) => activity._id !== activityId)
@@ -261,7 +273,7 @@ const BookedItems = ({ touristId }) => {
 
       if (itemType === "activity") {
         response = await axios.post(
-          `/payWalletAct/${touristId}/${currentItem._id}`,
+          `http://localhost:3000/payWalletAct/${touristId}/${currentItem._id}`,
           {
             isApplied: promoCode ? true : false, // Pass promo code status
             promoCode: promoCode || "", // Send promo code if exists
@@ -269,7 +281,7 @@ const BookedItems = ({ touristId }) => {
         );
       } else if (itemType === "itinerary") {
         response = await axios.post(
-          `/payWalletIti/${touristId}/${currentItem._id}`,
+          `http://localhost:3000/payWalletIti/${touristId}/${currentItem._id}`,
           {
             isApplied: promoCode ? true : false, // Pass promo code status
             promoCode: promoCode || "", // Send promo code if exists
@@ -288,6 +300,45 @@ const BookedItems = ({ touristId }) => {
 
   return (
     <div>
+      {/* History Button */}
+      <button
+        onClick={toggleHistory}
+        style={{
+          position: "absolute",
+          top: "50px", // Lowered the button
+          right: "10px",
+          backgroundColor: "#1d3557", // Updated color
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          padding: "10px 20px",
+          cursor: "pointer",
+        }}
+      >
+        {showHistory ? "Close History" : "View History"}
+      </button>
+
+      {/* Show PaidItemView */}
+      {showHistory && (
+        <div
+          style={{
+            position: "absolute",
+            top: "110px", // Lowered the container to match the button
+            right: "10px",
+            backgroundColor: "#fff",
+            boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
+            padding: "20px",
+            borderRadius: "5px",
+            zIndex: 10,
+            maxWidth: "400px",
+            overflowY: "auto",
+            maxHeight: "400px",
+          }}
+        >
+          <PaidItemsView touristId={touristId} />
+        </div>
+      )}
+
       <h2>Booked Itineraries</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <ul>

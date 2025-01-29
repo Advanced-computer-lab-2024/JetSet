@@ -12,6 +12,7 @@ import SetPreferredCurrency from "./SetPreferredCurrency";
 import AddAddress from "./AddAddress";
 import ChangePassword from "./ChangePasswordForm";
 import LoyaltyPointsForm from "./LoyaltyPoints";
+import ShareItem from "./ShareItem";
 
 const TouristProfile = () => {
   const { touristId } = useParams();
@@ -48,7 +49,7 @@ const TouristProfile = () => {
   const fetchConversionRate = async (currency) => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/tourist/${touristId}/preferredCurrency"
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
       );
       setSelectedCurrency(response.data.preferredCurrency);
       setConversionRate(response.data.conversionRate);
@@ -66,7 +67,7 @@ const TouristProfile = () => {
       if (touristId) {
         try {
           const response = await axios.get(
-            "http://localhost:3000/getTourist/${touristId}"
+            `http://localhost:3000/getTourist/${touristId}`
           );
           setTourist(response.data.tourist);
         } catch (error) {
@@ -76,7 +77,6 @@ const TouristProfile = () => {
               error.response?.data?.message || "Error fetching tourist profile",
           });
         } finally {
-
           setLoading(false);
         }
       }
@@ -92,7 +92,7 @@ const TouristProfile = () => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        "http://localhost:3000/updateTourist/${touristId}",
+        `http://localhost:3000/updateTourist/${touristId}`,
         updateFields
       );
       setTourist((prevTourist) => ({
@@ -134,7 +134,6 @@ const TouristProfile = () => {
             }}
             title={tourist?.username}
             extra={
-
               <div style={{ display: "flex", alignItems: "center" }}>
                 <Button
                   type="primary"
@@ -181,7 +180,6 @@ const TouristProfile = () => {
               <strong>Level:</strong> {tourist.level}
             </p>
           </Card>
-
 
           <Card
             title="Addresses"

@@ -178,6 +178,24 @@ const touristSchema = new Schema(
         },
       },
     ],
+    payedActivities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Activity",
+      },
+    ],
+    payedItineraries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Itinerary",
+      },
+    ],
+    payedProducts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
     resetOtp: { type: String },
   },
 

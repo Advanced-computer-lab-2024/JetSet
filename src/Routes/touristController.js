@@ -36,7 +36,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-cron.schedule("17 14 * * *", async () => {
+cron.schedule("41 15 * * *", async () => {
   try {
     const now = new Date();
 
@@ -273,7 +273,7 @@ const checkBirthdaysAndSendPromoCodes = async () => {
 };
 
 // Schedule the job to run daily at 9:15 AM
-cron.schedule("52 09 * * *", () => {
+cron.schedule("41 15 * * *", () => {
   checkBirthdaysAndSendPromoCodes();
 });
 const createTourist = async (req, res) => {
