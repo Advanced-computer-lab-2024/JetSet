@@ -273,7 +273,7 @@ const checkBirthdaysAndSendPromoCodes = async () => {
 };
 
 // Schedule the job to run daily at 9:15 AM
-cron.schedule("41 15 * * *", () => {
+cron.schedule("16 03 * * *", () => {
   checkBirthdaysAndSendPromoCodes();
 });
 const createTourist = async (req, res) => {

@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import ActivityList from "./Activity/ActivitiesList";
-import ItineraryList from "./Itinerary/ItineraryTourist";
+import React, { useState } from "react";
 import HistoricalPlaces from "./Place/HistoricalPlacesList";
 import Search from "./tourist/SearchComponent.js";
 import ActivityByCategory from "./Activity/ActivitiesByCategory.js";
@@ -12,6 +9,14 @@ import ItineraryListGuest from "./Itinerary/ItineraryListGuest.js";
 
 const Guest = () => {
   const [currentPage, setCurrentPage] = useState("home"); // Initial page
+  const guestActions = [
+    ["activityList", "View Activities"],
+    ["itineraryList", "View Itineraries"],
+    ["historicalPlaces", "View Historical Places"],
+    ["search", "Search"],
+    ["activitiesByCategory", "Filter Activities by Category"],
+    ["vacationguestguide", "View Guest Vacation Guide"],
+  ];
 
   const renderPage = () => {
     switch (currentPage) {
@@ -29,31 +34,20 @@ const Guest = () => {
         return <VacationGuestGuide />;
       default:
         return (
-          <div>
-            <button onClick={() => setCurrentPage("activityList")}>
-              View Activities
-            </button>
-            <button onClick={() => setCurrentPage("itineraryList")}>
-              View Itineraries
-            </button>
-            <button onClick={() => setCurrentPage("historicalPlaces")}>
-              View Historical Places
-            </button>
-            <button onClick={() => setCurrentPage("search")}>Search</button>
-            <button onClick={() => setCurrentPage("activitiesByCategory")}>
-              Filter Activities by Category
-            </button>
-            <button onClick={() => setCurrentPage("vacationguestguide")}>
-              View Guest Vacation Guide
-            </button>
+          <div className="button-grid">
+            {guestActions.map(([page, label]) => (
+              <button key={page} type="button" onClick={() => setCurrentPage(page)}>
+                {label}
+              </button>
+            ))}
           </div>
         );
     }
   };
   return (
-    <div className="App">
+    <main className="App" aria-live="polite">
       {renderPage()} {/* Render the current page */}
-    </div>
+    </main>
   );
 };
 

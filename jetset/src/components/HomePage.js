@@ -1,37 +1,27 @@
 import React from "react";
 import Guest from "./Guest";
 import Navbar from "./Navbar";
+import logo from "./images/logo.jpg";
 
 const Home = () => {
   return (
-    <div style={styles.container}>
-
+    <div className="page-shell">
       <Navbar />
-
-      <h2 style={styles.title}>Welcome to Jetset</h2>
-      <p style={styles.subHeading}>Your adventure starts here!</p>
+      <section className="hero">
+        <div>
+          <h1 className="hero-title">Plan the trip, keep the spark.</h1>
+          <p className="hero-copy">
+            Explore activities, itineraries, cultural places, and travel
+            services from one clean dashboard.
+          </p>
+        </div>
+        <div className="hero-panel" aria-hidden="true">
+          <img src={logo} alt="" />
+        </div>
+      </section>
       <Guest />
     </div>
   );
-};
-
-const styles = {
-  container: {
-    textAlign: "center",
-    marginTop: "50px",
-  },
-  title: {
-    fontSize: "4rem", // Adjust this value for a larger title
-    fontWeight: "bold", // Optional: Make it bold
-    color: "#1d3557", // Optional: Change text color
-    marginBottom: "20px", // Optional: Add spacing below the title
-  },
-  subHeading: {
-    fontSize: "2rem", // Adjust this value for larger font size
-    fontWeight: "bold", // Optional: Make it bold
-    color: "#1d3557", // Optional: Change text color
-    marginTop: "10px", // Optional: Add spacing above
-  },
 };
 
 export default Home;
