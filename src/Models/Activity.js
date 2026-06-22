@@ -59,7 +59,7 @@ const activitySchema = new Schema(
 
     booking_open: {
       type: Boolean,
-      //default: true,
+      default: false,
     },
 
     rating: {
