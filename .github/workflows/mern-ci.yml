@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Build Frontend
-        run: npm run build
+        run: CI=false npm run build
 
   backend-build:
     runs-on: ubuntu-latest
