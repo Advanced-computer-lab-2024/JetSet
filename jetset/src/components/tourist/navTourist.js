@@ -26,7 +26,7 @@ const NavTourist = ({ touristId, username }) => {
       const fetchData = async () => {
         try {
           const notifications = await axios.get(
-            `http://localhost:3000/unread?recipient=${username}&role=Tourist`
+            `http://localhost:3000/unread?recipient=${username}&role=Tourist`,
           );
           setUnreadCount(notifications.data.unreadCount);
         } catch (err) {

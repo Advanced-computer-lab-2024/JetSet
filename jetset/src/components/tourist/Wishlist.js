@@ -15,7 +15,7 @@ const Wishlist = ({ touristId }) => {
   const fetchWishlist = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/Wishlist/${touristId}`
+        `http://localhost:3000/Wishlist/${touristId}`,
       );
       setWishlist(response.data.wishlist);
       setLoading(false);
@@ -32,7 +32,7 @@ const Wishlist = ({ touristId }) => {
         `http://localhost:3000/Wishlist/${touristId}`,
         {
           data: { productID: productId },
-        }
+        },
       );
       notification.success({
         message: "Success",
@@ -54,7 +54,7 @@ const Wishlist = ({ touristId }) => {
         `http://localhost:3000/addToCart/${touristId}`,
         {
           item: productId,
-        }
+        },
       );
       notification.success({
         message: "Success",
