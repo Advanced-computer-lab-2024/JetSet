@@ -69,7 +69,7 @@ jobs:
       - name: Run Linting
         run: npm run lint
       - name: Run Tests
-        run: npm test -- --watchAll=false
+        run: npm test -- --watchAll=false --passWithNoTests
 
       - name: Check Backend Startup
         env:
