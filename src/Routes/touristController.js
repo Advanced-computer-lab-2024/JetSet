@@ -2769,7 +2769,7 @@ const payByCardIti = async (req, res) => {
       return res.status(404).json({ message: "Itinerary not found" });
     }
 
-    const amount = itinerary.budget * 100; // Convert to cents for Stripe
+    let amount = itinerary.budget * 100; // Convert to cents for Stripe
 
     if (isApplied) {
       const promo = await PromoCode.findOne({ code: promoCode });
