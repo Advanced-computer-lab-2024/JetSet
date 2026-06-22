@@ -71,8 +71,8 @@ cron.schedule("41 15 * * *", async () => {
         reminders.push(
           `<li><strong>Activity:</strong> ${
             activity.title
-          } on ${activity.date.toDateString()}</li>`
-        )
+          } on ${activity.date.toDateString()}</li>`,
+        ),
       );
 
       // Add itineraries
@@ -87,7 +87,7 @@ cron.schedule("41 15 * * *", async () => {
         reminders.push(
           `<li><strong>Itinerary:</strong> ${
             itinerary.name
-          } on ${availabilityStrings.join(", ")}</li>`
+          } on ${availabilityStrings.join(", ")}</li>`,
         );
       });
 
@@ -98,8 +98,8 @@ cron.schedule("41 15 * * *", async () => {
             transport.pickup_location
           } to ${
             transport.dropoff_location
-          } on ${transport.availability.toDateString()}</li>`
-        )
+          } on ${transport.availability.toDateString()}</li>`,
+        ),
       );
 
       // Fetch Hotel Bookings
@@ -111,8 +111,8 @@ cron.schedule("41 15 * * *", async () => {
         reminders.push(
           `<li><strong>Hotel:</strong> ${
             hotel.destinationCode
-          } from ${hotel.checkIn.toDateString()} to ${hotel.checkOut.toDateString()}</li>`
-        )
+          } from ${hotel.checkIn.toDateString()} to ${hotel.checkOut.toDateString()}</li>`,
+        ),
       );
 
       // Fetch Flight Bookings
@@ -124,8 +124,8 @@ cron.schedule("41 15 * * *", async () => {
         reminders.push(
           `<li><strong>Flight:</strong> From ${flight.origin} to ${
             flight.destination
-          } on ${flight.departureDate.toDateString()}</li>`
-        )
+          } on ${flight.departureDate.toDateString()}</li>`,
+        ),
       );
 
       // Send Email if reminders exist
@@ -265,7 +265,7 @@ const checkBirthdaysAndSendPromoCodes = async () => {
     }
 
     console.log(
-      `Promo codes and notifications sent to ${tourists.length} tourists today.`
+      `Promo codes and notifications sent to ${tourists.length} tourists today.`,
     );
   } catch (error) {
     console.error("Error checking birthdays:", error);
@@ -336,7 +336,7 @@ const updateTouristProfile = async (req, res) => {
           wallet: wallet, // Keep existing wallet
         },
       },
-      { new: true, runValidators: true } // Validate during update
+      { new: true, runValidators: true }, // Validate during update
     );
 
     tourist.level = determineLevel(tourist.loyaltyPoints);
@@ -404,7 +404,7 @@ const sortProductsTourist = async (req, res) => {
 
     // Find and sort the products that are not archived
     const sortedProducts = await Product.find({ archive: false }).sort(
-      sortOption
+      sortOption,
     );
 
     // Return the sorted products
@@ -458,7 +458,7 @@ const SortItineraries = async (req, res) => {
       sortOption[sortBy] = validSortOrder; // Assign the correct sorting value
     }
     const upcomingItineraries = await Itinerary.find({ flag: false }).sort(
-      sortOption
+      sortOption,
     );
 
     res.status(200).json(upcomingItineraries);
@@ -858,9 +858,8 @@ const getPurchasedProducts = async (req, res) => {
 const getBookedItinerary = async (req, res) => {
   const { touristId } = req.params; // Correctly accessing touristId from req.params
   try {
-    const tourist = await Tourist.findById(touristId).populate(
-      "bookedItineraries"
-    );
+    const tourist =
+      await Tourist.findById(touristId).populate("bookedItineraries");
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found." });
     }
@@ -874,9 +873,8 @@ const getBookedItinerary = async (req, res) => {
 const getBookedActivities = async (req, res) => {
   const { touristId } = req.params; // Correctly accessing touristId from req.params
   try {
-    const tourist = await Tourist.findById(touristId).populate(
-      "bookedActivities"
-    );
+    const tourist =
+      await Tourist.findById(touristId).populate("bookedActivities");
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found." });
     }
@@ -923,7 +921,7 @@ const rateandcommentItinerary = async (req, res) => {
 
     // Check if the tourist has already rated this itinerary
     const existingRating = itinerary.ratings.find(
-      (r) => r.touristId.toString() === touristId
+      (r) => r.touristId.toString() === touristId,
     );
     if (existingRating) {
       return res
@@ -939,7 +937,7 @@ const rateandcommentItinerary = async (req, res) => {
     const totalRatings = itinerary.ratings.length;
     const sumOfRatings = itinerary.ratings.reduce(
       (sum, r) => sum + r.rating,
-      0
+      0,
     );
     itinerary.rating = sumOfRatings / totalRatings;
 
@@ -1069,7 +1067,7 @@ const addRatingAndComment = async (req, res) => {
 
     // Check for existing rating
     const existingRatingIndex = tourGuide.ratings.findIndex((r) =>
-      r.touristId.equals(touristId)
+      r.touristId.equals(touristId),
     );
 
     if (existingRatingIndex !== -1) {
@@ -1100,7 +1098,7 @@ const updateTouristPreferences = async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       req.params.id,
       { $set: { preferences } },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedTourist) {
@@ -1392,13 +1390,13 @@ const cancelActivityBooking = async (req, res) => {
 
       // Remove the activity ID from payedActivities
       tourist.payedActivities = tourist.payedActivities.filter(
-        (id) => id.toString() !== activityId
+        (id) => id.toString() !== activityId,
       );
     }
 
     // Remove the activity ID from tourist's bookedActivities
     tourist.bookedActivities = tourist.bookedActivities.filter(
-      (id) => id.toString() !== activityId
+      (id) => id.toString() !== activityId,
     );
 
     // Save updates
@@ -1448,13 +1446,13 @@ const cancelItineraryBooking = async (req, res) => {
 
       // Remove the activity ID from payedActivities
       tourist.payedItineraries = tourist.payedItineraries.filter(
-        (id) => id.toString() !== itineraryId
+        (id) => id.toString() !== itineraryId,
       );
     }
 
     // Remove the itinerary ID from tourist's bookedItineraries
     tourist.bookedItineraries = tourist.bookedItineraries.filter(
-      (id) => id.toString() !== itineraryId
+      (id) => id.toString() !== itineraryId,
     );
 
     await tourist.save();
@@ -1500,7 +1498,7 @@ const bookTransportation = async (req, res) => {
 
     const loyaltyUpdate = await addLoyaltyPoints(
       transportation.price,
-      touristId
+      touristId,
     );
 
     res.status(200).json({
@@ -1581,9 +1579,8 @@ const buyProduct = async (req, res) => {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    const product = await Product.findById(productId).populate(
-      "admin_id seller_id"
-    );
+    const product =
+      await Product.findById(productId).populate("admin_id seller_id");
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -1603,7 +1600,7 @@ const buyProduct = async (req, res) => {
     await product.save();
 
     const existingProduct = tourist.products.find(
-      (item) => item.productId.toString() === productId
+      (item) => item.productId.toString() === productId,
     );
 
     if (existingProduct) {
@@ -1722,7 +1719,7 @@ const setPreferredCurrency = async (req, res) => {
     const tourist = await Tourist.findByIdAndUpdate(
       touristId,
       { preferredCurrency: currency }, // Set the preferred currency
-      { new: true } // Return the updated document
+      { new: true }, // Return the updated document
     );
 
     if (!tourist) {
@@ -1788,7 +1785,7 @@ const searchFlights = async (req, res) => {
           adults: adults,
           maxPrice: 500, // Optional
         },
-      }
+      },
     );
 
     res.json(response.data);
@@ -1951,7 +1948,7 @@ const searchHotels = async (req, res) => {
   } catch (error) {
     console.error(
       "Error from Hotelbeds API:",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     res
       .status(error.response?.status || 500)
@@ -2083,7 +2080,7 @@ const removeFromCart = async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
       { $pull: { cart: item } }, // Remove the item from the cart array
-      { new: true } // Return the updated document after modification
+      { new: true }, // Return the updated document after modification
     );
 
     if (!updatedTourist) {
@@ -2092,7 +2089,7 @@ const removeFromCart = async (req, res) => {
     const updatedTourist2 = await Tourist.findByIdAndUpdate(
       touristId,
       { $pull: { cartQuantities: item } }, // Remove the item from the cart array
-      { new: true } // Return the updated document after modification
+      { new: true }, // Return the updated document after modification
     );
 
     if (!updatedTourist2) {
@@ -2141,7 +2138,7 @@ const getProductQuantity = async (req, res) => {
 
     // Find the product in the tourist's cart using the productId
     const product = tourist.products.find(
-      (item) => item.productId._id.toString() === productId
+      (item) => item.productId._id.toString() === productId,
     );
 
     if (!product) {
@@ -2173,7 +2170,7 @@ const addToCart = async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
       { $push: { cart: item } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedTourist) {
@@ -2315,7 +2312,7 @@ async function unbookmarkActivity(touristId, activityId) {
 
     // Remove the activity ID from the bookmarkedActivities array
     tourist.bookmarkedActivities = tourist.bookmarkedActivities.filter(
-      (id) => id.toString() !== activityId.toString()
+      (id) => id.toString() !== activityId.toString(),
     );
 
     // Save the tourist document
@@ -2387,7 +2384,7 @@ async function unbookmarkItinerary(touristId, itineraryId) {
 
     // Remove the itinerary ID from the bookmarkedIteniraries array
     tourist.bookmarkedIteniraries = tourist.bookmarkedIteniraries.filter(
-      (id) => id.toString() !== itineraryId.toString()
+      (id) => id.toString() !== itineraryId.toString(),
     );
 
     // Save the tourist document
@@ -2422,7 +2419,7 @@ const addToWishlist = async (req, res) => {
 
     // Check if the product is already in the wishlist
     const productExists = tourist.wishlist.some(
-      (item) => item.productId.toString() === productID
+      (item) => item.productId.toString() === productID,
     );
 
     if (productExists) {
@@ -2445,9 +2442,8 @@ const viewMyWishlist = async (req, res) => {
   const { touristID } = req.params;
 
   try {
-    const tourist = await Tourist.findById(touristID).populate(
-      "wishlist.productId"
-    );
+    const tourist =
+      await Tourist.findById(touristID).populate("wishlist.productId");
 
     if (!tourist) {
       return res.status(404).json({ error: "Tourist not found" });
@@ -2470,7 +2466,7 @@ const removeFromMyWishlist = async (req, res) => {
     }
 
     tourist.wishlist = tourist.wishlist.filter(
-      (item) => item.productId.toString() !== productID
+      (item) => item.productId.toString() !== productID,
     );
 
     await tourist.save();
@@ -2594,7 +2590,7 @@ const payByWalletAct = async (req, res) => {
       amount -= (promo.discount / 100) * amount;
 
       tourist.promoCodes = tourist.promoCodes.filter(
-        (assignedPromo) => !assignedPromo.equals(promo._id)
+        (assignedPromo) => !assignedPromo.equals(promo._id),
       );
 
       await tourist.save(); // Persist changes
@@ -2672,7 +2668,7 @@ const payByCardAct = async (req, res) => {
       return res.status(404).json({ message: "Activity not found" });
     }
 
-    const amount = activity.budget * 100; // Convert to cents for Stripe
+    let amount = activity.budget * 100; // Convert to cents for Stripe
 
     if (isApplied) {
       const promo = await PromoCode.findOne({ code: promoCode });
@@ -2691,7 +2687,7 @@ const payByCardAct = async (req, res) => {
       amount -= (promo.discount / 100) * amount;
 
       tourist.promoCodes = tourist.promoCodes.filter(
-        (assignedPromo) => !assignedPromo.equals(promo._id)
+        (assignedPromo) => !assignedPromo.equals(promo._id),
       );
 
       await tourist.save(); // Persist changes
@@ -2792,7 +2788,7 @@ const payByCardIti = async (req, res) => {
       amount -= (promo.discount / 100) * amount;
 
       tourist.promoCodes = tourist.promoCodes.filter(
-        (assignedPromo) => !assignedPromo.equals(promo._id)
+        (assignedPromo) => !assignedPromo.equals(promo._id),
       );
 
       await tourist.save(); // Persist changes
@@ -2894,7 +2890,7 @@ const payByWalletIti = async (req, res) => {
       amount -= (promo.discount / 100) * amount;
 
       tourist.promoCodes = tourist.promoCodes.filter(
-        (assignedPromo) => !assignedPromo.equals(promo._id)
+        (assignedPromo) => !assignedPromo.equals(promo._id),
       );
 
       await tourist.save(); // Persist changes
@@ -3021,7 +3017,7 @@ const payByWalletProduct = async (req, res) => {
 
       // Remove the promo code from the tourist's list
       tourist.promoCodes = tourist.promoCodes.filter(
-        (assignedPromo) => !assignedPromo.equals(promo._id)
+        (assignedPromo) => !assignedPromo.equals(promo._id),
       );
 
       await tourist.save(); // Persist changes
@@ -3093,7 +3089,7 @@ const payByWalletProduct = async (req, res) => {
           ${updatedProducts
             .map(
               ({ product, quantity }) =>
-                `<li>${product.name} (Quantity: ${quantity})</li>`
+                `<li>${product.name} (Quantity: ${quantity})</li>`,
             )
             .join("")}
         </ul>
@@ -3179,7 +3175,7 @@ const payCashOnDelivery = async (req, res) => {
 
       // Remove the promo code from the tourist's list
       tourist.promoCodes = tourist.promoCodes.filter(
-        (assignedPromo) => !assignedPromo.equals(promo._id)
+        (assignedPromo) => !assignedPromo.equals(promo._id),
       );
 
       await tourist.save(); // Persist changes
@@ -3251,7 +3247,7 @@ const payCashOnDelivery = async (req, res) => {
           ${updatedProducts
             .map(
               ({ product, quantity }) =>
-                `<li>${product.name} (Quantity: ${quantity})</li>`
+                `<li>${product.name} (Quantity: ${quantity})</li>`,
             )
             .join("")}
         </ul>
@@ -3352,7 +3348,7 @@ const payByCardPro = async (req, res) => {
 
       // Remove the promo code from the tourist's list
       tourist.promoCodes = tourist.promoCodes.filter(
-        (assignedPromo) => !assignedPromo.equals(promo._id)
+        (assignedPromo) => !assignedPromo.equals(promo._id),
       );
 
       await tourist.save(); // Persist changes
@@ -3388,7 +3384,7 @@ const payByCardPro = async (req, res) => {
           ${updatedProducts
             .map(
               ({ product, quantity }) =>
-                `<li>${product.name} (Quantity: ${quantity})</li>`
+                `<li>${product.name} (Quantity: ${quantity})</li>`,
             )
             .join("")}
         </ul>
@@ -3447,7 +3443,7 @@ const filterItinerariesByDate = (itineraries, isUpcoming) => {
   const now = new Date();
   return itineraries.filter((itinerary) => {
     const hasValidDates = itinerary.availability_dates.some((date) =>
-      isUpcoming ? new Date(date) > now : new Date(date) <= now
+      isUpcoming ? new Date(date) > now : new Date(date) <= now,
     );
     return hasValidDates;
   });
@@ -3456,7 +3452,7 @@ const filterItinerariesAllPastDates = (itineraries) => {
   const now = new Date();
   return itineraries.filter((itinerary) => {
     const allPastDates = itinerary.availability_dates.every(
-      (date) => new Date(date) < now
+      (date) => new Date(date) < now,
     );
     return allPastDates;
   });
@@ -3477,7 +3473,7 @@ const paidUpcoming = async (req, res) => {
     const upcomingActivities = filterByDate(tourist.payedActivities, true);
     const upcomingItineraries = filterItinerariesByDate(
       tourist.payedItineraries,
-      true
+      true,
     );
 
     res.status(200).json({
@@ -3504,7 +3500,7 @@ const paidHistory = async (req, res) => {
     const historyActivities = filterByDate(tourist.payedActivities, false);
     const historyItineraries = filterItinerariesAllPastDates(
       tourist.payedItineraries,
-      false
+      false,
     );
 
     res.status(200).json({
@@ -3551,7 +3547,7 @@ const viewOrderDetails = async (req, res) => {
   try {
     // Step 1: Find the tourist by ID
     const tourist = await Tourist.findById(touristId).populate(
-      "products bookedActivities bookedItineraries"
+      "products bookedActivities bookedItineraries",
     );
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found." });
@@ -3559,7 +3555,7 @@ const viewOrderDetails = async (req, res) => {
 
     // Step 2: Check for the order in purchased products
     const purchasedProduct = tourist.products.find(
-      (product) => product._id.toString() === orderId
+      (product) => product._id.toString() === orderId,
     );
     if (purchasedProduct) {
       return res.status(200).json({
@@ -3570,7 +3566,7 @@ const viewOrderDetails = async (req, res) => {
 
     // Step 3: Check for the order in booked activities
     const bookedActivity = tourist.bookedActivities.find(
-      (activity) => activity._id.toString() === orderId
+      (activity) => activity._id.toString() === orderId,
     );
     if (bookedActivity) {
       return res.status(200).json({
@@ -3581,7 +3577,7 @@ const viewOrderDetails = async (req, res) => {
 
     // Step 4: Check for the order in booked itineraries
     const bookedItinerary = tourist.bookedItineraries.find(
-      (itinerary) => itinerary._id.toString() === orderId
+      (itinerary) => itinerary._id.toString() === orderId,
     );
     if (bookedItinerary) {
       return res.status(200).json({
@@ -3633,7 +3629,7 @@ const cancelOrder = async (req, res) => {
       order.products.map(async (item) => {
         const product = await Product.findById(item.productId).select("price");
         return product ? product.price * item.quantity : 0;
-      })
+      }),
     );
 
     const refundAmount = products.reduce((total, price) => total + price, 0);
@@ -3686,7 +3682,7 @@ const viewRefundAmount = async (req, res) => {
 
     // Check if the order is a purchased product
     const purchasedProduct = tourist.products.find(
-      (product) => product._id.toString() === orderId
+      (product) => product._id.toString() === orderId,
     );
     if (purchasedProduct) {
       // Make sure the product has a valid price
@@ -3753,7 +3749,7 @@ const addTouristAddress = async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
       { $push: { addresses: { $each: addresses } } },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedTourist) {
@@ -3836,7 +3832,7 @@ const getActivitiesBasedOnPreferences = async (req, res) => {
 
     // Filter activities by budget
     const filteredActivities = activities.filter(
-      (activity) => activity.budget <= maxBudget
+      (activity) => activity.budget <= maxBudget,
     );
 
     // Return the filtered activities

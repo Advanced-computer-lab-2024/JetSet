@@ -62,7 +62,6 @@ const activitySchema = new Schema(
       //default: true,
     },
 
-    budget: Number,
     rating: {
       type: Number,
       min: 0,
@@ -89,7 +88,7 @@ const activitySchema = new Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Activity = mongoose.model("Activity", activitySchema);
