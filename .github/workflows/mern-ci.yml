@@ -15,7 +15,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: jetset
+        working-directory: jetset/src
 
     steps:
       - name: Checkout Code
