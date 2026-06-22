@@ -13,7 +13,7 @@ export default [
     rules: {
       "no-unused-vars": "warn",
       "no-undef": "warn",
-      " Irregular whitespace not allowed (no-irregular-whitespace) ": "error",
+      "no-irregular-whitespace": "warn",
     },
   },
 ];
