@@ -53,7 +53,9 @@
   "proxy": "http://localhost:3000",
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@eslint/js": "^9.39.4",
     "eslint": "^8.57.1",
-    "eslint-config-react-app": "^7.0.1"
+    "eslint-config-react-app": "^7.0.1",
+    "globals": "^17.6.0"
   }
 }
