@@ -17,6 +17,8 @@ jobs:
           cache-dependency-path: jetset/package-lock.json
       - name: Build Frontend
         working-directory: jetset
+        env:
+          REACT_APP_ENV: ${{ secrets.React_APP_ENV }}
         run: |
           npm ci
           CI=false npm run build
@@ -47,77 +49,80 @@ jobs:
             !src/node_modules/**
             !src/.env
 
-  deploy:
+  deploy-backend:
     runs-on: ubuntu-latest
     needs: [build-frontend, build-backend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - name: Download Frontend
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: dist/frontend
-
-      - name: Download Backend
+      - name: Download backend artifact
         uses: actions/download-artifact@v4
         with:
           name: backend-build
-          path: dist/backend
+          path: ./backend-build
 
-      - name: Prepare directories on VM
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_KEY }}
-          script: |
-            sudo mkdir -p /var/www/JetSet/frontend
-            sudo mkdir -p /var/www/JetSet/backend
-            sudo chown -R $USER:$USER /var/www/JetSet
-
-      - name: Deploy Frontend to VM
+      - name: SCP backend to VM
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_KEY }}
-          source: "dist/frontend/*"
-          target: "/var/www/JetSet/frontend"
-          strip_components: 2 # removes dist/frontend/ prefix
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "backend-build/"
+          target: "/tmp/"
 
-      - name: Deploy Backend to VM
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_KEY }}
-          source: "dist/backend/*"
-          target: "/var/www/JetSet/backend"
-          strip_components: 2
-
-      - name: Write .env to VM
+      - name: Start backend on VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_KEY }}
+          key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            cat > /var/www/JetSet/backend/.env << 'EOF'
+            mkdir -p /var/www/api
+            rsync -a --delete /tmp/backend-build/ /var/www/api/
+            cd /var/www/api
+            npm install --production --legacy-peer-deps
+
+            cat > /var/www/api/.env << 'ENVEOF'
+            NODE_ENV=production
+            PORT=3000
             MONGO_URI=${{ secrets.MONGO_URI }}
-            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
             AMADEUS_API_KEY=${{ secrets.AMADEUS_API_KEY }}
             AMADEUS_API_SECRET=${{ secrets.AMADEUS_API_SECRET }}
-            EMAIL_USER=${{ secrets.EMAIL_USER }}
-            EMAIL_PASS=${{ secrets.EMAIL_PASS }}
             HOTELBEDS_API_KEY=${{ secrets.HOTELBEDS_API_KEY }}
             HOTELBEDS_SECRET=${{ secrets.HOTELBEDS_SECRET }}
-            EOF
+            EMAIL_USER=${{ secrets.EMAIL_USER }}
+            EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            ENVEOF
 
-      - name: Restart Services
+            pm2 restart api || pm2 start index.js --name api --cwd /var/www/api
+            pm2 save
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: [build-frontend, deploy-backend] # ← waits for backend to be live
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: ./frontend-build
+
+      - name: SCP frontend to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "frontend-build/"
+          target: "/tmp/"
+
+      - name: Deploy frontend files
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_KEY }}
+          key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            pm2 restart backend || pm2 start /var/www/JetSet/backend/App.js --name backend
-            sudo systemctl reload nginx
+            sudo rm -rf /var/www/app/*
+            sudo cp -r /tmp/frontend-build/. /var/www/app/
