@@ -105,7 +105,7 @@ jobs:
             STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
             ENVEOF
 
-            pm2 restart api || pm2 start index.js --name api --cwd /var/www/backend
+            pm2 restart api || pm2 start App.js --name api --cwd /var/www/backend
             pm2 save
 
   deploy-frontend:
