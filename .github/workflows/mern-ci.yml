@@ -94,6 +94,24 @@ jobs:
           target: "/var/www/JetSet/backend"
           strip_components: 2
 
+      - name: Write .env to VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_KEY }}
+          script: |
+            cat > /var/www/JetSet/backend/.env << 'EOF'
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            AMADEUS_API_KEY=${{ secrets.AMADEUS_API_KEY }}
+            AMADEUS_API_SECRET=${{ secrets.AMADEUS_API_SECRET }}
+            EMAIL_USER=${{ secrets.EMAIL_USER }}
+            EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+            HOTELBEDS_API_KEY=${{ secrets.HOTELBEDS_API_KEY }}
+            HOTELBEDS_SECRET=${{ secrets.HOTELBEDS_SECRET }}
+            EOF
+
       - name: Restart Services
         uses: appleboy/ssh-action@v1.0.3
         with:
