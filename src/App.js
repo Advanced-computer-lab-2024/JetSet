@@ -245,6 +245,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Server is running.");
@@ -432,7 +433,6 @@ app.get("/complaints/:touristId", viewMyComplaints);
 app.get("/viewAllComplaints", viewAllComplaints);
 // const response = await axios.get('http://localhost:3000/viewAllComplaints');
 
-app.use(express.json());
 app.post("/addItinerary", createItinerary);
 app.get("/Itineraries", getItineraries);
 app.put("/updateItinerary/:id", updateItinerary);
@@ -441,7 +441,6 @@ app.get("/listofiternaries/:id", viewCreatedItineraries);
 app.post("/activateItinerary/:id", activateItinerary);
 app.post("/deactivateItinerary/:id", deactivateItinerary);
 
-app.use(express.json());
 app.post("/addPreferancetag", createPrefTag);
 app.get("/getPreferancetag", getPrefTag);
 app.put("/updateTags", updatePrefTag);
