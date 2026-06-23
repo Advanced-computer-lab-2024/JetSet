@@ -311,7 +311,7 @@ const {
   unbookmarkActivity,
   bookmarkItinerary,
   unbookmarkItinerary,
-} = require("../Routes/touristController"); // Adjust this path
+} = require("./Routes/touristController"); // Adjust this path
 app.post("/api/bookmarkActivity", async (req, res) => {
   const { touristId, activityId } = req.body;
 
