@@ -58,14 +58,31 @@ jobs:
           name: full-app
           path: dist
 
-      - name: Deploy to VM via SSH
-        uses: ppleboy/scp-action@v0.1.7
+      - name: Deploy to VM
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           source: "dist/*"
           target: "/var/www/JetSet"
+
+      - name: Restart services on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_KEY }}
+          script: |
+            echo "Installing backend dependencies..."
+            cd /var/www/JetSet/backend
+            npm install
+
+            echo "Restarting backend..."
+            pm2 restart all || pm2 start App.js --name backend
+
+            echo "Reloading Nginx..."
+            sudo systemctl reload nginx
 
   # frontend-build:
   #   runs-on: ubuntu-latest
