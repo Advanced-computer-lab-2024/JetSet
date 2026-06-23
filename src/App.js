@@ -311,7 +311,7 @@ const {
   unbookmarkActivity,
   bookmarkItinerary,
   unbookmarkItinerary,
-} = require("../src/Routes/touristController"); // Adjust this path
+} = require("../Routes/touristController"); // Adjust this path
 app.post("/api/bookmarkActivity", async (req, res) => {
   const { touristId, activityId } = req.body;
 
@@ -524,8 +524,8 @@ app.get("/purchased-products/:touristId", getPurchasedProducts);
 app.get("/itiTour", getItineraryTourist);
 app.get("/Acttour", getActivityTourist);
 
-const Tourist = require("../src/Models/Tourist");
-const Product = require("../src/Models/Product");
+const Tourist = require("../Models/Tourist");
+const Product = require("../Models/Product");
 
 app.put("/buyProduct/:touristId", buyProduct);
 
@@ -681,7 +681,7 @@ app.get("/tourist/:id/preferredCurrency", async (req, res) => {
 app.post("/checkout/:touristId", checkout);
 
 // Import necessary modules and models
-const Admin = require("../src/Models/Admin.js"); // Replace with your Admin model's path
+const Admin = require("../Models/Admin.js"); // Replace with your Admin model's path
 
 app.delete("/deleteAdmin/:id", async (req, res) => {
   const { id } = req.params; // Get admin ID from route parameters
@@ -706,7 +706,7 @@ module.exports = router;
 app.post("/forgot-password", forgetPass);
 app.post("/reset-password", restPass);
 
-const Notification = require("../src/Models/Notification.js");
+const Notification = require("../Models/Notification.js");
 app.get("/notification", async (req, res) => {
   try {
     const { recipient, role } = req.query; // Pass recipient's username to get notifications
