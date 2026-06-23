@@ -37,13 +37,15 @@ jobs:
       - name: Lint Backend
         working-directory: src
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           npm run lint
       - uses: actions/upload-artifact@v4
         with:
           name: backend-build
-          path: src
-          # node_modules excluded — installed fresh on VM
+          path: |
+            src/**
+            !src/node_modules/**
+            !src/.env
 
   deploy:
     runs-on: ubuntu-latest
@@ -99,7 +101,5 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           script: |
-            cd /var/www/JetSet/backend
-            npm install --omit=dev
-            pm2 restart backend || pm2 start App.js --name backend
+            pm2 restart backend || pm2 start /var/www/JetSet/backend/App.js --name backend
             sudo systemctl reload nginx
