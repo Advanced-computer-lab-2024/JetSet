@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(
       null,
-      "D:/GUC/Semester 7/CSEN704 Advanced Computer lab/Virtual Trip Planner/JetSet/src/uploads"
+      "D:/GUC/Semester 7/CSEN704 Advanced Computer lab/Virtual Trip Planner/JetSet/src/uploads",
     ); // Set the path where images will be saved
   },
   filename: function (req, file, cb) {
@@ -205,7 +205,7 @@ const {
   getAddress,
   payByCardPro,
   getActivitiesBasedOnPreferences,
-} = require("../src/Routes/touristController");
+} = require("./Routes/touristController");
 
 const {
   createTourGuideProfile,
@@ -228,7 +228,7 @@ const {
   getTourGuideTouristReport,
   filterTourGuideTouristReportByMonth,
   filterTourGuideSalesReport,
-} = require("../src/Routes/tourguideController");
+} = require("./Routes/tourguideController");
 
 //tourguide tourist itinerary
 const {
@@ -236,7 +236,7 @@ const {
   readTouristItinerary,
   updateTouristItinerary,
   deleteTouristItinerary,
-} = require("../src/Routes/tourguideController");
+} = require("./Routes/tourguideController");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -245,8 +245,6 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-
-app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Server is running.");
@@ -409,7 +407,7 @@ app.get("/TourGuideProfile/:tourGuideID", readTourGuideProfile);
 app.put(
   "/updateTourGuide/:tourGuideId",
   upload.single("image"),
-  updateTourGuideProfile
+  updateTourGuideProfile,
 );
 
 app.post("/addCategory", createCategory);
@@ -560,7 +558,7 @@ app.delete("/cancelActivity/:touristId/:activityId", cancelActivityBooking);
 app.delete("/cancelItinerary/:touristId/:itineraryId", cancelItineraryBooking);
 app.post(
   "/bookTransportation/:touristId/:transportationId",
-  bookTransportation
+  bookTransportation,
 );
 app.post("/payByWallet/:touristId/:itemId", payByWallet);
 app.post("/payWalletAct/:touristId/:activityId", payByWalletAct);
@@ -592,7 +590,7 @@ app.put("/touristwallet/:id", async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       id,
       { wallet },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedTourist) {
@@ -766,7 +764,7 @@ app.put("/read/:id", async (req, res) => {
     const notification = await Notification.findByIdAndUpdate(
       id,
       { read: true },
-      { new: true }
+      { new: true },
     );
 
     if (!notification) {
@@ -835,12 +833,12 @@ app.get("/admin-sales-report", getSalesReport);
 app.get("/filter-tour-guide-sales-report", filterTourGuideSalesReport);
 app.get(
   "/filter-tour-guide-tourist-report",
-  filterTourGuideTouristReportByMonth
+  filterTourGuideTouristReportByMonth,
 );
 app.get("/filter-advertiser-sales-report", filterAdvertiserSalesReport);
 app.get(
   "/filter-advertiser-tourist-report",
-  filterAdvertiserTouristReportByMonth
+  filterAdvertiserTouristReportByMonth,
 );
 app.get("/filter-sales-report", filterSellerSalesReport);
 app.get("/filter-admin-report", getFilteredSalesReport);
