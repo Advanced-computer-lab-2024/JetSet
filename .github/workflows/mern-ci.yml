@@ -68,3 +68,9 @@ jobs:
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
         run: node --check App.js
+
+       - name: Upload Backend Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: src/build
