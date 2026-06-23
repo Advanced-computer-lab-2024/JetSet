@@ -20,7 +20,8 @@
     "start": "node app.js",
     "react": "^18.3.1",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "node --check App.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
