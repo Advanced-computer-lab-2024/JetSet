@@ -18,7 +18,7 @@ jobs:
       - name: Build Frontend
         working-directory: jetset
         env:
-          REACT_APP_ENV: ${{ secrets.React_APP_ENV }}
+          REACT_APP_ENV: ${{ secrets.REACT_APP_ENV }}
         run: |
           npm ci
           CI=false npm run build
@@ -60,6 +60,18 @@ jobs:
           name: backend-build
           path: ./backend-build
 
+      - name: Prepare directories on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_KEY }}
+          script: |
+            sudo mkdir -p /var/www/backend
+            sudo mkdir -p /var/www/frontend
+            sudo chown -R $USER:$USER /var/www/backend  # ← so SCP can write without sudo
+            sudo chown -R $USER:$USER /var/www/frontend
+
       - name: SCP backend to VM
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -67,7 +79,7 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           source: "backend-build/"
-          target: "/var/www/api"
+          target: "/var/www/backend"
           strip_components: 1
 
       - name: Start backend on VM
@@ -77,10 +89,10 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           script: |
-            cd /var/www/api
+            cd /var/www/backend          # ← matches SCP target
             npm install --production --legacy-peer-deps
 
-            cat > /var/www/api/.env << 'ENVEOF'
+            cat > /var/www/backend/.env << 'ENVEOF'
             NODE_ENV=production
             PORT=3000
             MONGO_URI=${{ secrets.MONGO_URI }}
@@ -93,12 +105,12 @@ jobs:
             STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
             ENVEOF
 
-            pm2 restart api || pm2 start index.js --name api --cwd /var/www/api
+            pm2 restart api || pm2 start index.js --name api --cwd /var/www/backend
             pm2 save
 
   deploy-frontend:
     runs-on: ubuntu-latest
-    needs: [build-frontend, deploy-backend] # ← waits for backend to be live
+    needs: [build-frontend, deploy-backend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Download frontend artifact
@@ -114,14 +126,14 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           source: "frontend-build/"
-          target: "/tmp/"
+          target: "/var/www/frontend"
+          strip_components: 1
 
-      - name: Deploy frontend files
+      - name: Reload Nginx
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           script: |
-            sudo rm -rf /var/www/app/*
-            sudo cp -r /tmp/frontend-build/. /var/www/app/
+            sudo nginx -s reload
