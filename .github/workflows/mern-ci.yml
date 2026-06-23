@@ -61,6 +61,17 @@ jobs:
           name: backend-build
           path: dist/backend
 
+      - name: Prepare directories on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_KEY }}
+          script: |
+            sudo mkdir -p /var/www/JetSet/frontend
+            sudo mkdir -p /var/www/JetSet/backend
+            sudo chown -R $USER:$USER /var/www/JetSet
+
       - name: Deploy Frontend to VM
         uses: appleboy/scp-action@v0.1.7
         with:
