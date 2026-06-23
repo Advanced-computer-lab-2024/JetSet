@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "/api"; // Adjust to your backend URL
+const API_URL = "http://localhost:3000"; // Adjust to your backend URL
 
 export const getPlaces = async () => {
   const response = await axios.get(`${API_URL}/Places`);

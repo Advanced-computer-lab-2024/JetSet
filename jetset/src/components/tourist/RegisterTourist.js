@@ -21,7 +21,7 @@ const TouristForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/addTourist", tourist);
+      const response = await axios.post("/api/addTourist", tourist);
       alert(response.data.msg); // Show success message
       // Navigate to the Tourist component after registration
       navigate(`/tourist`, { state: { touristId: response.data.touristId } });
