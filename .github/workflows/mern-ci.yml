@@ -67,7 +67,8 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           source: "backend-build/"
-          target: "/tmp/"
+          target: "/var/www/api"
+          strip_components: 1
 
       - name: Start backend on VM
         uses: appleboy/ssh-action@v1.0.3
@@ -76,8 +77,6 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           script: |
-            mkdir -p /var/www/api
-            rsync -a --delete /tmp/backend-build/ /var/www/api/
             cd /var/www/api
             npm install --production --legacy-peer-deps
 
