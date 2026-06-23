@@ -47,6 +47,26 @@ jobs:
           name: full-app
           path: dist
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: full-app
+          path: dist
+
+      - name: Deploy to VM via SSH
+        uses: ppleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_KEY }}
+          source: "dist/*"
+          target: "/var/www/JetSet"
+
   # frontend-build:
   #   runs-on: ubuntu-latest
 
