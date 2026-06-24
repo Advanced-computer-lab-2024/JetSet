@@ -29,9 +29,7 @@ const TouristProfile = () => {
 
   const fetchAddresses = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/address/${touristId}`
-      );
+      const response = await axios.get(`api/address/${touristId}`);
       setAddresses(response.data.addresses);
     } catch (error) {
       console.error("Error fetching addresses:", error);
@@ -49,7 +47,7 @@ const TouristProfile = () => {
   const fetchConversionRate = async (currency) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+        `http://localhost:3000/tourist/${touristId}/preferredCurrency`,
       );
       setSelectedCurrency(response.data.preferredCurrency);
       setConversionRate(response.data.conversionRate);
@@ -67,7 +65,7 @@ const TouristProfile = () => {
       if (touristId) {
         try {
           const response = await axios.get(
-            `http://localhost:3000/getTourist/${touristId}`
+            `http://localhost:3000/getTourist/${touristId}`,
           );
           setTourist(response.data.tourist);
         } catch (error) {
@@ -93,7 +91,7 @@ const TouristProfile = () => {
     try {
       const response = await axios.put(
         `http://localhost:3000/updateTourist/${touristId}`,
-        updateFields
+        updateFields,
       );
       setTourist((prevTourist) => ({
         ...prevTourist,
@@ -221,7 +219,7 @@ const TouristProfile = () => {
               type={activeSection === "preferences" ? "primary" : "default"}
               onClick={() =>
                 setActiveSection(
-                  activeSection === "preferences" ? "" : "preferences"
+                  activeSection === "preferences" ? "" : "preferences",
                 )
               }
               style={{ marginRight: "10px" }}
@@ -232,7 +230,7 @@ const TouristProfile = () => {
               type={activeSection === "changePassword" ? "primary" : "default"}
               onClick={() =>
                 setActiveSection(
-                  activeSection === "changePassword" ? "" : "changePassword"
+                  activeSection === "changePassword" ? "" : "changePassword",
                 )
               }
               style={{ marginRight: "10px" }}
@@ -247,7 +245,7 @@ const TouristProfile = () => {
                 setActiveSection(
                   activeSection === "setPreferredCurrency"
                     ? ""
-                    : "setPreferredCurrency"
+                    : "setPreferredCurrency",
                 )
               }
               style={{ marginRight: "10px" }}
@@ -258,7 +256,7 @@ const TouristProfile = () => {
               type={activeSection === "loyaltyPoints" ? "primary" : "default"}
               onClick={() =>
                 setActiveSection(
-                  activeSection === "loyaltyPoints" ? "" : "loyaltyPoints"
+                  activeSection === "loyaltyPoints" ? "" : "loyaltyPoints",
                 )
               }
             >
