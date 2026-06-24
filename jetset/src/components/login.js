@@ -28,7 +28,7 @@ const Register = () => {
     }
 
     const endpointMap = {
-      tourist: "api/loginTourist",
+      tourist: "loginTourist",
       admin: "api/loginAdmin",
       seller: "api/loginSeller",
       tourguide: "api/loginTourGuide",
