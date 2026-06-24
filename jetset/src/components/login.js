@@ -28,12 +28,12 @@ const Register = () => {
     }
 
     const endpointMap = {
-      tourist: "http://localhost:3000/loginTourist",
-      admin: "http://localhost:3000/loginAdmin",
-      seller: "http://localhost:3000/loginSeller",
-      tourguide: "http://localhost:3000/loginTourGuide",
-      advertisor: "http://localhost:3000/loginAdv",
-      tourismgovernor: "http://localhost:3000/loginTourism",
+      tourist: "api/loginTourist",
+      admin: "api/loginAdmin",
+      seller: "api/loginSeller",
+      tourguide: "api/loginTourGuide",
+      advertisor: "api/loginAdv",
+      tourismgovernor: "api/loginTourism",
     };
 
     try {
@@ -64,7 +64,7 @@ const Register = () => {
       }
     } catch (error) {
       setMessage(
-        error.response?.data?.message || "Error during authentication."
+        error.response?.data?.message || "Error during authentication.",
       );
     }
   };
@@ -83,12 +83,12 @@ const Register = () => {
         {
           username: forgetPasswordUsername,
           role: forgetPasswordRole,
-        }
+        },
       );
       setResetMessage(response.data.message || "Reset link sent successfully.");
     } catch (error) {
       setResetMessage(
-        error.response?.data?.message || "Error sending reset password link."
+        error.response?.data?.message || "Error sending reset password link.",
       );
     }
   };
@@ -188,39 +188,35 @@ const Register = () => {
           style={{ fontSize: "16px", padding: "20px" }}
         >
           <div className="form-stack">
-          <label htmlFor="forgot-username">Username</label>
-          <Input
-            id="forgot-username"
-            aria-label="Forgot password username"
-            placeholder="Enter username"
-            value={forgetPasswordUsername}
-            onChange={(e) => setForgetPasswordUsername(e.target.value)}
-          />
-          <label htmlFor="forgot-role">Role</label>
-          <Select
-            id="forgot-role"
-            aria-label="Forgot password role"
-            value={forgetPasswordRole || undefined}
-            onChange={setForgetPasswordRole}
-            placeholder="Select your role"
-            style={{ width: "100%" }}
-          >
-            <Select.Option value="tourist">Tourist</Select.Option>
-            <Select.Option value="admin">Admin</Select.Option>
-            <Select.Option value="seller">Seller</Select.Option>
-            <Select.Option value="tourguide">Tour Guide</Select.Option>
-            <Select.Option value="advertisor">Advertisor</Select.Option>
-            <Select.Option value="tourismgovernor">
-              Tourism Governor
-            </Select.Option>
-          </Select>
-          <Button
-            type="primary"
-            block
-            onClick={handleForgetPassword}
-          >
-            Send Reset Link
-          </Button>
+            <label htmlFor="forgot-username">Username</label>
+            <Input
+              id="forgot-username"
+              aria-label="Forgot password username"
+              placeholder="Enter username"
+              value={forgetPasswordUsername}
+              onChange={(e) => setForgetPasswordUsername(e.target.value)}
+            />
+            <label htmlFor="forgot-role">Role</label>
+            <Select
+              id="forgot-role"
+              aria-label="Forgot password role"
+              value={forgetPasswordRole || undefined}
+              onChange={setForgetPasswordRole}
+              placeholder="Select your role"
+              style={{ width: "100%" }}
+            >
+              <Select.Option value="tourist">Tourist</Select.Option>
+              <Select.Option value="admin">Admin</Select.Option>
+              <Select.Option value="seller">Seller</Select.Option>
+              <Select.Option value="tourguide">Tour Guide</Select.Option>
+              <Select.Option value="advertisor">Advertisor</Select.Option>
+              <Select.Option value="tourismgovernor">
+                Tourism Governor
+              </Select.Option>
+            </Select>
+            <Button type="primary" block onClick={handleForgetPassword}>
+              Send Reset Link
+            </Button>
           </div>
           {resetMessage && (
             <Text
