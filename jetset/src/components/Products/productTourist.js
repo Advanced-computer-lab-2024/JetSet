@@ -35,7 +35,7 @@ const ProductList = ({ touristId }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true); // Set loading state before fetching
-      const response = await axios.get("http://localhost:3000/products");
+      const response = await axios.get("/products");
       if (response.data && Array.isArray(response.data)) {
         setProducts(response.data);
       } else {
@@ -52,7 +52,7 @@ const ProductList = ({ touristId }) => {
   const fetchCurrencyData = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/tourist/${touristId}/preferredCurrency`
+        `/tourist/${touristId}/preferredCurrency`,
       );
       setCurrency(response.data.preferredCurrency);
       setConversionRate(response.data.conversionRate);
