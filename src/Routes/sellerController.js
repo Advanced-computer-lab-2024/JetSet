@@ -89,7 +89,7 @@ const updateSeller = async (req, res) => {
     const profile = await Seller.findByIdAndUpdate(
       sanitizedId, // Use the sanitized ID
       updateData, // Only update provided fields
-      { new: true } // Return the updated profile
+      { new: true }, // Return the updated profile
     );
 
     if (!profile) {
@@ -150,7 +150,7 @@ const filterProductSeller = async (req, res) => {
   try {
     const products = await Product.find({ price: { $lte: limit } }).populate(
       "reviews.touristId",
-      "username"
+      "username",
     );
     res.status(200).json(products);
   } catch (err) {
@@ -186,7 +186,7 @@ const createProductSeller = async (req, res) => {
 
   try {
     // Get the image filename from the uploaded file
-    const imageFilename = req.file ? path.basename(req.file.path) : ""; // Ensure we use imageFilename
+    const imageFilename = req.file ? req.file.filename : "";
 
     // Create a new product with the image filename
     const newProduct = await Product.create({
@@ -285,7 +285,7 @@ const archiveProduct = async (req, res) => {
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       { archive: archiveStatus }, // Set archive field based on the passed status
-      { new: true } // Return the updated document
+      { new: true }, // Return the updated document
     );
 
     if (!updatedProduct) {
@@ -388,10 +388,10 @@ const getSellerSalesReport = async (req, res) => {
     // Fetch all products associated with the seller
     const products = await Product.find({ seller_id: id })
       .populate({
-        path: 'purchaseRecords.tourist',  // Ensure we populate the tourist within purchaseRecords
-        select: 'username email',
+        path: "purchaseRecords.tourist", // Ensure we populate the tourist within purchaseRecords
+        select: "username email",
       })
-      .exec();  // Make sure the query executes properly
+      .exec(); // Make sure the query executes properly
 
     if (!products || products.length === 0) {
       return res.status(404).json({
@@ -404,7 +404,7 @@ const getSellerSalesReport = async (req, res) => {
     const productDetails = products.map((product) => {
       // Calculate revenue based on purchaseRecords quantity
       const productRevenue = product.purchaseRecords.reduce((total, record) => {
-        return total + (record.quantity * product.price);  // Multiply quantity by price
+        return total + record.quantity * product.price; // Multiply quantity by price
       }, 0);
 
       totalRevenue += productRevenue;
@@ -478,14 +478,14 @@ const filterSellerSalesReport = async (req, res) => {
     // Build the product filter based on product name
     const productFilter = { seller_id: id };
     if (product) {
-      productFilter.name = { $regex: new RegExp(product, 'i') }; // Filter by product name using regex (case-insensitive)
+      productFilter.name = { $regex: new RegExp(product, "i") }; // Filter by product name using regex (case-insensitive)
     }
 
     // Fetch products based on filters
     const products = await Product.find(productFilter)
       .populate({
-        path: 'purchaseRecords.tourist',
-        select: 'username email',
+        path: "purchaseRecords.tourist",
+        select: "username email",
       })
       .exec();
 
@@ -500,23 +500,30 @@ const filterSellerSalesReport = async (req, res) => {
     const filteredProductDetails = products
       .map((product) => {
         // Filter purchase records only if date or month filters are provided
-        const filteredPurchaseRecords = product.purchaseRecords.filter((record) => {
-          const purchaseDate = new Date(record.purchaseDate);
+        const filteredPurchaseRecords = product.purchaseRecords.filter(
+          (record) => {
+            const purchaseDate = new Date(record.purchaseDate);
 
-          // Apply date and month filters
-          const isDateMatch = date ? purchaseDate.toISOString().split('T')[0] === date : true;
-          const isMonthMatch = month
-            ? purchaseDate.getMonth() + 1 === parseInt(month) // Months are 0-indexed
-            : true;
+            // Apply date and month filters
+            const isDateMatch = date
+              ? purchaseDate.toISOString().split("T")[0] === date
+              : true;
+            const isMonthMatch = month
+              ? purchaseDate.getMonth() + 1 === parseInt(month) // Months are 0-indexed
+              : true;
 
-          // Include records matching both filters or all records if no filters
-          return isDateMatch && isMonthMatch;
-        });
+            // Include records matching both filters or all records if no filters
+            return isDateMatch && isMonthMatch;
+          },
+        );
 
         // Calculate revenue for filtered purchase records
-        const productRevenue = filteredPurchaseRecords.reduce((total, record) => {
-          return total + record.quantity * product.price;
-        }, 0);
+        const productRevenue = filteredPurchaseRecords.reduce(
+          (total, record) => {
+            return total + record.quantity * product.price;
+          },
+          0,
+        );
 
         totalRevenue += productRevenue;
 
@@ -544,7 +551,9 @@ const filterSellerSalesReport = async (req, res) => {
           })),
         };
       })
-      .filter((product) => product.purchaseRecords.length > 0 || (!date && !month)); // Only include products with matching records or all if no filters
+      .filter(
+        (product) => product.purchaseRecords.length > 0 || (!date && !month),
+      ); // Only include products with matching records or all if no filters
 
     // Send response with filtered details
     res.status(200).json({
@@ -586,5 +595,5 @@ module.exports = {
   deleteSellerAccount,
   loginSeller,
   getSellerSalesReport,
-  filterSellerSalesReport
+  filterSellerSalesReport,
 };

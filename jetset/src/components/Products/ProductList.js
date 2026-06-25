@@ -25,12 +25,9 @@ const ProductList = () => {
 
   const toggleArchive = async (productId, currentStatus) => {
     try {
-      const response = await axios.put(
-        `http://localhost:3000/archieve/${productId}`,
-        {
-          archiveStatus: !currentStatus,
-        },
-      );
+      const response = await axios.put(`/archieve/${productId}`, {
+        archiveStatus: !currentStatus,
+      });
 
       if (response.status === 200) {
         setProducts((prevProducts) =>
