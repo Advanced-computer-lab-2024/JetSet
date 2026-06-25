@@ -170,7 +170,7 @@ const ProductList = ({ touristId }) => {
           images.map((img, index) => (
             <img
               key={index}
-              src={`:3000/uploads/${img.split("/").pop()}`}
+              src={`/uploads/${img.split("/").pop()}`}
               alt="product"
               style={{ width: 50, height: 50 }}
             />
