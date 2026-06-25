@@ -80,27 +80,16 @@ const Guest = () => {
   const isSubPage = currentPage !== "home";
 
   return (
-    <main
-      className="App"
-      aria-live="polite"
-      style={{ border: "none", boxShadow: "none", background: "transparent" }}
-    >
+    <main aria-live="polite">
       {isSubPage && (
         <button
           type="button"
+          className="btn btn-ghost"
           onClick={() => setCurrentPage("home")}
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            background: "transparent",
-            color: "var(--color-primary)",
-            border: "none",
             padding: "0.5rem 0",
             marginBottom: "1.5rem",
             fontWeight: 600,
-            cursor: "pointer",
-            minHeight: "auto",
           }}
           aria-label="Back to browsing options"
         >
@@ -127,61 +116,26 @@ const Guest = () => {
               Browse activities, itineraries, and historical places without an account.
             </p>
           </div>
-          <div className="button-grid" style={{ gap: "1.25rem" }}>
+          <div className="card-grid">
             {guestActions.map(({ key, label, description, icon }) => (
               <button
                 key={key}
                 type="button"
+                className="feature-card"
                 onClick={() => setCurrentPage(key)}
                 aria-label={label}
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  padding: "2rem 1.25rem",
-                  background: "var(--color-surface)",
-                  border: "1px solid var(--color-line)",
-                  borderRadius: "var(--radius-lg)",
-                  color: "var(--color-ink)",
-                  textAlign: "center",
                   cursor: "pointer",
-                  transition: "transform 200ms ease, box-shadow 200ms ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "0 12px 32px rgba(15,76,129,0.12)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
+                  border: "1px solid var(--color-line)",
+                  width: "100%",
+                  height: "100%",
                 }}
               >
-                <span
-                  style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: "50%",
-                    background: "linear-gradient(135deg, var(--color-primary), var(--color-accent))",
-                    display: "grid",
-                    placeItems: "center",
-                    color: "#fff",
-                    fontSize: "1.25rem",
-                    flexShrink: 0,
-                  }}
-                >
+                <span className="feature-icon">
                   <FontAwesomeIcon icon={icon} />
                 </span>
-                <span style={{ fontWeight: 700, fontSize: "1.05rem" }}>{label}</span>
-                <span
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "var(--color-muted)",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {description}
-                </span>
+                <h3>{label}</h3>
+                <p>{description}</p>
               </button>
             ))}
           </div>
