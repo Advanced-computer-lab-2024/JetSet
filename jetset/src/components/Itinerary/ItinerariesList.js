@@ -7,12 +7,11 @@ const ItineraryList = (onEdit) => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-
   // Fetch itineraries on component mount
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/Itineraries");
+        const response = await axios.get("/Itineraries");
         setItineraries(response.data);
       } catch (err) {
         setError(err.message);
@@ -27,47 +26,47 @@ const ItineraryList = (onEdit) => {
   // Handle itinerary deletion
   const deleteItinerary = async (itineraryId) => {
     // Show confirmation dialog
-    const confirmed = window.confirm("Are you sure you want to delete this itinerary?");
-    
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this itinerary?",
+    );
+
     if (confirmed) {
       try {
-        const response = await axios.delete(
-          `http://localhost:3000/deleteItinerary`,
-          {
-            data: { id: itineraryId }, // Sending the ID in the body
-          }
-        );
+        const response = await axios.delete(`/deleteItinerary`, {
+          data: { id: itineraryId }, // Sending the ID in the body
+        });
         window.location.reload();
         setMessage(response.data.msg || "Itinerary deleted successfully!");
         setError(""); // Clear any previous error
         setItineraries((prevItineraries) =>
-          prevItineraries.filter((itinerary) => itinerary._id !== itineraryId)
+          prevItineraries.filter((itinerary) => itinerary._id !== itineraryId),
         );
       } catch (err) {
         setError(
           err.response?.data?.error ||
-            "An error occurred while deleting the itinerary."
+            "An error occurred while deleting the itinerary.",
         );
         setMessage(""); // Clear success message
       }
     }
   };
-  
 
   const toggleActivationStatus = async (itineraryId, currentStatus) => {
     try {
       let response;
-      
+
       if (currentStatus === "active") {
-        response = await axios.post(`http://localhost:3000/deactivateItinerary/${itineraryId}`);
+        response = await axios.post(`/deactivateItinerary/${itineraryId}`);
       } else {
-        response = await axios.post(`http://localhost:3000/activateItinerary/${itineraryId}`);
+        response = await axios.post(`/activateItinerary/${itineraryId}`);
       }
-        window.location.reload();
-        setMessage(response.data.message);
-        setError("");
+      window.location.reload();
+      setMessage(response.data.message);
+      setError("");
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to toggle itinerary status.');
+      setError(
+        err.response?.data?.error || "Failed to toggle itinerary status.",
+      );
       setMessage("");
     }
   };
@@ -114,41 +113,41 @@ const ItineraryList = (onEdit) => {
                   "No tags available"}
               </p>
               <div style={{ display: "flex", gap: "10px" }}>
-              <a
-                href="#"
-                style={{
-                  color: "green",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-                onClick={() =>
-                  toggleActivationStatus(itinerary._id, itinerary.status)
-                }
-              >
-                {itinerary.status ==="active" ? "Deactivate" : "Activate"}
-              </a>
-              <a
-                href="#"
-                style={{
-                  color: "red",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-                onClick={() => deleteItinerary(itinerary._id)}
-              >
-                Delete
-              </a>
-              <a
-                href="#"
-                style={{
-                  color: "#007BFF",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-                onClick={() => onEdit(itinerary._id)}
-              >
-                Edit
-              </a>
+                <a
+                  href="#"
+                  style={{
+                    color: "green",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                  onClick={() =>
+                    toggleActivationStatus(itinerary._id, itinerary.status)
+                  }
+                >
+                  {itinerary.status === "active" ? "Deactivate" : "Activate"}
+                </a>
+                <a
+                  href="#"
+                  style={{
+                    color: "red",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                  onClick={() => deleteItinerary(itinerary._id)}
+                >
+                  Delete
+                </a>
+                <a
+                  href="#"
+                  style={{
+                    color: "#007BFF",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                  onClick={() => onEdit(itinerary._id)}
+                >
+                  Edit
+                </a>
               </div>
             </li>
           ))

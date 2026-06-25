@@ -12,21 +12,18 @@ const CreateTourismGovernor = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/tourism-governor",
-        {
-          username: username.trim(), // Trim whitespace
-          password: password.trim(), // Trim whitespace
-          email: email,
-        }
-      );
+      const response = await axios.post("/tourism-governor", {
+        username: username.trim(), // Trim whitespace
+        password: password.trim(), // Trim whitespace
+        email: email,
+      });
       setMessage(response.data.message); // Use 'message' instead of 'msg'
       setError(""); // Clear any previous errors
     } catch (err) {
       console.error(err); // Log the error for better debugging
       setError(
         err.response?.data.message ||
-          "An error occurred while creating the Tourism Governor."
+          "An error occurred while creating the Tourism Governor.",
       );
       setMessage(""); // Clear any previous success messages
     }

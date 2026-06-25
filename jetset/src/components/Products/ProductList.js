@@ -14,7 +14,7 @@ const ProductList = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/productsAdmin");
+      const response = await axios.get("/productsAdmin");
       setProducts(response.data);
     } catch (err) {
       setError("Failed to load products. Please try again later.");
@@ -29,7 +29,7 @@ const ProductList = () => {
         `http://localhost:3000/archieve/${productId}`,
         {
           archiveStatus: !currentStatus,
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -37,8 +37,8 @@ const ProductList = () => {
           prevProducts.map((product) =>
             product._id === productId
               ? { ...product, archive: !currentStatus }
-              : product
-          )
+              : product,
+          ),
         );
       } else {
         alert("Failed to update archive status. Please try again.");

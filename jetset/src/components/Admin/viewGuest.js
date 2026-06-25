@@ -10,7 +10,7 @@ const GuestList = () => {
   useEffect(() => {
     const fetchGuests = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/guest");
+        const response = await axios.get("/guest");
         setGuests(response.data.users);
       } catch (err) {
         setError("Error retrieving guest data.");
@@ -23,9 +23,7 @@ const GuestList = () => {
   // Accept guest function
   const acceptGuest = async (guestId) => {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/acceptguest/${guestId}`
-      );
+      const response = await axios.post(`/acceptguest/${guestId}`);
       alert(response.data.message);
       // Optionally refresh the guest list after acceptance
       setGuests(guests.filter((guest) => guest._id !== guestId));
@@ -38,9 +36,7 @@ const GuestList = () => {
   // Reject guest function
   const rejectGuest = async (guestId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/rejectguest/${guestId}`
-      );
+      const response = await axios.get(`/rejectguest/${guestId}`);
       alert(response.data.message);
       // Optionally refresh the guest list after rejection
       setGuests(guests.filter((guest) => guest._id !== guestId));
@@ -77,7 +73,7 @@ const GuestList = () => {
                       {guest.document.map((doc, idx) => (
                         <li key={idx}>
                           <a
-                            href={`http://localhost:3000/uploads/${doc}`}
+                            href={`/uploads/${doc}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
