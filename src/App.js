@@ -10,10 +10,7 @@ const router = express.Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(
-      null,
-      "D:/GUC/Semester 7/CSEN704 Advanced Computer lab/Virtual Trip Planner/JetSet/src/uploads",
-    ); // Set the path where images will be saved
+    cb(null, "/var/www/backend/uploads"); // Set the path where images will be saved
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname); // Create a unique filename

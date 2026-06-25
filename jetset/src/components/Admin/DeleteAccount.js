@@ -11,18 +11,15 @@ const DeleteAccount = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.delete(
-        "http://localhost:3000/deleteAccount",
-        {
-          data: { accountUsername, accountType },
-        }
-      );
+      const response = await axios.delete("/deleteAccount", {
+        data: { accountUsername, accountType },
+      });
       setMessage(response.data.message);
       setError(""); // Clear any previous errors
     } catch (err) {
       setError(
         err.response?.data.message ||
-          "An error occurred while deleting the account."
+          "An error occurred while deleting the account.",
       );
       setMessage(""); // Clear any previous success messages
     }
