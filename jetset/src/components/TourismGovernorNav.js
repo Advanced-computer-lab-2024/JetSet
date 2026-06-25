@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./Admin/navLogin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,27 +15,18 @@ const TourismGovernor = ({ governorUsername }) => {
 
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
 
-  useEffect(() => {
-    // No notification fetching logic here
-  }, [governorUsername]);
-
   const toggleProfileMenu = () => {
     setProfileMenuVisible((prev) => !prev);
   };
-
-//   const handleGetProfile = () => {
-//     navigate(`/governor/change-password/${governorId}`);
-//   };
 
   const handleLogOut = () => {
     localStorage.clear();
     navigate("/login");
   };
+
   const handleChangePass = () => {
-    // localStorage.clear();
     navigate("/changepass");
   };
-
 
   const handleBack = () => {
     navigate(-1);
@@ -52,8 +43,7 @@ const TourismGovernor = ({ governorUsername }) => {
             <span className="app-title">Tourism Governor Dashboard</span>
           </div>
           <div className="navbar-right">
-            <div className="governor-info">
-              {/* <span className="username"> </span> */}
+            <div className="governor-info" style={{ position: "relative" }}>
               <FontAwesomeIcon
                 icon={faUser}
                 className="profile-icon"
@@ -61,12 +51,9 @@ const TourismGovernor = ({ governorUsername }) => {
               />
               {profileMenuVisible && (
                 <div className="profile-menu">
-                 <button onClick={handleChangePass}>
-                    {/* <FontAwesomeIcon
-                      icon={faSignOutAlt}
-                      className="menu-icon"
-                    /> */}
-                   🔑 Change Password
+                  <button onClick={handleChangePass}>
+                    <FontAwesomeIcon icon={faKey} className="menu-icon" />
+                    Change Password
                   </button>
                   <button onClick={handleLogOut}>
                     <FontAwesomeIcon
@@ -75,7 +62,6 @@ const TourismGovernor = ({ governorUsername }) => {
                     />
                     Log Out
                   </button>
-
                 </div>
               )}
             </div>

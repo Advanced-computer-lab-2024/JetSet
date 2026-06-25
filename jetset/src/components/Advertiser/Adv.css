@@ -1,224 +1,223 @@
 
 /* General Layout */
-.admin-container {
-    display: flex;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-    background-color: #f8f9fa;
-  }
-  
-  /* Sidebar Styling */
-  .admin-sidebar {
-    width: 260px; /* Sidebar width */
-    background: #1d3557; /* Dark blue color */
-    color: white;
-    display: flex;
+.advertiser-dashboard .admin-container {
+  display: flex;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  background-color: #f8f9fa;
+}
+
+/* Sidebar Styling */
+.advertiser-dashboard .admin-sidebar {
+  width: 260px; /* Sidebar width */
+  background: #1d3557; /* Dark blue color */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  position: fixed;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.advertiser-dashboard .admin-sidebar a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: white;
+  font-size: 1.1rem;
+  text-decoration: none;
+  margin: 10px 0;
+  border-radius: 4px;
+  transition: 0.3s ease;
+}
+
+.advertiser-dashboard .admin-sidebar a:hover {
+  background-color: #4f5d75; /* Slight hover effect */
+}
+
+.advertiser-dashboard .admin-sidebar .icon {
+  margin-right: 12px;
+  font-size: 1.4rem;
+}
+
+.advertiser-dashboard .admin-sidebar a.active {
+  background-color: #ff6f61; /* Active state color */
+}
+
+/* Main Content Area */
+.advertiser-dashboard .admin-main-content {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 260px; /* Adjust content to fit beside the sidebar */
+  height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+/* Section Header */
+.advertiser-dashboard .section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.advertiser-dashboard .section-header h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1d3557;
+}
+
+/* Record Details */
+.advertiser-dashboard .record-details {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 3rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.advertiser-dashboard .record-details h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #1d3557;
+}
+
+.advertiser-dashboard .record-details p {
+  font-size: 1.8rem; /* Increased font size for Company Description */
+  color: #495057;
+  line-height: 1.6;
+}
+
+/* Table Styling */
+.advertiser-dashboard .table-container {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+.advertiser-dashboard table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.advertiser-dashboard th,
+.advertiser-dashboard td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.advertiser-dashboard th {
+  background-color: #1d3557;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.advertiser-dashboard td {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.advertiser-dashboard tr:hover td {
+  background-color: #e9ecef;
+}
+
+.advertiser-dashboard table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Form Styling */
+.advertiser-dashboard .form-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.advertiser-dashboard .form-container label {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.advertiser-dashboard .form-container input,
+.advertiser-dashboard .form-container textarea,
+.advertiser-dashboard .form-container select {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  margin-bottom: 1.5rem;
+}
+
+.advertiser-dashboard .form-container input:focus,
+.advertiser-dashboard .form-container textarea:focus,
+.advertiser-dashboard .form-container select:focus {
+  outline: none;
+  border-color: #1d3557;
+}
+
+/* Button Styling */
+.advertiser-dashboard .button {
+  background-color: #1d3557;
+  color: white;
+  font-size: 1.1rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.advertiser-dashboard .button:hover {
+  background-color: #495057;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .advertiser-dashboard .admin-container {
     flex-direction: column;
-    padding-top: 20px;
-    position: fixed;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
   }
-  
-  .admin-sidebar a {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    color: white;
-    font-size: 1.1rem;
-    text-decoration: none;
-    margin: 10px 0;
-    border-radius: 4px;
-    transition: 0.3s ease;
-  }
-  
-  .admin-sidebar a:hover {
-    background-color: #4f5d75; /* Slight hover effect */
-  }
-  
-  .admin-sidebar .icon {
-    margin-right: 12px;
-    font-size: 1.4rem;
-  }
-  
-  .admin-sidebar a.active {
-    background-color: #ff6f61; /* Active state color */
-  }
-  
-  /* Main Content Area */
-  .admin-main-content {
-    flex: 1;
-    padding: 2rem;
-    margin-left: 260px; /* Adjust content to fit beside the sidebar */
-    height: 100vh;
-    overflow-y: auto;
-    box-sizing: border-box;
-    background: #ffffff;
-  }
-  
-  /* Section Header */
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .section-header h2 {
-    margin: 0;
-    font-size: 2rem;
-    color: #1d3557;
-  }
-  
-  /* Record Details */
-  .record-details {
-    background-color: #ffffff;
-    border-radius: 8px;
-    padding: 3rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    margin-top: 2rem;
-  }
-  
-  .record-details h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: #1d3557;
-  }
-  
-  .record-details p {
-    font-size: 1.8rem; /* Increased font size for Company Description */
-    color: #495057;
-    line-height: 1.6;
-  }
-  
-  /* Table Styling */
-  .table-container {
-    margin-top: 2rem;
-    overflow-x: auto;
-  }
-  
-  table {
+
+  .advertiser-dashboard .admin-sidebar {
     width: 100%;
-    border-collapse: collapse;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  th,
-  td {
+    height: auto;
     padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
+    flex-direction: row;
+    justify-content: space-between;
+    position: static;
   }
-  
-  th {
-    background-color: #1d3557;
-    color: white;
-    font-size: 1.2rem;
+
+  .advertiser-dashboard .admin-main-content {
+    padding: 1rem;
+    margin-left: 0;
   }
-  
-  td {
-    background-color: #f8f9fa;
-    color: #495057;
+
+  .advertiser-dashboard table {
+    font-size: 0.9rem;
   }
-  
-  tr:hover td {
-    background-color: #e9ecef;
+
+  .advertiser-dashboard .record-details h2 {
+    font-size: 2rem;
   }
-  
-  table tr:last-child td {
-    border-bottom: none;
+
+  .advertiser-dashboard .record-details p {
+    font-size: 1.5rem; /* Smaller font on mobile */
   }
-  
-  /* Form Styling */
-  .form-container {
-    background-color: #ffffff;
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 100%;
+
+  .advertiser-dashboard .form-container input,
+  .advertiser-dashboard .form-container textarea,
+  .advertiser-dashboard .form-container select {
+    font-size: 1rem;
+    padding: 0.5rem;
   }
-  
-  .form-container label {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .form-container input,
-  .form-container textarea,
-  .form-container select {
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 4px;
-    border: 1px solid #ced4da;
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-container input:focus,
-  .form-container textarea:focus,
-  .form-container select:focus {
-    outline: none;
-    border-color: #1d3557;
-  }
-  
-  /* Button Styling */
-  .button {
-    background-color: #1d3557;
-    color: white;
-    font-size: 1.1rem;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .button:hover {
-    background-color: #495057;
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .admin-container {
-      flex-direction: column;
-    }
-  
-    .admin-sidebar {
-      width: 100%;
-      height: auto;
-      padding: 1rem;
-      flex-direction: row;
-      justify-content: space-between;
-      position: static;
-    }
-  
-    .admin-main-content {
-      padding: 1rem;
-      margin-left: 0;
-    }
-  
-    table {
-      font-size: 0.9rem;
-    }
-  
-    .record-details h2 {
-      font-size: 2rem;
-    }
-  
-    .record-details p {
-      font-size: 1.5rem; /* Smaller font on mobile */
-    }
-  
-    .form-container input,
-    .form-container textarea,
-    .form-container select {
-      font-size: 1rem;
-      padding: 0.5rem;
-    }
-  }
-  
+}

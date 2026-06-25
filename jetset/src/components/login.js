@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { Input, Button, Modal, Select, Typography } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import logo from "./images/logo.jpg";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
-const Register = () => {
+const Login = () => {
   const [role, setRole] = useState("");
   const [message, setMessage] = useState(null);
   const [username, setUsername] = useState("");
@@ -15,6 +16,7 @@ const Register = () => {
   const [forgetPasswordUsername, setForgetPasswordUsername] = useState("");
   const [forgetPasswordRole, setForgetPasswordRole] = useState("");
   const [resetMessage, setResetMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -36,6 +38,7 @@ const Register = () => {
       tourismgovernor: "loginTourism",
     };
 
+    setLoading(true);
     try {
       const response = await axios.post(endpointMap[role], {
         user: username,
@@ -64,171 +67,243 @@ const Register = () => {
       }
     } catch (error) {
       setMessage(
-        error.response?.data?.message || "Error during authentication.",
+        error.response?.data?.message || "Error during authentication."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleForgetPassword = async () => {
     setMessage("");
-    setResetMessage(""); // Clear previous messages
+    setResetMessage("");
     if (!forgetPasswordUsername || !forgetPasswordRole) {
       setResetMessage("Please enter your username and select a role.");
       return;
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/forgot-password",
-        {
-          username: forgetPasswordUsername,
-          role: forgetPasswordRole,
-        },
-      );
+      const response = await axios.post("/forgot-password", {
+        username: forgetPasswordUsername,
+        role: forgetPasswordRole,
+      });
       setResetMessage(response.data.message || "Reset link sent successfully.");
     } catch (error) {
       setResetMessage(
-        error.response?.data?.message || "Error sending reset password link.",
+        error.response?.data?.message || "Error sending reset password link."
       );
     }
   };
 
+  const roleOptions = [
+    { value: "tourist", label: "Tourist" },
+    { value: "admin", label: "Admin" },
+    { value: "seller", label: "Seller" },
+    { value: "tourguide", label: "Tour Guide" },
+    { value: "advertisor", label: "Advertiser" },
+    { value: "tourismgovernor", label: "Tourism Governor" },
+  ];
+
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <Title
-          level={2}
-          style={{
-            textAlign: "center",
-            fontSize: "30px",
-            color: "var(--color-primary-strong)",
-            fontWeight: "bold",
-          }}
-        >
-          Login
-        </Title>
-
-        {/* Username Input */}
-        <div className="form-stack">
-          <label htmlFor="login-username">Username</label>
-          <Input
-            id="login-username"
-            aria-label="Username"
-            prefix={<UserOutlined />}
-            placeholder="Enter username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+          <img
+            src={logo}
+            alt="JetSet"
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              objectFit: "cover",
+              margin: "0 auto 1rem",
+              display: "block",
+              boxShadow: "0 4px 12px rgba(15,76,129,0.12)",
+            }}
           />
-
-          {/* Password Input */}
-          <label htmlFor="login-password">Password</label>
-          <Input.Password
-            id="login-password"
-            aria-label="Password"
-            prefix={<LockOutlined />}
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          {/* Role Selection */}
-          <label htmlFor="login-role">Role</label>
-          <Select
-            id="login-role"
-            aria-label="Role"
-            value={role || undefined}
-            onChange={setRole}
-            placeholder="Select your role"
-            style={{ width: "100%" }}
-          >
-            <Select.Option value="tourist">Tourist</Select.Option>
-            <Select.Option value="admin">Admin</Select.Option>
-            <Select.Option value="seller">Seller</Select.Option>
-            <Select.Option value="tourguide">Tour Guide</Select.Option>
-            <Select.Option value="advertisor">Advertisor</Select.Option>
-            <Select.Option value="tourismgovernor">
-              Tourism Governor
-            </Select.Option>
-          </Select>
-
-          {/* Login Button */}
-          <Button type="primary" block onClick={handleLogin}>
-            Login
-          </Button>
-
-          {/* Forgot Password Button */}
-          <Button type="link" block onClick={() => setShowForgetPassword(true)}>
-            Forgot Password?
-          </Button>
+          <h2 style={{ marginBottom: "0.35rem", fontSize: "1.75rem" }}>
+            Welcome Back
+          </h2>
+          <p style={{ color: "var(--color-muted)", margin: 0, fontSize: "0.95rem" }}>
+            Sign in to your JetSet account
+          </p>
         </div>
 
-        {/* Error Message */}
-        {message && (
-          <Text
-            type="danger"
+        <div className="form-stack">
+          <div>
+            <label htmlFor="login-username">Username</label>
+            <Input
+              id="login-username"
+              aria-label="Username"
+              prefix={<UserOutlined />}
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setMessage(null);
+              }}
+              size="large"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="login-password">Password</label>
+            <Input.Password
+              id="login-password"
+              aria-label="Password"
+              prefix={<LockOutlined />}
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setMessage(null);
+              }}
+              size="large"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="login-role">Role</label>
+            <Select
+              id="login-role"
+              aria-label="Role"
+              value={role || undefined}
+              onChange={(val) => {
+                setRole(val);
+                setMessage(null);
+              }}
+              placeholder="Select your role"
+              style={{ width: "100%" }}
+              size="large"
+              options={roleOptions}
+            />
+          </div>
+
+          <Button
+            type="primary"
+            block
+            size="large"
+            onClick={handleLogin}
+            loading={loading}
             style={{
-              display: "block",
-              textAlign: "center",
-              marginTop: "15px",
-              fontSize: "16px",
+              height: 48,
+              fontWeight: 700,
+              fontSize: "1rem",
+              borderRadius: "var(--radius-md)",
+              background: "var(--color-primary)",
+              borderColor: "var(--color-primary)",
+              marginTop: "0.25rem",
             }}
           >
+            Sign In
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => setShowForgetPassword(true)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--color-primary)",
+              fontWeight: 600,
+              cursor: "pointer",
+              textAlign: "center",
+              padding: "0.5rem",
+              minHeight: "auto",
+              fontSize: "0.9rem",
+            }}
+          >
+            Forgot Password?
+          </button>
+        </div>
+
+        {message && (
+          <p
+            className="error-message"
+            role="alert"
+            style={{ marginTop: "1rem", textAlign: "center" }}
+          >
             {message}
-          </Text>
+          </p>
         )}
+
+        <p
+          style={{
+            textAlign: "center",
+            marginTop: "1.5rem",
+            fontSize: "0.9rem",
+            color: "var(--color-muted)",
+          }}
+        >
+          Don&apos;t have an account?{" "}
+          <Link to="/register" style={{ fontWeight: 600, color: "var(--color-primary)" }}>
+            Register
+          </Link>
+        </p>
       </div>
 
-      {/* Modal for Forgot Password */}
       {showForgetPassword && (
         <Modal
           title="Forgot Password"
           open={showForgetPassword}
-          onCancel={() => setShowForgetPassword(false)}
+          onCancel={() => {
+            setShowForgetPassword(false);
+            setResetMessage("");
+            setForgetPasswordUsername("");
+            setForgetPasswordRole("");
+          }}
           footer={null}
-          style={{ fontSize: "16px", padding: "20px" }}
+          centered
         >
-          <div className="form-stack">
-            <label htmlFor="forgot-username">Username</label>
-            <Input
-              id="forgot-username"
-              aria-label="Forgot password username"
-              placeholder="Enter username"
-              value={forgetPasswordUsername}
-              onChange={(e) => setForgetPasswordUsername(e.target.value)}
-            />
-            <label htmlFor="forgot-role">Role</label>
-            <Select
-              id="forgot-role"
-              aria-label="Forgot password role"
-              value={forgetPasswordRole || undefined}
-              onChange={setForgetPasswordRole}
-              placeholder="Select your role"
-              style={{ width: "100%" }}
+          <div className="form-stack" style={{ paddingTop: "0.5rem" }}>
+            <div>
+              <label htmlFor="forgot-username">Username</label>
+              <Input
+                id="forgot-username"
+                aria-label="Forgot password username"
+                placeholder="Enter username"
+                value={forgetPasswordUsername}
+                onChange={(e) => setForgetPasswordUsername(e.target.value)}
+                size="large"
+              />
+            </div>
+            <div>
+              <label htmlFor="forgot-role">Role</label>
+              <Select
+                id="forgot-role"
+                aria-label="Forgot password role"
+                value={forgetPasswordRole || undefined}
+                onChange={setForgetPasswordRole}
+                placeholder="Select your role"
+                style={{ width: "100%" }}
+                size="large"
+                options={roleOptions}
+              />
+            </div>
+            <Button
+              type="primary"
+              block
+              size="large"
+              onClick={handleForgetPassword}
+              style={{
+                height: 48,
+                fontWeight: 700,
+                borderRadius: "var(--radius-md)",
+                background: "var(--color-primary)",
+                borderColor: "var(--color-primary)",
+              }}
             >
-              <Select.Option value="tourist">Tourist</Select.Option>
-              <Select.Option value="admin">Admin</Select.Option>
-              <Select.Option value="seller">Seller</Select.Option>
-              <Select.Option value="tourguide">Tour Guide</Select.Option>
-              <Select.Option value="advertisor">Advertisor</Select.Option>
-              <Select.Option value="tourismgovernor">
-                Tourism Governor
-              </Select.Option>
-            </Select>
-            <Button type="primary" block onClick={handleForgetPassword}>
               Send Reset Link
             </Button>
           </div>
           {resetMessage && (
-            <Text
-              type={resetMessage.includes("Error") ? "danger" : "success"}
-              style={{
-                display: "block",
-                textAlign: "center",
-                fontSize: "16px",
-              }}
+            <p
+              className={resetMessage.includes("Error") ? "error-message" : "success-message"}
+              role="alert"
+              style={{ marginTop: "1rem", textAlign: "center" }}
             >
               {resetMessage}
-            </Text>
+            </p>
           )}
         </Modal>
       )}
@@ -236,4 +311,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
