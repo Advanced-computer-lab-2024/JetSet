@@ -29,7 +29,7 @@ const TouristProfile = () => {
 
   const fetchAddresses = async () => {
     try {
-      const response = await axios.get(`api/address/${touristId}`);
+      const response = await axios.get(`address/${touristId}`);
       setAddresses(response.data.addresses);
     } catch (error) {
       console.error("Error fetching addresses:", error);
@@ -64,9 +64,7 @@ const TouristProfile = () => {
     const fetchTourist = async () => {
       if (touristId) {
         try {
-          const response = await axios.get(
-            `http://localhost:3000/getTourist/${touristId}`,
-          );
+          const response = await axios.get(`/getTourist/${touristId}`);
           setTourist(response.data.tourist);
         } catch (error) {
           notification.error({
@@ -90,7 +88,7 @@ const TouristProfile = () => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        `http://localhost:3000/updateTourist/${touristId}`,
+        `/updateTourist/${touristId}`,
         updateFields,
       );
       setTourist((prevTourist) => ({
