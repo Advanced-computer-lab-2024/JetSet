@@ -91,7 +91,7 @@ const ProductList = () => {
                         return (
                           <img
                             key={index}
-                            src={`http://localhost:3000/uploads/${imageName}`} // Change here
+                            src={`/uploads/${imageName}`} // Change here
                             alt={product.name || "Product image"}
                             className="product-image"
                             style={{ width: "50px", height: "50px" }}
