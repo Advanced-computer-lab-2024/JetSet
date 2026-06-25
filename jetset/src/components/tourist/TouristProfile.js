@@ -47,7 +47,7 @@ const TouristProfile = () => {
   const fetchConversionRate = async (currency) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/tourist/${touristId}/preferredCurrency`,
+        `/tourist/${touristId}/preferredCurrency`,
       );
       setSelectedCurrency(response.data.preferredCurrency);
       setConversionRate(response.data.conversionRate);

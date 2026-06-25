@@ -42,22 +42,18 @@ const AddProduct = ({ sellerId, adminId }) => {
     });
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/createproducts",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post("/createproducts", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       console.log(response.data);
       setMessage("Product created successfully!");
     } catch (error) {
       console.error("Error creating product:", error.response?.data);
       setError(
         "Error creating product: " +
-          (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message),
       );
     }
   };

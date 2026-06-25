@@ -17,7 +17,7 @@ const EditProduct = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/productsAdmin");
+        const response = await axios.get("/productsAdmin");
         setProducts(response.data);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -48,16 +48,16 @@ const EditProduct = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:3000/editproduct/${selectedProductId}`,
+        `/editproduct/${selectedProductId}`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data", // Set the appropriate content type for file upload
           },
-        }
+        },
       );
       setMessage(
-        `Product updated: ${response.data.product.name} (ID: ${response.data.product._id})`
+        `Product updated: ${response.data.product.name} (ID: ${response.data.product._id})`,
       );
       // Clear form fields after successful update
       setNewPrice("");
