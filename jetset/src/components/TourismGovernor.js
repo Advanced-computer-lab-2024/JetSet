@@ -12,6 +12,8 @@ import {
   faKey,
   faSignOutAlt,
   faCompass,
+  faBars,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
 function PlaceManagement() {
@@ -22,6 +24,7 @@ function PlaceManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentSection, setCurrentSection] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const fetchTourismGovernor = async () => {
     setLoading(true);
@@ -89,29 +92,29 @@ function PlaceManagement() {
 
   return (
     <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
+      {/* Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`dashboard-sidebar${sidebarOpen ? " open" : ""}`}>
         <div className="sidebar-header">
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <FontAwesomeIcon
-              icon={faCompass}
-              style={{ fontSize: "1.5rem", color: "var(--color-primary-strong)" }}
-            />
+          <div className="sidebar-brand">
+            <FontAwesomeIcon icon={faCompass} className="sidebar-brand-icon" />
             <div>
-              <div style={{ fontWeight: 700, fontSize: "1.1rem", color: "var(--color-ink)" }}>
-                JetSet
-              </div>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  color: "var(--color-muted)",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Governor Panel
-              </div>
+              <span className="sidebar-brand-name">JetSet</span>
+              <span className="sidebar-brand-role">Governor Panel</span>
             </div>
           </div>
+          <button
+            type="button"
+            className="sidebar-close-btn"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -119,55 +122,47 @@ function PlaceManagement() {
             <button
               key={item.key}
               className={`sidebar-link${currentSection === item.key ? " active" : ""}`}
-              onClick={item.action}
+              onClick={() => {
+                item.action();
+                setSidebarOpen(false);
+              }}
             >
-              <FontAwesomeIcon icon={item.icon} style={{ width: "18px" }} />
+              <FontAwesomeIcon icon={item.icon} className="sidebar-link-icon" />
               <span>{item.label}</span>
             </button>
           ))}
         </nav>
 
-        <div
-          style={{
-            marginTop: "auto",
-            padding: "16px 20px",
-            borderTop: "1px solid var(--color-line)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                background: "var(--color-primary-light)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--color-primary-strong)",
-                fontWeight: 600,
-                fontSize: "0.85rem",
-              }}
-            >
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="sidebar-user-avatar">
               {username ? username.charAt(0).toUpperCase() : "G"}
             </div>
-            <span style={{ fontSize: "0.9rem", color: "var(--color-ink)", fontWeight: 500 }}>
-              {username || "Governor"}
-            </span>
+            <div className="sidebar-user-info">
+              <span className="sidebar-user-name">{username || "Governor"}</span>
+              <span className="sidebar-user-role">Tourism Governor</span>
+            </div>
           </div>
-          <button
-            className="sidebar-link"
-            onClick={handleLogout}
-            style={{ color: "var(--color-danger)" }}
-          >
-            <FontAwesomeIcon icon={faSignOutAlt} style={{ width: "18px" }} />
-            <span>Log Out</span>
+          <button className="sidebar-logout" onClick={handleLogout}>
+            <FontAwesomeIcon icon={faSignOutAlt} />
+            <span>Logout</span>
           </button>
         </div>
       </aside>
 
+      {/* Main Content */}
       <main className="dashboard-main">
-        <TourismGovernorNav />
+        <header className="content-header" style={{ marginBottom: "1rem" }}>
+          <button
+            type="button"
+            className="sidebar-toggle-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </button>
+          <TourismGovernorNav />
+        </header>
         <div style={{ padding: "24px 0" }} className="fade-in">
           {loading ? (
             <p className="text-muted">Loading...</p>

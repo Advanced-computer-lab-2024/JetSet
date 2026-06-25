@@ -105,26 +105,16 @@ const Login = () => {
   ];
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-card">
-        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+        <div className="auth-header">
           <img
             src={logo}
             alt="JetSet"
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
-              objectFit: "cover",
-              margin: "0 auto 1rem",
-              display: "block",
-              boxShadow: "0 4px 12px rgba(15,76,129,0.12)",
-            }}
+            className="auth-logo"
           />
-          <h2 style={{ marginBottom: "0.35rem", fontSize: "1.75rem" }}>
-            Welcome Back
-          </h2>
-          <p style={{ color: "var(--color-muted)", margin: 0, fontSize: "0.95rem" }}>
+          <h2>Welcome Back</h2>
+          <p className="auth-subtitle">
             Sign in to your JetSet account
           </p>
         </div>
@@ -179,38 +169,24 @@ const Login = () => {
             />
           </div>
 
-          <Button
-            type="primary"
-            block
-            size="large"
+          <button
+            type="button"
+            className="btn btn-primary btn-lg"
             onClick={handleLogin}
-            loading={loading}
-            style={{
-              height: 48,
-              fontWeight: 700,
-              fontSize: "1rem",
-              borderRadius: "var(--radius-md)",
-              background: "var(--color-primary)",
-              borderColor: "var(--color-primary)",
-              marginTop: "0.25rem",
-            }}
+            disabled={loading}
+            style={{ width: "100%", height: 48, marginTop: "0.25rem" }}
           >
-            Sign In
-          </Button>
+            {loading ? "Signing In..." : "Sign In"}
+          </button>
 
           <button
             type="button"
+            className="btn btn-ghost"
             onClick={() => setShowForgetPassword(true)}
             style={{
-              background: "transparent",
-              border: "none",
-              color: "var(--color-primary)",
+              marginTop: "0.5rem",
               fontWeight: 600,
-              cursor: "pointer",
-              textAlign: "center",
-              padding: "0.5rem",
-              minHeight: "auto",
-              fontSize: "0.9rem",
+              color: "var(--color-primary)",
             }}
           >
             Forgot Password?
@@ -280,21 +256,14 @@ const Login = () => {
                 options={roleOptions}
               />
             </div>
-            <Button
-              type="primary"
-              block
-              size="large"
+            <button
+              type="button"
+              className="btn btn-primary btn-lg"
               onClick={handleForgetPassword}
-              style={{
-                height: 48,
-                fontWeight: 700,
-                borderRadius: "var(--radius-md)",
-                background: "var(--color-primary)",
-                borderColor: "var(--color-primary)",
-              }}
+              style={{ width: "100%", height: 48 }}
             >
               Send Reset Link
-            </Button>
+            </button>
           </div>
           {resetMessage && (
             <p
@@ -307,7 +276,7 @@ const Login = () => {
           )}
         </Modal>
       )}
-    </div>
+    </main>
   );
 };
 

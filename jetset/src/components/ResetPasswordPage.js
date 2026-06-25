@@ -52,20 +52,12 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-card" style={{ textAlign: "center" }}>
         <img
           src={logo}
           alt="JetSet"
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: "50%",
-            objectFit: "cover",
-            margin: "0 auto 1rem",
-            display: "block",
-            boxShadow: "0 4px 12px rgba(15,76,129,0.12)",
-          }}
+          className="auth-logo"
         />
 
         {message ? (
@@ -80,12 +72,10 @@ const ResetPasswordPage = () => {
             </p>
             <Link
               to="/login"
-              className="btn"
+              className="btn btn-primary"
               style={{
-                display: "inline-block",
+                display: "inline-flex",
                 marginTop: "1.5rem",
-                textDecoration: "none",
-                textAlign: "center",
               }}
             >
               Back to Login
@@ -109,7 +99,7 @@ const ResetPasswordPage = () => {
               <FontAwesomeIcon icon={faLock} />
             </span>
             <h2 style={{ fontSize: "1.75rem" }}>Reset Password</h2>
-            <p style={{ color: "var(--color-muted)", marginBottom: "1.5rem" }}>
+            <p style={{ color: "var(--color-text-secondary)", marginBottom: "1.5rem" }}>
               Please enter your new password below.
             </p>
 
@@ -139,7 +129,7 @@ const ResetPasswordPage = () => {
 
               <button
                 type="button"
-                className="btn"
+                className="btn btn-primary btn-lg"
                 onClick={handleResetPassword}
                 disabled={loading}
                 style={{ width: "100%", marginTop: "0.5rem" }}
@@ -154,16 +144,16 @@ const ResetPasswordPage = () => {
               </p>
             )}
 
-            <p style={{ marginTop: "1.5rem", fontSize: "0.9rem" }}>
+            <p style={{ marginTop: "1.5rem", fontSize: "0.9rem", color: "var(--color-text-secondary)" }}>
               Remember your password?{" "}
-              <Link to="/login" style={{ fontWeight: 600 }}>
+              <Link to="/login" style={{ fontWeight: 600, color: "var(--color-primary)" }}>
                 Sign in
               </Link>
             </p>
           </>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

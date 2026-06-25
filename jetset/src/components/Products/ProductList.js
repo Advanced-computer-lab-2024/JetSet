@@ -84,8 +84,7 @@ const ProductList = () => {
                     {product.images && product.images.length > 0 ? (
                       product.images.map((img, index) => {
                         // Use string manipulation instead of path.basename
-                        const imageName = img.split("/").pop();
-                        console.log("product.images:", product.images); // Get the filename from the image path
+                        const imageName = img.split("/").pop(); // Get the filename from the image path
                         return (
                           <img
                             key={index}

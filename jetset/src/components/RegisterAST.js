@@ -367,20 +367,16 @@ const Register = () => {
   }
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-card" style={{ maxWidth: 600 }}>
-        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+        <div className="auth-header">
           <img
             src={logo}
             alt="JetSet"
-            style={{
-              width: 56, height: 56, borderRadius: "50%", objectFit: "cover",
-              margin: "0 auto 1rem", display: "block",
-              boxShadow: "0 4px 12px rgba(15,76,129,0.12)",
-            }}
+            className="auth-logo"
           />
-          <h2 style={{ fontSize: "1.75rem", marginBottom: "0.35rem" }}>Create Your Account</h2>
-          <p style={{ color: "var(--color-muted)", margin: 0, fontSize: "0.95rem" }}>
+          <h2>Create Your Account</h2>
+          <p className="auth-subtitle">
             Join JetSet as a service provider
           </p>
         </div>
@@ -389,8 +385,11 @@ const Register = () => {
         <div style={{ marginBottom: "2rem" }}>
           <div
             style={{
-              display: "flex", justifyContent: "space-between",
-              marginBottom: "0.5rem", fontSize: "0.8rem", color: "var(--color-muted)",
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "0.5rem",
+              fontSize: "0.8rem",
+              color: "var(--color-text-secondary)",
             }}
           >
             {stepLabels.map((label, i) => (
@@ -398,7 +397,7 @@ const Register = () => {
                 key={label}
                 style={{
                   fontWeight: i + 1 <= step ? 700 : 400,
-                  color: i + 1 <= step ? "var(--color-primary)" : "var(--color-muted)",
+                  color: i + 1 <= step ? "var(--color-primary)" : "var(--color-text-secondary)",
                 }}
               >
                 {label}
@@ -407,12 +406,16 @@ const Register = () => {
           </div>
           <div
             style={{
-              height: 6, borderRadius: 3, background: "var(--color-line)", overflow: "hidden",
+              height: 6,
+              borderRadius: 3,
+              background: "var(--color-border)",
+              overflow: "hidden",
             }}
           >
             <div
               style={{
-                height: "100%", borderRadius: 3,
+                height: "100%",
+                borderRadius: 3,
                 background: "linear-gradient(90deg, var(--color-primary), var(--color-accent))",
                 width: `${progressPercent}%`,
                 transition: "width 350ms ease",
@@ -435,25 +438,32 @@ const Register = () => {
                     onClick={() => { setRole(value); setStepErrors({}); }}
                     aria-pressed={selected}
                     style={{
-                      display: "flex", alignItems: "center", gap: "1rem",
-                      padding: "1.25rem", textAlign: "left",
-                      background: selected ? "rgba(15,76,129,0.06)" : "var(--color-soft)",
-                      border: `2px solid ${selected ? "var(--color-primary)" : "var(--color-line)"}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "1rem",
+                      padding: "1.25rem",
+                      textAlign: "left",
+                      background: selected ? "var(--color-primary-bg)" : "var(--color-surface-alt)",
+                      border: `2px solid ${selected ? "var(--color-primary)" : "var(--color-border)"}`,
                       borderRadius: "var(--radius-lg)",
-                      color: "var(--color-ink)",
+                      color: "var(--color-text)",
                       cursor: "pointer",
                       transition: "border-color 150ms ease, background 150ms ease",
                     }}
                   >
                     <span
                       style={{
-                        width: 46, height: 46, borderRadius: "50%",
+                        width: 46,
+                        height: 46,
+                        borderRadius: "50%",
                         background: selected
                           ? "linear-gradient(135deg, var(--color-primary), var(--color-accent))"
-                          : "var(--color-line)",
-                        display: "grid", placeItems: "center",
-                        color: selected ? "#fff" : "var(--color-muted)",
-                        fontSize: "1.1rem", flexShrink: 0,
+                          : "var(--color-border)",
+                        display: "grid",
+                        placeItems: "center",
+                        color: selected ? "#fff" : "var(--color-text-muted)",
+                        fontSize: "1.1rem",
+                        flexShrink: 0,
                         transition: "background 150ms ease, color 150ms ease",
                       }}
                     >
@@ -461,7 +471,14 @@ const Register = () => {
                     </span>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: "1rem" }}>{label}</div>
-                      <div style={{ fontSize: "0.82rem", color: "var(--color-muted)", lineHeight: 1.4, marginTop: 2 }}>
+                      <div
+                        style={{
+                          fontSize: "0.82rem",
+                          color: "var(--color-text-secondary)",
+                          lineHeight: 1.4,
+                          marginTop: 2,
+                        }}
+                      >
                         {description}
                       </div>
                     </div>
@@ -539,7 +556,7 @@ const Register = () => {
         {step === 3 && (
           <div className="form-stack">
             <h3 style={{ fontSize: "1.1rem", marginBottom: "0.25rem" }}>Upload Documents</h3>
-            <p style={{ color: "var(--color-muted)", fontSize: "0.85rem", margin: 0 }}>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.85rem", margin: 0 }}>
               Required for verification as a{" "}
               <strong>{ROLE_OPTIONS.find((r) => r.value === role)?.label}</strong>.
             </p>
@@ -551,11 +568,11 @@ const Register = () => {
               </label>
               <div
                 style={{
-                  border: `2px dashed ${stepErrors.idDocument ? "var(--color-danger)" : "var(--color-line)"}`,
+                  border: `2px dashed ${stepErrors.idDocument ? "var(--color-danger)" : "var(--color-border)"}`,
                   borderRadius: "var(--radius-md)",
                   padding: "1.5rem",
                   textAlign: "center",
-                  background: "var(--color-soft)",
+                  background: "var(--color-surface-alt)",
                   cursor: "pointer",
                   transition: "border-color 150ms",
                 }}
@@ -565,8 +582,18 @@ const Register = () => {
                 role="button"
                 aria-label="Upload ID document"
               >
-                <FontAwesomeIcon icon={faCloudUploadAlt} style={{ fontSize: "1.5rem", color: "var(--color-primary)", marginBottom: "0.5rem", display: "block" }} />
-                <span style={{ fontSize: "0.85rem", color: "var(--color-muted)" }}>
+                <FontAwesomeIcon
+                  icon={faCloudUploadAlt}
+                  style={{
+                    fontSize: "1.5rem",
+                    color: "var(--color-primary)",
+                    marginBottom: "0.5rem",
+                    display: "block",
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                  }}
+                />
+                <span style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)" }}>
                   {idDocument ? idDocument.name : "Click to upload or drag and drop"}
                 </span>
                 <input
@@ -590,11 +617,11 @@ const Register = () => {
                 </label>
                 <div
                   style={{
-                    border: "2px dashed var(--color-line)",
+                    border: "2px dashed var(--color-border)",
                     borderRadius: "var(--radius-md)",
                     padding: "1.5rem",
                     textAlign: "center",
-                    background: "var(--color-soft)",
+                    background: "var(--color-surface-alt)",
                     cursor: "pointer",
                   }}
                   onClick={() => document.getElementById("reg-certificates").click()}
@@ -603,8 +630,18 @@ const Register = () => {
                   role="button"
                   aria-label="Upload certificates"
                 >
-                  <FontAwesomeIcon icon={faCloudUploadAlt} style={{ fontSize: "1.5rem", color: "var(--color-accent)", marginBottom: "0.5rem", display: "block" }} />
-                  <span style={{ fontSize: "0.85rem", color: "var(--color-muted)" }}>
+                  <FontAwesomeIcon
+                    icon={faCloudUploadAlt}
+                    style={{
+                      fontSize: "1.5rem",
+                      color: "var(--color-accent)",
+                      marginBottom: "0.5rem",
+                      display: "block",
+                      marginLeft: "auto",
+                      marginRight: "auto",
+                    }}
+                  />
+                  <span style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)" }}>
                     {certificates ? certificates.name : "Click to upload certificates"}
                   </span>
                   <input
@@ -625,11 +662,11 @@ const Register = () => {
                 </label>
                 <div
                   style={{
-                    border: "2px dashed var(--color-line)",
+                    border: "2px dashed var(--color-border)",
                     borderRadius: "var(--radius-md)",
                     padding: "1.5rem",
                     textAlign: "center",
-                    background: "var(--color-soft)",
+                    background: "var(--color-surface-alt)",
                     cursor: "pointer",
                   }}
                   onClick={() => document.getElementById("reg-tax-card").click()}
@@ -638,8 +675,18 @@ const Register = () => {
                   role="button"
                   aria-label="Upload taxation card"
                 >
-                  <FontAwesomeIcon icon={faCloudUploadAlt} style={{ fontSize: "1.5rem", color: "var(--color-accent)", marginBottom: "0.5rem", display: "block" }} />
-                  <span style={{ fontSize: "0.85rem", color: "var(--color-muted)" }}>
+                  <FontAwesomeIcon
+                    icon={faCloudUploadAlt}
+                    style={{
+                      fontSize: "1.5rem",
+                      color: "var(--color-accent)",
+                      marginBottom: "0.5rem",
+                      display: "block",
+                      marginLeft: "auto",
+                      marginRight: "auto",
+                    }}
+                  />
+                  <span style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)" }}>
                     {taxationCard ? taxationCard.name : "Click to upload taxation card"}
                   </span>
                   <input
@@ -660,19 +707,29 @@ const Register = () => {
             <h3 style={{ fontSize: "1.1rem", marginBottom: "0.75rem" }}>Terms & Conditions</h3>
             <div
               style={{
-                maxHeight: 260, overflow: "auto", padding: "1rem",
-                background: "var(--color-soft)", borderRadius: "var(--radius-md)",
-                fontSize: "0.82rem", lineHeight: 1.65, color: "var(--color-ink)",
-                whiteSpace: "pre-line", marginBottom: "1rem",
-                border: "1px solid var(--color-line)",
+                maxHeight: 260,
+                overflow: "auto",
+                padding: "1rem",
+                background: "var(--color-surface-alt)",
+                borderRadius: "var(--radius-md)",
+                fontSize: "0.82rem",
+                lineHeight: 1.65,
+                color: "var(--color-text)",
+                whiteSpace: "pre-line",
+                marginBottom: "1rem",
+                border: "1px solid var(--color-border)",
               }}
             >
               {TERMS_TEXT}
             </div>
             <label
               style={{
-                display: "flex", alignItems: "center", gap: "0.5rem",
-                cursor: "pointer", fontWeight: 600, marginBottom: "1rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                cursor: "pointer",
+                fontWeight: 600,
+                marginBottom: "1rem",
               }}
             >
               <input
@@ -699,16 +756,18 @@ const Register = () => {
         {/* Navigation Buttons */}
         <div
           style={{
-            display: "flex", justifyContent: "space-between",
-            alignItems: "center", marginTop: "1.5rem", gap: "0.75rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: "1.5rem",
+            gap: "0.75rem",
           }}
         >
           {step > 1 ? (
             <button
               type="button"
-              className="btn-secondary"
+              className="btn btn-secondary"
               onClick={prevStep}
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
             >
               <FontAwesomeIcon icon={faArrowLeft} />
               Back
@@ -720,8 +779,8 @@ const Register = () => {
           {step < 4 ? (
             <button
               type="button"
+              className="btn btn-primary"
               onClick={nextStep}
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
             >
               Next
               <FontAwesomeIcon icon={faArrowRight} />
@@ -729,15 +788,9 @@ const Register = () => {
           ) : (
             <button
               type="button"
+              className="btn btn-primary"
               onClick={handleRegister}
               disabled={!termsAccepted || loading}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "0.4rem",
-                background: termsAccepted
-                  ? "linear-gradient(135deg, var(--color-primary), var(--color-accent))"
-                  : "var(--color-line)",
-                cursor: termsAccepted ? "pointer" : "not-allowed",
-              }}
             >
               {loading ? (
                 <>
@@ -756,8 +809,10 @@ const Register = () => {
 
         <p
           style={{
-            textAlign: "center", marginTop: "1.5rem", fontSize: "0.9rem",
-            color: "var(--color-muted)",
+            textAlign: "center",
+            marginTop: "1.5rem",
+            fontSize: "0.9rem",
+            color: "var(--color-text-secondary)",
           }}
         >
           Already have an account?{" "}
@@ -766,7 +821,7 @@ const Register = () => {
           </Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import "./AdminFrontend.css";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,6 +15,8 @@ import {
   faSignOutAlt,
   faPlane,
   faUserShield,
+  faBars,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
 // Import components for Tag Management
@@ -82,6 +83,7 @@ function AdminFrontend() {
   const [tags, setTags] = useState([]);
   const [tagLoading, setTagLoading] = useState(true);
   const [tagError, setTagError] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [categories, setCategories] = useState([]);
   const [categoryLoading, setCategoryLoading] = useState(true);
@@ -209,8 +211,13 @@ function AdminFrontend() {
 
   return (
     <div className="dashboard-layout">
+      {/* Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <aside className="dashboard-sidebar">
+      <aside className={`dashboard-sidebar${sidebarOpen ? " open" : ""}`}>
         <div className="sidebar-header">
           <div className="sidebar-brand">
             <FontAwesomeIcon icon={faPlane} className="sidebar-brand-icon" />
@@ -219,6 +226,14 @@ function AdminFrontend() {
               <span className="sidebar-brand-role">Admin Panel</span>
             </div>
           </div>
+          <button
+            type="button"
+            className="sidebar-close-btn"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -226,7 +241,10 @@ function AdminFrontend() {
             <button
               key={link.key}
               className={`sidebar-link${currentSection === link.key ? " active" : ""}`}
-              onClick={() => setCurrentSection(link.key)}
+              onClick={() => {
+                setCurrentSection(link.key);
+                setSidebarOpen(false);
+              }}
             >
               <FontAwesomeIcon icon={link.icon} className="sidebar-link-icon" />
               <span>{link.label}</span>
@@ -254,6 +272,14 @@ function AdminFrontend() {
       {/* Main Content */}
       <main className="dashboard-main">
         <div className="content-header">
+          <button
+            type="button"
+            className="sidebar-toggle-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </button>
           <h1 className="section-title">
             {sectionTitles[currentSection] || "Dashboard"}
           </h1>

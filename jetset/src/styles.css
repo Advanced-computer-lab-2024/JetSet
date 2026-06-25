@@ -937,6 +937,28 @@ th {
   font-size: 1.75rem;
 }
 
+.auth-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 1rem;
+  display: block;
+  box-shadow: 0 4px 12px rgba(15, 76, 129, 0.12);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+  text-align: center;
+}
+
 /* ── Hero Section ─────────────────────────────────────────── */
 .hero-section {
   background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, var(--color-primary) 100%);

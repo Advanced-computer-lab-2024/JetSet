@@ -22,6 +22,8 @@ import {
   faSignOutAlt,
   faPlane,
   faUser,
+  faBars,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
 import ActivityList from "./Activity/ActivitiesList";
@@ -170,6 +172,7 @@ const Tourist = () => {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPurchasedProducts, setShowPurchasedProducts] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchTourist = async () => {
@@ -243,8 +246,13 @@ const Tourist = () => {
 
   return (
     <div className="dashboard-layout">
+      {/* Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <aside className="dashboard-sidebar">
+      <aside className={`dashboard-sidebar${sidebarOpen ? " open" : ""}`}>
         <div className="sidebar-header">
           <div className="sidebar-brand">
             <FontAwesomeIcon icon={faPlane} className="sidebar-brand-icon" />
@@ -253,6 +261,14 @@ const Tourist = () => {
               <span className="sidebar-brand-role">Tourist</span>
             </div>
           </div>
+          <button
+            type="button"
+            className="sidebar-close-btn"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -263,7 +279,10 @@ const Tourist = () => {
                 <button
                   key={item.key}
                   className={`sidebar-link${currentPage === item.key || (!currentPage && item.key === "Home") ? " active" : ""}`}
-                  onClick={() => setCurrentPage(item.key)}
+                  onClick={() => {
+                    setCurrentPage(item.key);
+                    setSidebarOpen(false);
+                  }}
                 >
                   <FontAwesomeIcon icon={item.icon} className="sidebar-link-icon" />
                   <span>{item.label}</span>
@@ -292,7 +311,17 @@ const Tourist = () => {
 
       {/* Main Content */}
       <main className="dashboard-main">
-        <NavTourist touristId={touristId} username={username} />
+        <header className="content-header">
+          <button
+            type="button"
+            className="sidebar-toggle-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </button>
+          <NavTourist touristId={touristId} username={username} />
+        </header>
         <div className="fade-in">
           {loading ? (
             <div style={{ display: "grid", placeItems: "center", padding: "80px 0" }}>
